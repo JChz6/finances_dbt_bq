@@ -11,7 +11,7 @@
             "data_type": "datetime",
             "granularity": "month"
         },
-        pre_hook = "{{ replace_partitions(ref('stg_transactions'), this, 'txn_time', 'txn_time') }}"
+        pre_hook = "{{ replace_partitions(ref('stg_transactions'), this, 'txn_time', 'fecha_trunc') }}"
     )
 }}
 
