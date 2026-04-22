@@ -1,0 +1,254 @@
+[0m22:03:01.247658 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'start', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x748ebb6a0d70>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x748ebad30f50>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x748eba62fed0>]}
+
+
+============================== 22:03:01.253333 | 93c7f005-fb85-473a-918a-ff361097ac58 ==============================
+[0m22:03:01.253333 [info ] [MainThread]: Running with dbt=1.11.8
+[0m22:03:01.254512 [debug] [MainThread]: running dbt with arguments {'debug': 'False', 'empty': 'None', 'profiles_dir': '/home/cheesus/.dbt', 'warn_error': 'None', 'cache_selected_only': 'False', 'fail_fast': 'False', 'use_colors': 'True', 'static_parser': 'True', 'version_check': 'True', 'use_experimental_parser': 'False', 'write_json': 'True', 'indirect_selection': 'eager', 'printer_width': '80', 'log_path': 'logs', 'warn_error_options': 'WarnErrorOptionsV2(error=[], warn=[], silence=[])', 'partial_parse': 'True', 'quiet': 'False', 'target_path': 'None', 'introspect': 'True', 'log_format': 'default', 'invocation_command': 'dbt init', 'no_print': 'None', 'log_cache_events': 'False', 'send_anonymous_usage_stats': 'True'}
+[0m22:03:06.710377 [debug] [MainThread]: Starter project path: /home/cheesus/Documents/finanzas_personales_mds_bq/venv/lib/python3.13/site-packages/dbt/include/starter_project
+[0m22:03:06.716001 [info ] [MainThread]: 
+Your new dbt project "finances_bq" was created!
+
+For more information on how to configure the profiles.yml file,
+please consult the dbt documentation here:
+
+  https://docs.getdbt.com/docs/configure-your-profile
+
+One more thing:
+
+Need help? Don't hesitate to reach out to us via GitHub issues or on Slack:
+
+  https://community.getdbt.com/
+
+Happy modeling!
+
+[0m22:03:06.717079 [info ] [MainThread]: Setting up your profile.
+[0m22:09:51.077091 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'start', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7b97de774d70>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7b97ddffcf50>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7b97dd90fed0>]}
+
+
+============================== 22:09:51.084247 | 647d4afe-8198-40bc-963f-bb129f06ef6d ==============================
+[0m22:09:51.084247 [info ] [MainThread]: Running with dbt=1.11.8
+[0m22:09:51.085611 [debug] [MainThread]: running dbt with arguments {'warn_error': 'None', 'target_path': 'None', 'printer_width': '80', 'empty': 'None', 'warn_error_options': 'WarnErrorOptionsV2(error=[], warn=[], silence=[])', 'invocation_command': 'dbt init', 'use_colors': 'True', 'log_format': 'default', 'fail_fast': 'False', 'use_experimental_parser': 'False', 'introspect': 'True', 'quiet': 'False', 'indirect_selection': 'eager', 'no_print': 'None', 'log_path': 'logs', 'static_parser': 'True', 'write_json': 'True', 'debug': 'False', 'cache_selected_only': 'False', 'profiles_dir': '/home/cheesus/.dbt', 'version_check': 'True', 'send_anonymous_usage_stats': 'True', 'log_cache_events': 'False', 'partial_parse': 'True'}
+[0m22:09:56.783368 [info ] [MainThread]: A project called finances_bq already exists here.
+[0m22:09:56.785560 [debug] [MainThread]: Resource report: {"command_name": "init", "command_success": true, "command_wall_clock_time": 5.825355, "process_in_blocks": "0", "process_kernel_time": 0.207483, "process_mem_max_rss": "104096", "process_out_blocks": "8", "process_user_time": 2.603738}
+[0m22:09:56.786991 [debug] [MainThread]: Command `dbt init` succeeded at 22:09:56.786620 after 5.83 seconds
+[0m22:09:56.788017 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'end', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7b97dd744fc0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7b97dd800050>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7b97dd79c7c0>]}
+[0m22:09:56.789022 [debug] [MainThread]: Flushing usage events
+[0m22:09:56.799557 [debug] [MainThread]: An error was encountered while trying to flush usage events
+[0m22:10:14.709385 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'start', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7cce2c77cd70>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7cce2c004f50>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7cce2b90fed0>]}
+
+
+============================== 22:10:14.715407 | 30cce4b7-dc76-4cad-b31b-a2d6a5131c01 ==============================
+[0m22:10:14.715407 [info ] [MainThread]: Running with dbt=1.11.8
+[0m22:10:14.716577 [debug] [MainThread]: running dbt with arguments {'version_check': 'True', 'cache_selected_only': 'False', 'printer_width': '80', 'introspect': 'True', 'log_format': 'default', 'debug': 'False', 'use_colors': 'True', 'target_path': 'None', 'quiet': 'False', 'indirect_selection': 'eager', 'partial_parse': 'True', 'static_parser': 'True', 'log_path': 'logs', 'warn_error': 'None', 'no_print': 'None', 'write_json': 'True', 'use_experimental_parser': 'False', 'fail_fast': 'False', 'warn_error_options': 'WarnErrorOptionsV2(error=[], warn=[], silence=[])', 'invocation_command': 'dbt debug', 'send_anonymous_usage_stats': 'True', 'profiles_dir': '/home/cheesus/.dbt', 'log_cache_events': 'False', 'empty': 'None'}
+[0m22:10:14.734194 [info ] [MainThread]: dbt version: 1.11.8
+[0m22:10:14.735392 [info ] [MainThread]: python version: 3.13.7
+[0m22:10:14.736429 [info ] [MainThread]: python path: /home/cheesus/Documents/finanzas_personales_mds_bq/venv/bin/python3
+[0m22:10:14.737387 [info ] [MainThread]: os info: Linux-6.17.0-20-generic-x86_64-with-glibc2.42
+[0m22:10:14.751179 [info ] [MainThread]: Error importing adapter: No module named 'dbt.adapters.snowflake'
+[0m22:10:14.754672 [info ] [MainThread]: Error importing adapter: No module named 'dbt.adapters.snowflake'
+[0m22:10:14.756045 [info ] [MainThread]: Using profiles dir at /home/cheesus/.dbt
+[0m22:10:14.756930 [info ] [MainThread]: Using profiles.yml file at /home/cheesus/.dbt/profiles.yml
+[0m22:10:14.757842 [info ] [MainThread]: Using dbt_project.yml file at /home/cheesus/Documents/finanzas_personales_mds_bq/dbt_project.yml
+[0m22:10:14.758640 [info ] [MainThread]: Configuration:
+[0m22:10:14.759345 [info ] [MainThread]:   profiles.yml file [[31mERROR invalid[0m]
+[0m22:10:14.759976 [info ] [MainThread]:   dbt_project.yml file [[31mERROR not found[0m]
+[0m22:10:14.760572 [info ] [MainThread]: Required dependencies:
+[0m22:10:14.761248 [debug] [MainThread]: Executing "git --help"
+[0m22:10:14.765460 [debug] [MainThread]: STDOUT: "b"usage: git [-v | --version] [-h | --help] [-C <path>] [-c <name>=<value>]\n           [--exec-path[=<path>]] [--html-path] [--man-path] [--info-path]\n           [-p | --paginate | -P | --no-pager] [--no-replace-objects] [--no-lazy-fetch]\n           [--no-optional-locks] [--no-advice] [--bare] [--git-dir=<path>]\n           [--work-tree=<path>] [--namespace=<name>] [--config-env=<name>=<envvar>]\n           <command> [<args>]\n\nThese are common Git commands used in various situations:\n\nstart a working area (see also: git help tutorial)\n   clone      Clone a repository into a new directory\n   init       Create an empty Git repository or reinitialize an existing one\n\nwork on the current change (see also: git help everyday)\n   add        Add file contents to the index\n   mv         Move or rename a file, a directory, or a symlink\n   restore    Restore working tree files\n   rm         Remove files from the working tree and from the index\n\nexamine the history and state (see also: git help revisions)\n   bisect     Use binary search to find the commit that introduced a bug\n   diff       Show changes between commits, commit and working tree, etc\n   grep       Print lines matching a pattern\n   log        Show commit logs\n   show       Show various types of objects\n   status     Show the working tree status\n\ngrow, mark and tweak your common history\n   backfill   Download missing objects in a partial clone\n   branch     List, create, or delete branches\n   commit     Record changes to the repository\n   merge      Join two or more development histories together\n   rebase     Reapply commits on top of another base tip\n   reset      Reset current HEAD to the specified state\n   switch     Switch branches\n   tag        Create, list, delete or verify a tag object signed with GPG\n\ncollaborate (see also: git help workflows)\n   fetch      Download objects and refs from another repository\n   pull       Fetch from and integrate with another repository or a local branch\n   push       Update remote refs along with associated objects\n\n'git help -a' and 'git help -g' list available subcommands and some\nconcept guides. See 'git help <command>' or 'git help <concept>'\nto read about a specific subcommand or concept.\nSee 'git help git' for an overview of the system.\n""
+[0m22:10:14.766811 [debug] [MainThread]: STDERR: "b''"
+[0m22:10:14.767702 [info ] [MainThread]:  - git [[32mOK found[0m]
+
+[0m22:10:14.768814 [info ] [MainThread]: Connection test skipped since no profile was found
+[0m22:10:14.769926 [info ] [MainThread]: [31m2 checks failed:[0m
+[0m22:10:14.770921 [info ] [MainThread]: Could not load dbt_project.yml
+Profile loading failed for the following reason:
+Runtime Error
+  Credentials in profile "DNS_AUDITOR", target "dev" invalid: Runtime Error
+    Could not find adapter type snowflake!
+
+Runtime Error
+  Credentials in profile "finances", target "dev" invalid: Runtime Error
+    Could not find adapter type snowflake!
+
+
+[0m22:10:14.772178 [info ] [MainThread]: Project loading failed for the following reason:
+ project path </home/cheesus/Documents/finanzas_personales_mds_bq/dbt_project.yml> not found
+
+[0m22:10:14.774574 [debug] [MainThread]: Resource report: {"command_name": "debug", "command_success": false, "command_wall_clock_time": 0.17819157, "process_in_blocks": "0", "process_kernel_time": 0.218539, "process_mem_max_rss": "104168", "process_out_blocks": "8", "process_user_time": 2.504724}
+[0m22:10:14.776034 [debug] [MainThread]: Command `dbt debug` failed at 22:10:14.775723 after 0.18 seconds
+[0m22:10:14.777268 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'end', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7cce2b73b360>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7cce2b790050>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7cce2b797f00>]}
+[0m22:10:14.778463 [debug] [MainThread]: Flushing usage events
+[0m22:10:14.786487 [debug] [MainThread]: An error was encountered while trying to flush usage events
+[0m22:15:54.381018 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'start', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x771371784d70>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x771371010f50>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x771370907ed0>]}
+
+
+============================== 22:15:54.388715 | aea6b634-6267-48cb-9546-1874ce223329 ==============================
+[0m22:15:54.388715 [info ] [MainThread]: Running with dbt=1.11.8
+[0m22:15:54.390011 [debug] [MainThread]: running dbt with arguments {'fail_fast': 'False', 'printer_width': '80', 'quiet': 'False', 'partial_parse': 'True', 'profiles_dir': '/home/cheesus/.dbt', 'use_colors': 'True', 'log_format': 'default', 'static_parser': 'True', 'debug': 'False', 'warn_error_options': 'WarnErrorOptionsV2(error=[], warn=[], silence=[])', 'cache_selected_only': 'False', 'empty': 'None', 'version_check': 'True', 'target_path': 'None', 'use_experimental_parser': 'False', 'warn_error': 'None', 'indirect_selection': 'eager', 'invocation_command': 'dbt debug', 'no_print': 'None', 'log_cache_events': 'False', 'write_json': 'True', 'introspect': 'True', 'log_path': 'logs', 'send_anonymous_usage_stats': 'True'}
+[0m22:15:54.410621 [info ] [MainThread]: dbt version: 1.11.8
+[0m22:15:54.412021 [info ] [MainThread]: python version: 3.13.7
+[0m22:15:54.413072 [info ] [MainThread]: python path: /home/cheesus/Documents/finanzas_personales_mds_bq/venv/bin/python3
+[0m22:15:54.414009 [info ] [MainThread]: os info: Linux-6.17.0-20-generic-x86_64-with-glibc2.42
+[0m22:15:54.428731 [info ] [MainThread]: Error importing adapter: No module named 'dbt.adapters.snowflake'
+[0m22:15:54.433255 [info ] [MainThread]: Error importing adapter: No module named 'dbt.adapters.snowflake'
+[0m22:15:55.781841 [info ] [MainThread]: Using profiles dir at /home/cheesus/.dbt
+[0m22:15:55.782787 [info ] [MainThread]: Using profiles.yml file at /home/cheesus/.dbt/profiles.yml
+[0m22:15:55.783585 [info ] [MainThread]: Using dbt_project.yml file at /home/cheesus/Documents/finanzas_personales_mds_bq/dbt_project.yml
+[0m22:15:55.784506 [info ] [MainThread]: Configuration:
+[0m22:15:55.785298 [info ] [MainThread]:   profiles.yml file [[31mERROR invalid[0m]
+[0m22:15:55.786066 [info ] [MainThread]:   dbt_project.yml file [[31mERROR not found[0m]
+[0m22:15:55.786769 [info ] [MainThread]: Required dependencies:
+[0m22:15:55.787582 [debug] [MainThread]: Executing "git --help"
+[0m22:15:55.791508 [debug] [MainThread]: STDOUT: "b"usage: git [-v | --version] [-h | --help] [-C <path>] [-c <name>=<value>]\n           [--exec-path[=<path>]] [--html-path] [--man-path] [--info-path]\n           [-p | --paginate | -P | --no-pager] [--no-replace-objects] [--no-lazy-fetch]\n           [--no-optional-locks] [--no-advice] [--bare] [--git-dir=<path>]\n           [--work-tree=<path>] [--namespace=<name>] [--config-env=<name>=<envvar>]\n           <command> [<args>]\n\nThese are common Git commands used in various situations:\n\nstart a working area (see also: git help tutorial)\n   clone      Clone a repository into a new directory\n   init       Create an empty Git repository or reinitialize an existing one\n\nwork on the current change (see also: git help everyday)\n   add        Add file contents to the index\n   mv         Move or rename a file, a directory, or a symlink\n   restore    Restore working tree files\n   rm         Remove files from the working tree and from the index\n\nexamine the history and state (see also: git help revisions)\n   bisect     Use binary search to find the commit that introduced a bug\n   diff       Show changes between commits, commit and working tree, etc\n   grep       Print lines matching a pattern\n   log        Show commit logs\n   show       Show various types of objects\n   status     Show the working tree status\n\ngrow, mark and tweak your common history\n   backfill   Download missing objects in a partial clone\n   branch     List, create, or delete branches\n   commit     Record changes to the repository\n   merge      Join two or more development histories together\n   rebase     Reapply commits on top of another base tip\n   reset      Reset current HEAD to the specified state\n   switch     Switch branches\n   tag        Create, list, delete or verify a tag object signed with GPG\n\ncollaborate (see also: git help workflows)\n   fetch      Download objects and refs from another repository\n   pull       Fetch from and integrate with another repository or a local branch\n   push       Update remote refs along with associated objects\n\n'git help -a' and 'git help -g' list available subcommands and some\nconcept guides. See 'git help <command>' or 'git help <concept>'\nto read about a specific subcommand or concept.\nSee 'git help git' for an overview of the system.\n""
+[0m22:15:55.792462 [debug] [MainThread]: STDERR: "b''"
+[0m22:15:55.793150 [info ] [MainThread]:  - git [[32mOK found[0m]
+
+[0m22:15:55.794074 [info ] [MainThread]: Connection test skipped since no profile was found
+[0m22:15:55.795219 [info ] [MainThread]: [31m2 checks failed:[0m
+[0m22:15:55.796282 [info ] [MainThread]: Could not load dbt_project.yml
+Profile loading failed for the following reason:
+Runtime Error
+  Credentials in profile "DNS_AUDITOR", target "dev" invalid: Runtime Error
+    Could not find adapter type snowflake!
+
+Runtime Error
+  Credentials in profile "finances", target "dev" invalid: Runtime Error
+    Could not find adapter type snowflake!
+
+
+[0m22:15:55.797371 [info ] [MainThread]: Project loading failed for the following reason:
+ project path </home/cheesus/Documents/finanzas_personales_mds_bq/dbt_project.yml> not found
+
+[0m22:15:55.798613 [debug] [MainThread]: Resource report: {"command_name": "debug", "command_success": false, "command_wall_clock_time": 1.5802257, "process_in_blocks": "0", "process_kernel_time": 0.380376, "process_mem_max_rss": "218896", "process_out_blocks": "24", "process_user_time": 4.451706}
+[0m22:15:55.800208 [debug] [MainThread]: Command `dbt debug` failed at 22:15:55.799911 after 1.58 seconds
+[0m22:15:55.801068 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'end', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x77134b084e90>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x77134b228170>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x77134b36a140>]}
+[0m22:15:55.802312 [debug] [MainThread]: Flushing usage events
+[0m22:15:55.811952 [debug] [MainThread]: An error was encountered while trying to flush usage events
+[0m23:07:14.459486 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'start', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x733042784d70>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x73304200cf50>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x73304191bd90>]}
+
+
+============================== 23:07:14.462162 | 8a7da23c-a3be-4c20-a1f1-4a271935c1ce ==============================
+[0m23:07:14.462162 [info ] [MainThread]: Running with dbt=1.11.8
+[0m23:07:14.462584 [debug] [MainThread]: running dbt with arguments {'introspect': 'True', 'send_anonymous_usage_stats': 'True', 'log_cache_events': 'False', 'empty': 'False', 'quiet': 'False', 'no_print': 'None', 'log_format': 'default', 'invocation_command': 'dbt run --select stg_transactions', 'use_experimental_parser': 'False', 'indirect_selection': 'eager', 'log_path': 'logs', 'version_check': 'True', 'partial_parse': 'True', 'warn_error': 'None', 'target_path': 'None', 'printer_width': '80', 'static_parser': 'True', 'fail_fast': 'False', 'cache_selected_only': 'False', 'use_colors': 'True', 'warn_error_options': 'WarnErrorOptionsV2(error=[], warn=[], silence=[])', 'profiles_dir': '/home/cheesus/.dbt', 'debug': 'False', 'write_json': 'True'}
+[0m23:07:14.462942 [error] [MainThread]: Encountered an error:
+Runtime Error
+  No dbt_project.yml found at expected path /home/cheesus/Documents/finanzas_personales_mds_bq/dbt_project.yml
+  Verify that each entry within packages.yml (and their transitive dependencies) contains a file named dbt_project.yml
+  
+[0m23:07:14.463589 [debug] [MainThread]: Resource report: {"command_name": "run", "command_success": false, "command_wall_clock_time": 0.040193535, "process_in_blocks": "0", "process_kernel_time": 0.05881, "process_mem_max_rss": "104184", "process_out_blocks": "8", "process_user_time": 0.867211}
+[0m23:07:14.463928 [debug] [MainThread]: Command `dbt run` failed at 23:07:14.463861 after 0.04 seconds
+[0m23:07:14.464181 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'end', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7330417a1cd0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x73304174bd10>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x733041916470>]}
+[0m23:07:14.464430 [debug] [MainThread]: Flushing usage events
+[0m23:07:14.471191 [debug] [MainThread]: An error was encountered while trying to flush usage events
+[0m22:53:13.406140 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'start', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7cafa5f7cd70>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7cafa5804f50>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7cafa5113d90>]}
+
+
+============================== 22:53:13.414874 | 2a74e421-2976-431f-94b8-654a6ddadb4d ==============================
+[0m22:53:13.414874 [info ] [MainThread]: Running with dbt=1.11.8
+[0m22:53:13.415443 [debug] [MainThread]: running dbt with arguments {'debug': 'False', 'no_print': 'None', 'use_colors': 'True', 'quiet': 'False', 'profiles_dir': '/home/cheesus/.dbt', 'printer_width': '80', 'static_parser': 'True', 'log_cache_events': 'False', 'log_format': 'default', 'warn_error_options': 'WarnErrorOptionsV2(error=[], warn=[], silence=[])', 'target_path': 'None', 'introspect': 'True', 'empty': 'False', 'send_anonymous_usage_stats': 'True', 'warn_error': 'None', 'log_path': 'logs', 'partial_parse': 'True', 'fail_fast': 'False', 'indirect_selection': 'eager', 'use_experimental_parser': 'False', 'write_json': 'True', 'version_check': 'True', 'cache_selected_only': 'False', 'invocation_command': 'dbt run'}
+[0m22:53:13.415912 [error] [MainThread]: Encountered an error:
+Runtime Error
+  No dbt_project.yml found at expected path /home/cheesus/Documents/finanzas_personales_mds_bq/dbt_project.yml
+  Verify that each entry within packages.yml (and their transitive dependencies) contains a file named dbt_project.yml
+  
+[0m22:53:13.416549 [debug] [MainThread]: Resource report: {"command_name": "run", "command_success": false, "command_wall_clock_time": 0.049843773, "process_in_blocks": "16", "process_kernel_time": 0.088314, "process_mem_max_rss": "103840", "process_out_blocks": "16", "process_user_time": 1.038703}
+[0m22:53:13.416901 [debug] [MainThread]: Command `dbt run` failed at 22:53:13.416835 after 0.05 seconds
+[0m22:53:13.417158 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'end', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7cafa4f99cd0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7cafa4f43d10>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7cafa510e360>]}
+[0m22:53:13.417424 [debug] [MainThread]: Flushing usage events
+[0m22:53:13.422947 [debug] [MainThread]: An error was encountered while trying to flush usage events
+[0m15:52:06.845993 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'start', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x70c5da070d70>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x70c5d98f8f50>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x70c5d920bd90>]}
+
+
+============================== 15:52:06.859340 | 433a07c2-f7f0-4352-8e27-cc768df666c5 ==============================
+[0m15:52:06.859340 [info ] [MainThread]: Running with dbt=1.11.8
+[0m15:52:06.860672 [debug] [MainThread]: running dbt with arguments {'introspect': 'True', 'warn_error': 'None', 'partial_parse': 'True', 'version_check': 'True', 'target_path': 'None', 'indirect_selection': 'eager', 'send_anonymous_usage_stats': 'True', 'profiles_dir': '/home/cheesus/.dbt', 'static_parser': 'True', 'log_cache_events': 'False', 'fail_fast': 'False', 'cache_selected_only': 'False', 'debug': 'True', 'warn_error_options': 'WarnErrorOptionsV2(error=[], warn=[], silence=[])', 'no_print': 'None', 'printer_width': '80', 'quiet': 'False', 'invocation_command': 'dbt run --select fact_transactions --debug', 'log_format': 'default', 'empty': 'False', 'use_experimental_parser': 'False', 'log_path': 'logs', 'use_colors': 'True', 'write_json': 'True'}
+[0m15:52:06.862090 [error] [MainThread]: Encountered an error:
+Runtime Error
+  No dbt_project.yml found at expected path /home/cheesus/Documents/finanzas_personales_mds_bq/dbt_project.yml
+  Verify that each entry within packages.yml (and their transitive dependencies) contains a file named dbt_project.yml
+  
+[0m15:52:06.864532 [debug] [MainThread]: Resource report: {"command_name": "run", "command_success": false, "command_wall_clock_time": 0.13935545, "process_in_blocks": "16", "process_kernel_time": 0.245726, "process_mem_max_rss": "103960", "process_out_blocks": "16", "process_user_time": 3.106547}
+[0m15:52:06.865934 [debug] [MainThread]: Command `dbt run` failed at 15:52:06.865692 after 0.14 seconds
+[0m15:52:06.867267 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'end', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x70c5d908dcd0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x70c5d9037d10>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x70c5d9206360>]}
+[0m15:52:06.868740 [debug] [MainThread]: Flushing usage events
+[0m15:52:06.877399 [debug] [MainThread]: An error was encountered while trying to flush usage events
+[0m19:37:54.776015 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'start', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x747b12a9cd70>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x747b12324f50>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x747b11a33ed0>]}
+
+
+============================== 19:37:54.783366 | 38317a22-b58b-4ebf-816c-bc2ea9bd14fb ==============================
+[0m19:37:54.783366 [info ] [MainThread]: Running with dbt=1.11.8
+[0m19:37:54.784649 [debug] [MainThread]: running dbt with arguments {'no_print': 'None', 'version_check': 'True', 'fail_fast': 'False', 'empty': 'None', 'log_cache_events': 'False', 'cache_selected_only': 'False', 'debug': 'False', 'indirect_selection': 'eager', 'printer_width': '80', 'static_parser': 'True', 'use_colors': 'True', 'target_path': 'None', 'send_anonymous_usage_stats': 'True', 'log_path': 'logs', 'warn_error_options': 'WarnErrorOptionsV2(error=[], warn=[], silence=[])', 'invocation_command': 'dbt clean', 'quiet': 'False', 'log_format': 'default', 'partial_parse': 'True', 'write_json': 'True', 'use_experimental_parser': 'False', 'warn_error': 'None', 'introspect': 'True', 'profiles_dir': '/home/cheesus/.dbt'}
+[0m19:37:54.785921 [error] [MainThread]: Encountered an error:
+Runtime Error
+  No dbt_project.yml found at expected path /home/cheesus/Documents/finanzas_personales_mds_bq/dbt_project.yml
+  Verify that each entry within packages.yml (and their transitive dependencies) contains a file named dbt_project.yml
+  
+[0m19:37:54.787585 [debug] [MainThread]: Resource report: {"command_name": "clean", "command_success": false, "command_wall_clock_time": 0.13548662, "process_in_blocks": "24", "process_kernel_time": 0.294655, "process_mem_max_rss": "103356", "process_out_blocks": "8", "process_user_time": 3.405018}
+[0m19:37:54.788659 [debug] [MainThread]: Command `dbt clean` failed at 19:37:54.788441 after 0.14 seconds
+[0m19:37:54.789412 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'end', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x747b11a78e90>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x747b11ac4170>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x747b11ab86b0>]}
+[0m19:37:54.790185 [debug] [MainThread]: Flushing usage events
+[0m19:37:54.800526 [debug] [MainThread]: An error was encountered while trying to flush usage events
+[0m17:50:31.867428 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'start', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7c7ddcd78d70>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7c7ddc600f50>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7c7ddbf0fed0>]}
+
+
+============================== 17:50:31.874092 | 2fb05a25-d043-4cec-96fa-3a78e4b323da ==============================
+[0m17:50:31.874092 [info ] [MainThread]: Running with dbt=1.11.8
+[0m17:50:31.875302 [debug] [MainThread]: running dbt with arguments {'use_experimental_parser': 'False', 'warn_error_options': 'WarnErrorOptionsV2(error=[], warn=[], silence=[])', 'no_print': 'None', 'quiet': 'False', 'empty': 'None', 'use_colors': 'True', 'write_json': 'True', 'indirect_selection': 'eager', 'target_path': 'None', 'profiles_dir': '/home/cheesus/.dbt', 'log_path': 'logs', 'printer_width': '80', 'version_check': 'True', 'static_parser': 'True', 'debug': 'False', 'send_anonymous_usage_stats': 'True', 'invocation_command': 'dbt clean', 'warn_error': 'None', 'introspect': 'True', 'cache_selected_only': 'False', 'log_cache_events': 'False', 'log_format': 'default', 'fail_fast': 'False', 'partial_parse': 'True'}
+[0m17:50:31.876631 [error] [MainThread]: Encountered an error:
+Runtime Error
+  No dbt_project.yml found at expected path /home/cheesus/Documents/finanzas_personales_mds_bq/dbt_project.yml
+  Verify that each entry within packages.yml (and their transitive dependencies) contains a file named dbt_project.yml
+  
+[0m17:50:31.878372 [debug] [MainThread]: Resource report: {"command_name": "clean", "command_success": false, "command_wall_clock_time": 0.12228062, "process_in_blocks": "24", "process_kernel_time": 0.252728, "process_mem_max_rss": "103652", "process_out_blocks": "16", "process_user_time": 2.866922}
+[0m17:50:31.879470 [debug] [MainThread]: Command `dbt clean` failed at 17:50:31.879192 after 0.12 seconds
+[0m17:50:31.880257 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'end', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7c7ddbd54e90>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7c7ddbda0170>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7c7ddbd946b0>]}
+[0m17:50:31.881288 [debug] [MainThread]: Flushing usage events
+[0m17:50:31.892303 [debug] [MainThread]: An error was encountered while trying to flush usage events
+[0m17:50:49.131462 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'start', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x750d8ac60d70>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x750d8a4e8f50>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x750d89df7ed0>]}
+
+
+============================== 17:50:49.137967 | d1af0ae7-ced4-495e-9f82-e934fd6a35f8 ==============================
+[0m17:50:49.137967 [info ] [MainThread]: Running with dbt=1.11.8
+[0m17:50:49.139079 [debug] [MainThread]: running dbt with arguments {'write_json': 'True', 'target_path': 'None', 'log_cache_events': 'False', 'invocation_command': 'dbt clean', 'profiles_dir': '/home/cheesus/.dbt', 'warn_error': 'None', 'printer_width': '80', 'empty': 'None', 'no_print': 'None', 'log_path': 'logs', 'quiet': 'False', 'log_format': 'default', 'version_check': 'True', 'warn_error_options': 'WarnErrorOptionsV2(error=[], warn=[], silence=[])', 'send_anonymous_usage_stats': 'True', 'partial_parse': 'True', 'static_parser': 'True', 'fail_fast': 'False', 'use_colors': 'True', 'use_experimental_parser': 'False', 'indirect_selection': 'eager', 'cache_selected_only': 'False', 'debug': 'False', 'introspect': 'True'}
+[0m17:50:49.140424 [error] [MainThread]: Encountered an error:
+Runtime Error
+  No dbt_project.yml found at expected path /home/cheesus/Documents/finanzas_personales_mds_bq/dbt_project.yml
+  Verify that each entry within packages.yml (and their transitive dependencies) contains a file named dbt_project.yml
+  
+[0m17:50:49.142222 [debug] [MainThread]: Resource report: {"command_name": "clean", "command_success": false, "command_wall_clock_time": 0.12559952, "process_in_blocks": "0", "process_kernel_time": 0.178848, "process_mem_max_rss": "103576", "process_out_blocks": "0", "process_user_time": 2.519864}
+[0m17:50:49.143339 [debug] [MainThread]: Command `dbt clean` failed at 17:50:49.143116 after 0.13 seconds
+[0m17:50:49.144115 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'end', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x750d89c34e90>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x750d89c8c170>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x750d89c786b0>]}
+[0m17:50:49.144943 [debug] [MainThread]: Flushing usage events
+[0m17:50:49.154530 [debug] [MainThread]: An error was encountered while trying to flush usage events
+[0m17:52:12.470344 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'start', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x73e570970d70>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x73e5701fcf50>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x73e56fb0bd90>]}
+
+
+============================== 17:52:12.476024 | d392f33e-2bd1-424e-abea-7ea542bc107f ==============================
+[0m17:52:12.476024 [info ] [MainThread]: Running with dbt=1.11.8
+[0m17:52:12.477176 [debug] [MainThread]: running dbt with arguments {'use_colors': 'True', 'debug': 'False', 'indirect_selection': 'eager', 'static_parser': 'True', 'log_format': 'default', 'no_print': 'None', 'fail_fast': 'False', 'target_path': 'None', 'log_cache_events': 'False', 'quiet': 'False', 'cache_selected_only': 'False', 'send_anonymous_usage_stats': 'True', 'version_check': 'True', 'use_experimental_parser': 'False', 'partial_parse': 'True', 'printer_width': '80', 'introspect': 'True', 'log_path': 'logs', 'empty': 'False', 'write_json': 'True', 'invocation_command': 'dbt compile --select fact_transactions', 'profiles_dir': '/home/cheesus/.dbt', 'warn_error': 'None', 'warn_error_options': 'WarnErrorOptionsV2(error=[], warn=[], silence=[])'}
+[0m17:52:12.478202 [error] [MainThread]: Encountered an error:
+Runtime Error
+  No dbt_project.yml found at expected path /home/cheesus/Documents/finanzas_personales_mds_bq/dbt_project.yml
+  Verify that each entry within packages.yml (and their transitive dependencies) contains a file named dbt_project.yml
+  
+[0m17:52:12.479922 [debug] [MainThread]: Resource report: {"command_name": "compile", "command_success": false, "command_wall_clock_time": 0.118253924, "process_in_blocks": "0", "process_kernel_time": 0.188812, "process_mem_max_rss": "104092", "process_out_blocks": "8", "process_user_time": 2.498516}
+[0m17:52:12.480923 [debug] [MainThread]: Command `dbt compile` failed at 17:52:12.480730 after 0.12 seconds
+[0m17:52:12.481680 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'end', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x73e56f98dcd0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x73e56f937d10>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x73e56fb06360>]}
+[0m17:52:12.482447 [debug] [MainThread]: Flushing usage events
+[0m17:52:12.490509 [debug] [MainThread]: An error was encountered while trying to flush usage events
+[0m18:36:29.595729 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'start', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x761b11184d70>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x761b10a0cf50>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x761b1031fd90>]}
+
+
+============================== 18:36:29.602148 | 96b62f8a-f177-46fe-a8d7-df7b1d6c3d82 ==============================
+[0m18:36:29.602148 [info ] [MainThread]: Running with dbt=1.11.8
+[0m18:36:29.603238 [debug] [MainThread]: running dbt with arguments {'indirect_selection': 'eager', 'invocation_command': 'dbt run --select agg_costo_en_vida', 'log_cache_events': 'False', 'quiet': 'False', 'partial_parse': 'True', 'send_anonymous_usage_stats': 'True', 'write_json': 'True', 'warn_error': 'None', 'cache_selected_only': 'False', 'empty': 'False', 'profiles_dir': '/home/cheesus/.dbt', 'version_check': 'True', 'printer_width': '80', 'introspect': 'True', 'log_format': 'default', 'use_experimental_parser': 'False', 'target_path': 'None', 'log_path': 'logs', 'warn_error_options': 'WarnErrorOptionsV2(error=[], warn=[], silence=[])', 'fail_fast': 'False', 'no_print': 'None', 'debug': 'False', 'use_colors': 'True', 'static_parser': 'True'}
+[0m18:36:29.604210 [error] [MainThread]: Encountered an error:
+Runtime Error
+  No dbt_project.yml found at expected path /home/cheesus/Documents/finanzas_personales_mds_bq/dbt_project.yml
+  Verify that each entry within packages.yml (and their transitive dependencies) contains a file named dbt_project.yml
+  
+[0m18:36:29.605776 [debug] [MainThread]: Resource report: {"command_name": "run", "command_success": false, "command_wall_clock_time": 0.117980145, "process_in_blocks": "24", "process_kernel_time": 0.240418, "process_mem_max_rss": "103896", "process_out_blocks": "16", "process_user_time": 2.740367}
+[0m18:36:29.606695 [debug] [MainThread]: Command `dbt run` failed at 18:36:29.606495 after 0.12 seconds
+[0m18:36:29.607392 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'end', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x761b101a1cd0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x761b1014bd10>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x761b1031a360>]}
+[0m18:36:29.608110 [debug] [MainThread]: Flushing usage events
+[0m18:36:29.616403 [debug] [MainThread]: An error was encountered while trying to flush usage events
