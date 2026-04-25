@@ -1,0 +1,140 @@
+version: 2
+
+models:
+  - name: stg_transactions
+    description: >
+      Capa de staging que limpia y estandariza las transacciones financieras. 
+      Combina los datos crudos con metadatos de archivo para asegurar trazabilidad.
+    columns:
+      # Identificadores y Tiempo
+      - name: txn_id
+        description: "ID único (Hash MD5) generado a partir de la combinación de (segun_un_periodo, cuentas, pen, nota, descripcion, categoria, subcategorias)"
+        tests:
+          - unique
+          - not_null
+
+      - name: month_id
+        description: "ID mensual (YYYYMM) derivado de 'segun_un_periodo' para particionamiento lógico."
+
+      - name: txn_time
+        description: "Fecha y hora de la transacción. Origen: raw_transactions.segun_un_periodo."
+
+      - name: day_of_week
+        description: "Nombre del día de la semana. Calculado a partir de raw_transactions.segun_un_periodo."
+
+      # Clasificación de Negocio
+      - name: cuenta
+        description: "Nombre de la cuenta financiera. Origen: raw_transactions.cuentas."
+
+      - name: categoria
+        description: "Categoría principal del gasto o ingreso. Origen: raw_transactions.categoria."
+
+      - name: subcategoria
+        description: "Subcategoría detallada. Origen: raw_transactions.subcategorias (maneja nulos)."
+
+      - name: concepto
+        description: "Breve concepto de la transacción. Origen: raw_transactions.nota."
+
+      # Importes y Monedas
+      - name: importe_moneda_principal
+        description: "Monto convertido a la moneda base del sistema (PEN). Origen: raw_transactions.pen."
+
+      - name: ingreso_gasto
+        description: "Flag que indica si la transacción es un ingreso o un gasto. Origen: raw_transactions.ingreso_gasto."
+
+      - name: comentario
+        description: "Descripción extendida de la transacción. Origen: raw_transactions.descripcion."
+
+      - name: importe_nativo
+        description: "Monto original de la transacción en la cuenta original sin conversiones. Origen: raw_transactions.importe."
+
+      - name: moneda
+        description: "Divisa original de la transacción (USD, PEN, etc.). Origen: raw_transactions.moneda."
+
+      - name: importe_txn
+        description: "Monto de la transacción registrado en la columna cuentas_1 de la fuente."
+
+      # Metadatos de Auditoría (Trazabilidad)
+      - name: src_file
+        description: "Ruta o URI del archivo original en Cloud Storage. Origen: raw_transactions_metadata.uri."
+
+      - name: file_size
+        description: "Tamaño en bytes del archivo procesado. Origen: raw_transactions_metadata.size."
+
+      - name: file_creation_ts
+        description: "Fecha de creación del archivo físico. Origen: raw_transactions_metadata.generation."
+
+      - name: fecha_carga
+        description: "Timestamp del momento en que los metadatos fueron actualizados. Origen: raw_transactions_metadata.updated."
+
+
+  - name: fact_transactions
+    description: >
+      Tabla de hechos final (Capa Silver) que contiene las transacciones financieras refinadas. 
+      Incluye lógica de conversión de moneda, extracción de metadatos desde comentarios y 
+      limpieza de cuentas no financieras (Kilometraje/Personal).
+    columns:
+      # --- LÓGICA DE IMPORTES Y MONEDA (AFINADA) ---
+      - name: importe_moneda_principal
+        description: >
+          Monto total de la transacción expresado en la moneda base del reporte (PEN). 
+          Es el valor final utilizado para agregaciones financieras y presupuestos.
+          Origen: stg_transactions.pen.
+
+      - name: importe_nativo
+        description: >
+          Monto de la transacción en la divisa original en que se efectuó el gasto (ej. USD, EUR).
+          Origen: stg_transactions.importe.
+
+      - name: importe_txn
+        description: >
+          Representa el valor neto de la transacción según el registro de la cuenta de origen. 
+          En este modelo, se utiliza como la base de comparación para determinar el ratio de conversión.
+          Origen: stg_transactions.cuentas_1.
+
+      - name: tipo_cambio
+        description: >
+          Tipo de cambio implícito calculado para la transacción. 
+          Resulta de la división: importe_moneda_principal / importe_txn. 
+          Permite auditar el histórico de tipo de cambio.
+
+        #tests:
+        #  - dbt_utils.accepted_range:
+        #      min_value: 2.5
+        #      max_value: 5.0
+
+      # --- CAMPOS DE EXTRACCIÓN LÓGICA ---
+      - name: clave
+        description: >
+          Identificador extraído de la primera palabra del comentario. 
+          Se valida contra la tabla de referencia 'claves' para categorizar atributos especiales 
+          (ej. C/ para acompañante).
+
+        tests:
+          - relationships:
+              to: ref('claves')
+              field: clave
+
+      - name: valor
+        description: >
+          Atributo dinámico extraído del comentario basado en la 'clave'. 
+          Si la clave es 'C/', toma la segunda palabra; para otras claves, extrae el texto 
+          después del delimitador '/'.
+
+      - name: dias_trabajados
+        description: >
+          Campo numérico extraído de comentarios que contienen las frases 'dia trabajado' 
+          o 'dias trabajados'. Utilizado para análisis de proporcionalidad en ingresos/gastos.
+
+      # --- DIMENSIONES Y ATRIBUTOS ---
+      - name: cuenta
+        description: "Nombre de la entidad financiera o billetera. Se filtran 'Kilometraje' y 'Personal'."
+
+      - name: ingreso_gasto
+        description: "Clasificación binaria del flujo de caja."
+
+      - name: txn_time
+        description: "Timestamp exacto de la transacción (DATETIME)."
+
+      - name: src_file
+        description: "Nombre del archivo fuente para auditoría física de los datos."

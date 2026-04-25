@@ -37,7 +37,7 @@ WITH ultimo_pago AS (
     h.importe_moneda_principal,
     COALESCE(v.horas_trabajadas, u.horas_trabajadas) AS horas_trabajadas,
     COALESCE(v.pago_por_hora, u.pago_por_hora) AS pago_por_hora,
-    ROUND((h.importe_moneda_principal / COALESCE(v.pago_por_hora, u.pago_por_hora, 1)), 3) AS costo_en_horas,
+    ROUND(SAFE_DIVIDE(h.importe_moneda_principal, COALESCE(v.pago_por_hora, u.pago_por_hora)), 3) AS costo_en_horas,
     h.fecha_carga
   FROM
     {{ref('fact_transactions')}} h

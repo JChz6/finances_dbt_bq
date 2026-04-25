@@ -7,7 +7,8 @@
             "field": "txn_time",
             "data_type": "datetime",
             "granularity": "month"
-        }
+        },
+        pre_hook = "{{ replace_partitions(ref('fact_transactions'), this, 'txn_time', 'txn_time') }}"
     )
 }}
 
@@ -19,13 +20,8 @@ WITH CTE AS(
     AND categoria NOT IN ('Comida', 'Regalos', 'Transporte')
     
     {% if is_incremental() %}
-        AND 
-        (
-        DATETIME_TRUNC(DATETIME(txn_time), MONTH) IN (SELECT DISTINCT DATETIME_TRUNC(txn_time, MONTH) from {{ this }})
-        OR DATETIME_TRUNC(DATETIME(txn_time), MONTH) > (SELECT MAX(DATETIME_TRUNC(txn_time, MONTH)) from {{ this }})
-        )
+        AND fecha_carga > (SELECT MAX(fecha_carga) FROM {{ this }}) 
     {% endif %}
-
 )
 
 SELECT

@@ -1,0 +1,93 @@
+version: 2
+
+models:
+  - name: agg_pago_por_hora
+    description: >
+      Tabla agregada de nivel Gold que calcula el rendimiento económico del tiempo trabajado.
+      Cruza los ingresos por salario con los descuentos de ley (AFP, Impuestos) y las horas efectivas
+      para determinar el pago neto por hora.
+    columns:
+      # --- DIMENSIONES TEMPORALES ---
+      - name: anio
+        description: "Año de la transacción salarial."
+      - name: mes
+        description: "Mes numérico del periodo laborado."
+
+      # --- MÉTRICAS DE TIEMPO (Productividad) ---
+      - name: dias_trabajados_mes
+        description: >
+          Suma total de días laborados reportados en el mes. 
+          Calculado mediante la agregación del campo 'dias_trabajados' de fact_transactions.
+      
+      - name: dias_trabajados_neto
+        description: >
+          Ajuste de días laborados usando un factor de eficiencia (72.3%). 
+          Representa el tiempo efectivo de trabajo quitando tiempos muertos o administrativos.
+
+      - name: horas_trabajadas
+        description: "Equivalente en horas de los 'dias_trabajados_neto' (asumiendo jornada de 8h)."
+
+      # --- MÉTRICAS FINANCIERAS (Nómina) ---
+      - name: bruto_mensual
+        description: >
+          Suma de todos los ingresos bajo la categoría 'Salario' para el mes y moneda específica.
+      
+      - name: descuentos
+        description: >
+          Suma de deducciones (Aporte AFP, Seguro AFP, Quinta Categoría) identificadas en el concepto.
+      
+      - name: neto_mensual
+        description: "Ingreso real percibido después de impuestos y aportes (Bruto - Descuentos)."
+
+      - name: pago_por_hora
+        description: >
+          Métrica clave: Valor monetario de una hora efectiva de trabajo. 
+          Calculado como: neto_mensual / horas_trabajadas.
+
+      - name: moneda
+        description: "Divisa del cálculo. Permite separar salarios en diferentes monedas (ej. USD vs PEN)."
+
+
+
+
+
+  - name: agg_costo_en_vida
+    description: >
+      Tabla de nivel Gold que traduce los gastos monetarios a 'Costo de Vida' en horas.
+      Utiliza el pago neto por hora del mes correspondiente (o el más reciente disponible) 
+      para calcular cuánto tiempo de vida costó cada transacción.
+    columns:
+      # --- DIMENSIONES ---
+      - name: txn_id
+        description: "ID único de la transacción original (proviene de fact_transactions)."
+
+      - name: categoria
+        description: "Categoría del gasto (ej. Alimentación, Salud, Ocio)."
+
+      - name: importe_moneda_principal
+        description: "Monto del gasto expresado en la moneda base (PEN)."
+
+      # --- MÉTRICAS DE TIEMPO DE VIDA ---
+      - name: pago_por_hora
+        description: >
+          Tasa de pago utilizada para el cálculo. 
+          Prioriza el pago neto del mes de la transacción; si no existe, 
+          utiliza el último salario registrado en agg_pago_por_hora.
+
+      - name: costo_en_horas
+        description: >
+          Métrica principal: Representa cuántas horas de trabajo efectivo costó este gasto.
+          Cálculo: importe_moneda_principal / pago_por_hora.
+
+        #tests:
+        #  - dbt_utils.accepted_range:
+        #      max_value: 300utils
+
+      - name: horas_trabajadas
+        description: >
+          Referencia de la capacidad laboral del periodo. 
+          Ayuda a poner en contexto el 'costo_en_horas' frente al total de horas laboradas.
+
+      # --- AUDITORÍA ---
+      - name: fecha_carga
+        description: "Timestamp de la carga incremental para trazabilidad de datos."

@@ -45,7 +45,7 @@ FIRST_LAYER AS(
         importe_nativo,
         moneda,
         importe_txn,
-        ROUND(importe_moneda_principal / importe_txn, 3) AS tipo_cambio,
+        SAFE_CAST(ROUND(SAFE_DIVIDE(importe_moneda_principal, importe_txn), 3) AS NUMERIC) AS tipo_cambio,
         CASE
             WHEN TRIM(REPLACE(LOWER(comentario), 'í', 'i')) LIKE '%dias trabajados'
                 THEN CAST(part_1 AS NUMERIC)
