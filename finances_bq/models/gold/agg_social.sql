@@ -52,7 +52,7 @@ SELECT
     ingreso_total,
     gasto_mujeres,
     CONCAT(
-        ROUND((gasto_mujeres / ingreso_total)*100, 2)
+        ROUND(SAFE_DIVIDE(gasto_mujeres, ingreso_total)*100, 2)
         , '%') AS porc_mujeres,
     fecha_carga
 FROM FIRST_LAYER
