@@ -66,7 +66,6 @@ FIRST_LAYER AS(
         part_1,
         part_2
     FROM CTE
-    
 )
 SELECT
     txn_id,
