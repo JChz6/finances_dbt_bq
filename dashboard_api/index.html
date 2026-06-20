@@ -1,0 +1,1503 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wealth Dashboard</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Outfit', 'sans-serif'],
+                    },
+                    colors: {
+                        darkbg: '#090d16', 
+                        card: '#131926', 
+                        accent: '#6366f1',
+                        accentHover: '#4f46e5',
+                        income: '#10b981', 
+                        expense: '#f43f5e',
+                        textmain: '#f8fafc', 
+                        textmuted: '#64748b'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #090d16;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1e293b;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #334155;
+        }
+    </style>
+</head>
+<body class="bg-darkbg text-textmain font-sans antialiased selection:bg-accent selection:text-white">
+
+    <div class="flex flex-col md:flex-row min-h-screen">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="w-full md:w-64 bg-card border-r border-slate-800/80 p-6 flex flex-col justify-between transition-all duration-300">
+            <div>
+                <div class="flex items-center justify-between mb-8">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-pink-500 flex items-center justify-center font-bold text-white shadow-lg shadow-indigo-500/20">W</div>
+                        <div>
+                            <h1 class="text-lg font-bold tracking-tight">Wealth<span class="text-indigo-400 font-light">Dash</span></h1>
+                            <span class="text-[10px] text-textmuted uppercase tracking-widest font-semibold">Consola de Control</span>
+                        </div>
+                    </div>
+                    <!-- Collapse Button -->
+                    <button onclick="toggleSidebar()" class="p-1.5 hover:bg-slate-800 rounded-lg text-textmuted hover:text-textmain transition-colors" title="Ocultar menú">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"/></svg>
+                    </button>
+                </div>
+                
+                <nav class="space-y-1.5" id="sidebar-nav">
+                    <button onclick="switchTab('overview')" id="tab-btn-overview" class="w-full flex items-center gap-3 px-4 py-2.5 bg-accent/15 text-indigo-400 rounded-xl text-sm font-medium border border-accent/20 transition-all text-left">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2v-4zM14 16a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2v-4z"/></svg>
+                        Overview General
+                    </button>
+                    <button onclick="switchTab('presupuesto')" id="tab-btn-presupuesto" class="w-full flex items-center gap-3 px-4 py-2.5 text-textmuted hover:bg-slate-800/50 hover:text-textmain rounded-xl text-sm font-medium transition-all text-left">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                        Presupuesto
+                    </button>
+                    <button onclick="switchTab('crecimiento')" id="tab-btn-crecimiento" class="w-full flex items-center gap-3 px-4 py-2.5 text-textmuted hover:bg-slate-800/50 hover:text-textmain rounded-xl text-sm font-medium transition-all text-left">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6M17 14v6m-3-3h6"/></svg>
+                        Crecimiento e Inversiones
+                    </button>
+                </nav>
+            </div>
+            
+            <div class="mt-8 pt-4 border-t border-slate-800/80 text-[11px] text-textmuted">
+                Conectado a <span class="text-indigo-400">BigQuery</span>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 p-4 md:p-8 overflow-y-auto max-w-7xl mx-auto w-full">
+            
+            <!-- Global filters -->
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 pb-6 border-b border-slate-800/60">
+                <div class="flex items-center gap-3">
+                    <button id="btn-show-sidebar" onclick="toggleSidebar()" class="hidden p-2 bg-card border border-slate-800 hover:border-slate-700 hover:bg-slate-800 rounded-xl text-textmuted hover:text-textmain transition-all animate-fade-in" title="Mostrar menú">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+                    </button>
+                    <div>
+                        <h2 class="text-2xl font-bold tracking-tight text-white" id="page-title">Overview Financiero</h2>
+                        <p class="text-textmuted text-xs mt-0.5" id="page-subtitle">Resumen de flujo de caja, gastos y balances consolidados.</p>
+                    </div>
+                </div>
+                
+                <!-- Filters Container -->
+                <div class="flex flex-wrap items-center gap-3">
+                    <!-- Date Picker Filter (Tab Overview) -->
+                    <div id="filter-dates" class="flex items-center gap-2 bg-card px-3 py-1.5 rounded-xl border border-slate-800/80 text-xs">
+                        <span class="text-textmuted">Desde:</span>
+                        <input type="date" id="input-desde" class="bg-transparent text-white focus:outline-none focus:ring-1 focus:ring-accent rounded px-1.5 py-0.5 border border-slate-800" value="2026-01-01">
+                        <span class="text-textmuted ml-1">Hasta:</span>
+                        <input type="date" id="input-hasta" class="bg-transparent text-white focus:outline-none focus:ring-1 focus:ring-accent rounded px-1.5 py-0.5 border border-slate-800" value="2026-06-15">
+                        <button onclick="aplicarFiltros()" class="ml-2 bg-accent hover:bg-accentHover text-white px-3 py-1 rounded-lg font-medium transition-colors">
+                            Filtrar
+                        </button>
+                    </div>
+
+                    <!-- Budget Filters (Tab Presupuesto) -->
+                    <div id="filter-budget" class="hidden flex flex-wrap items-center gap-3">
+                        <div class="flex items-center gap-2 bg-card px-3 py-1.5 rounded-xl border border-slate-800/80 text-xs">
+                            <span class="text-textmuted">Año:</span>
+                            <select id="select-year" onchange="cargarPresupuestos()" class="bg-transparent text-white focus:outline-none focus:ring-1 focus:ring-accent rounded px-1 py-0.5 border border-slate-800">
+                                <option value="2026" selected>2026</option>
+                                <option value="2025">2025</option>
+                                <option value="2024">2024</option>
+                                <option value="2023">2023</option>
+                            </select>
+                             <span class="text-textmuted ml-2">Mes(es):</span>
+                              <div class="relative inline-block text-left">
+                                  <button id="btn-month-filter" onclick="toggleMonthDropdown(event)" class="bg-card hover:bg-slate-800 text-white focus:outline-none focus:ring-1 focus:ring-accent rounded-xl px-2.5 py-1.5 border border-slate-800 text-xs flex items-center gap-1.5 transition-all">
+                                      <span id="selected-months-text">Mayo</span>
+                                      <svg class="w-3 h-3 text-textmuted" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                                  </button>
+                                  <div id="month-dropdown" class="hidden absolute left-0 mt-1.5 w-44 bg-slate-950 border border-slate-800 rounded-xl shadow-xl z-50 p-3 max-h-64 overflow-y-auto">
+                                      <div class="flex items-center justify-between border-b border-slate-800/80 pb-2 mb-2 text-[10px]">
+                                          <button onclick="selectAllMonths(true)" class="text-indigo-400 hover:text-indigo-300 font-semibold">Todos</button>
+                                          <button onclick="selectAllMonths(false)" class="text-textmuted hover:text-textmain font-semibold">Ninguno</button>
+                                      </div>
+                                      <div id="month-checkboxes" class="space-y-1.5 pr-1">
+                                          <!-- Will be populated dynamically by JS -->
+                                      </div>
+                                  </div>
+                              </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 1: OVERVIEW -->
+            <div id="tab-overview" class="space-y-6">
+                <!-- KPI Summary cards -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="bg-card rounded-2xl p-5 border border-slate-800/60 shadow-sm relative overflow-hidden">
+                        <p class="text-textmuted text-xs uppercase font-semibold tracking-wider">Ingresos Totales</p>
+                        <h3 class="text-2xl font-bold text-income mt-2" id="kpi-ingresos">$0</h3>
+                        <p class="text-[10px] text-textmuted mt-1" id="kpi-ingresos-desc">En el periodo seleccionado</p>
+                        <div class="absolute right-4 bottom-4 text-income/10"><svg class="w-12 h-12" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path></svg></div>
+                    </div>
+                    <div class="bg-card rounded-2xl p-5 border border-slate-800/60 shadow-sm relative overflow-hidden">
+                        <p class="text-textmuted text-xs uppercase font-semibold tracking-wider">Gastos Totales</p>
+                        <h3 class="text-2xl font-bold text-expense mt-2" id="kpi-gastos">$0</h3>
+                        <p class="text-[10px] text-textmuted mt-1" id="kpi-gastos-desc">En el periodo seleccionado</p>
+                        <div class="absolute right-4 bottom-4 text-expense/10"><svg class="w-12 h-12" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path></svg></div>
+                    </div>
+                    <div class="bg-card rounded-2xl p-5 border border-slate-800/60 shadow-sm relative overflow-hidden">
+                        <p class="text-textmuted text-xs uppercase font-semibold tracking-wider">Balance Neto</p>
+                        <h3 class="text-2xl font-bold text-white mt-2" id="kpi-balance">$0</h3>
+                        <p class="text-[10px] text-textmuted mt-1" id="kpi-balance-desc">Ingresos - Gastos</p>
+                        <div class="absolute right-4 bottom-4 text-white/5"><svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg></div>
+                    </div>
+                    <div class="bg-card rounded-2xl p-5 border border-slate-800/60 shadow-sm relative overflow-hidden">
+                        <p class="text-textmuted text-xs uppercase font-semibold tracking-wider">Porcentaje de flujo</p>
+                        <h3 class="text-2xl font-bold text-indigo-400 mt-2" id="kpi-ahorro">0%</h3>
+                        <p class="text-[10px] text-textmuted mt-1" id="kpi-ahorro-desc">Liquidez al final del periodo</p>
+                        <div class="absolute right-4 bottom-4 text-indigo-400/10"><svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg></div>
+                    </div>
+                </div>
+
+                <!-- Charts layout -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="bg-card rounded-2xl p-6 border border-slate-800/60 shadow-sm lg:col-span-2">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="font-bold text-white text-base">Flujo de Caja vs Balance Acumulado</h3>
+                            <!-- Granularity switches -->
+                            <div class="flex bg-slate-900 border border-slate-800 p-0.5 rounded-lg text-xs">
+                                <button onclick="setGranularidad('mensual')" id="btn-gran-mensual" class="px-2.5 py-1 bg-accent text-white rounded-md transition-colors font-medium">Mensual</button>
+                                <button onclick="setGranularidad('diario')" id="btn-gran-diario" class="px-2.5 py-1 text-textmuted hover:text-textmain rounded-md transition-colors font-medium">Diario</button>
+                            </div>
+                        </div>
+                        <div class="relative h-[320px]">
+                            <canvas id="flujoChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="bg-card rounded-2xl p-6 border border-slate-800/60 shadow-sm flex flex-col relative">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="font-bold text-white text-base">Distribución por Categorías</h3>
+                            <!-- Dropdown for category select -->
+                            <div class="relative">
+                                <button onclick="toggleCategoryDropdown(event)" class="px-2.5 py-1.5 bg-slate-900 border border-slate-800 hover:border-slate-700 hover:bg-slate-800 text-[11px] text-textmain rounded-lg flex items-center gap-1.5 transition-all">
+                                    <svg class="w-3.5 h-3.5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 8.293A1 1 0 013 7.586V4z"/></svg>
+                                    Filtrar
+                                </button>
+                                <div id="cat-dropdown" class="hidden absolute right-0 mt-1.5 w-52 bg-slate-900 border border-slate-800 rounded-xl shadow-xl z-50 p-3 max-h-64 overflow-y-auto">
+                                    <div class="flex items-center justify-between border-b border-slate-800/80 pb-2 mb-2 text-[10px]">
+                                        <button onclick="selectAllCategories(true)" class="text-indigo-400 hover:text-indigo-300 font-semibold">Marcar todos</button>
+                                        <button onclick="selectAllCategories(false)" class="text-textmuted hover:text-textmain font-semibold">Desmarcar todos</button>
+                                    </div>
+                                    <div id="cat-checkboxes" class="space-y-1.5 max-h-48 overflow-y-auto pr-1">
+                                        <!-- Will be populated dynamically -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="relative h-[280px]">
+                            <canvas id="pieChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="bg-card rounded-2xl p-6 border border-slate-800/60 shadow-sm">
+                        <h3 class="font-bold text-white text-base mb-4">Balance por Trimestre</h3>
+                        <div class="relative h-[280px]">
+                            <canvas id="trimestreChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="bg-card rounded-2xl p-6 border border-slate-800/60 shadow-sm lg:col-span-2 overflow-hidden flex flex-col h-[360px]">
+                        <h3 class="font-bold text-white text-base mb-4">Top Gastos del Periodo</h3>
+                        <div class="overflow-y-auto overflow-x-auto flex-1 pr-1">
+                            <table class="w-full text-left text-xs whitespace-nowrap table-auto">
+                                <thead>
+                                    <tr class="text-textmuted border-b border-slate-800 bg-card sticky top-0 z-10">
+                                        <th class="pb-3 font-semibold px-2 bg-card">Fecha</th>
+                                        <th class="pb-3 font-semibold px-2 bg-card">Descripción</th>
+                                        <th class="pb-3 font-semibold px-2 bg-card">Categoría</th>
+                                        <th class="pb-3 font-semibold px-2 text-right bg-card">Monto</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabla-body" class="divide-y divide-slate-800/40">
+                                    <tr><td colspan="4" class="py-6 text-center text-textmuted animate-pulse">Cargando transacciones...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 2: PRESUPUESTO -->
+            <div id="tab-presupuesto" class="hidden space-y-6">
+                <!-- Category multiselect filters -->
+                <div class="bg-card rounded-2xl p-5 border border-slate-800/60 shadow-sm">
+                    <span class="text-xs text-textmuted uppercase tracking-wider font-semibold block mb-3">Filtrar por Categorías</span>
+                    <div class="flex flex-wrap gap-2" id="category-checkboxes">
+                        <!-- Categorías se poblarán dinámicamente -->
+                    </div>
+                </div>
+
+                <!-- Budget grid cards (Dynamic visual analysis) -->
+                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6" id="budget-charts-container">
+                    <!-- Los minigráficos de cumplimiento se pintarán aquí -->
+                </div>
+
+                <!-- Modal for showing concept details on bar click -->
+                <div id="concept-modal" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                    <div class="bg-card w-full max-w-lg rounded-2xl border border-slate-800/80 shadow-2xl flex flex-col max-h-[80vh] overflow-hidden animate-fade-in">
+                        <!-- Modal Header -->
+                        <div class="p-5 border-b border-slate-800/80 flex items-center justify-between">
+                            <div>
+                                <h3 id="modal-title" class="text-sm font-bold text-white uppercase tracking-wider">Detalle de Gastos</h3>
+                                <p id="modal-subtitle" class="text-[10px] text-textmuted mt-0.5">Conceptos que componen esta categoría y mes.</p>
+                            </div>
+                            <button onclick="cerrarModalConceptos()" class="p-1.5 hover:bg-slate-800 rounded-lg text-textmuted hover:text-textmain transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                            </button>
+                        </div>
+                        
+                        <!-- Modal Content (Table) -->
+                        <div class="p-5 overflow-y-auto flex-1 pr-3">
+                            <table class="w-full text-left text-xs whitespace-nowrap table-auto">
+                                <thead>
+                                    <tr class="text-textmuted border-b border-slate-800 bg-card sticky top-0 z-10">
+                                        <th class="pb-3 font-semibold px-2 bg-card">Concepto / Descripción</th>
+                                        <th class="pb-3 font-semibold px-2 text-right bg-card">Monto</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="modal-table-body" class="divide-y divide-slate-800/40">
+                                    <!-- Loaded dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <!-- Modal Footer -->
+                        <div class="p-4 bg-slate-900/50 border-t border-slate-800/80 text-right">
+                            <button onclick="cerrarModalConceptos()" class="px-4 py-2 bg-slate-850 hover:bg-slate-800 border border-slate-800 hover:border-slate-700 text-white rounded-xl text-xs font-semibold transition-all">
+                                Cerrar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 3: CRECIMIENTO E INVERSIONES -->
+            <div id="tab-crecimiento" class="hidden space-y-6">
+                <!-- KPI Summary cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div class="bg-card rounded-2xl p-6 border border-slate-800/60 shadow-sm relative overflow-hidden">
+                        <p class="text-textmuted text-xs uppercase font-semibold tracking-wider">Fondo de Emergencia</p>
+                        <h3 class="text-2xl font-bold text-white mt-2" id="kpi-fondo-emergencia">S/ 0</h3>
+                        <p class="text-[10px] text-textmuted mt-1">Valor objetivo constante (S/ 30,000)</p>
+                        <div class="absolute right-4 bottom-4 text-emerald-400/10"><svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg></div>
+                    </div>
+                    <div class="bg-card rounded-2xl p-6 border border-slate-800/60 shadow-sm relative overflow-hidden">
+                        <p class="text-textmuted text-xs uppercase font-semibold tracking-wider">Supervivencia Estricta</p>
+                        <h3 class="text-2xl font-bold text-expense mt-2" id="kpi-supervivencia-estricta">S/ 0</h3>
+                        <p class="text-[10px] text-textmuted mt-1">Categorías indispensables seleccionadas</p>
+                        <div class="absolute right-4 bottom-4 text-expense/10"><svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg></div>
+                    </div>
+                    <div class="bg-card rounded-2xl p-6 border border-slate-800/60 shadow-sm relative overflow-hidden">
+                        <p class="text-textmuted text-xs uppercase font-semibold tracking-wider">Gastos de Vida</p>
+                        <h3 class="text-2xl font-bold text-indigo-400 mt-2" id="kpi-gastos-vida">S/ 0</h3>
+                        <p class="text-[10px] text-textmuted mt-1">Presupuesto total de vida mensual</p>
+                        <div class="absolute right-4 bottom-4 text-indigo-400/10"><svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg></div>
+                    </div>
+                    <div class="bg-card rounded-2xl p-6 border border-slate-800/60 shadow-sm relative overflow-hidden">
+                        <p class="text-textmuted text-xs uppercase font-semibold tracking-wider">Mediana Ingreso Neto</p>
+                        <h3 class="text-2xl font-bold text-textmuted mt-2" id="kpi-mediana-ingreso">S/ 0000</h3>
+                        <p class="text-[10px] text-yellow-500 mt-1 font-semibold flex items-center gap-1">
+                            <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>
+                            Vista pendiente en BigQuery
+                        </p>
+                        <div class="absolute right-4 bottom-4 text-textmuted/10"><svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg></div>
+                    </div>
+                </div>
+
+                <!-- Charts layout -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="bg-card rounded-2xl p-6 border border-slate-800/60 shadow-sm">
+                        <h3 class="font-bold text-white text-base mb-4">Ingreso Pasivo Mensual vs Acumulado</h3>
+                        <div class="relative h-[320px]">
+                            <canvas id="pasivoChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="bg-card rounded-2xl p-6 border border-slate-800/60 shadow-sm relative overflow-hidden flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="font-bold text-white text-base">Ingreso Neto Mensual</h3>
+                                <span class="px-2 py-0.5 text-[9px] bg-yellow-500/10 border border-yellow-500/20 text-yellow-500 font-bold rounded-lg uppercase tracking-wider">Pendiente</span>
+                            </div>
+                            <div class="relative h-[250px] flex flex-col items-center justify-center border border-dashed border-slate-850 rounded-xl bg-slate-900/25 p-6 text-center">
+                                <svg class="w-10 h-10 text-yellow-500/60 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                                <p class="text-xs text-white font-medium">Gráfico no disponible</p>
+                                <p class="text-[10px] text-textmuted mt-1 max-w-xs">Esta vista requiere una vista consolidada de ingreso neto que aún no ha sido creada en la base de datos de BigQuery.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Category Breakdown and Top Incomes Table -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="bg-card rounded-2xl p-6 border border-slate-800/60 shadow-sm flex flex-col relative">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="font-bold text-white text-base">Porcentaje de Ingreso por Categoría</h3>
+                            <!-- Dropdown for category select -->
+                            <div class="relative">
+                                <button onclick="toggleIncomeCategoryDropdown(event)" class="px-2.5 py-1.5 bg-slate-900 border border-slate-800 hover:border-slate-700 hover:bg-slate-800 text-[11px] text-textmain rounded-lg flex items-center gap-1.5 transition-all">
+                                    <svg class="w-3.5 h-3.5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 8.293A1 1 0 013 7.586V4z"/></svg>
+                                    Filtrar
+                                </button>
+                                <div id="inc-cat-dropdown" class="hidden absolute right-0 mt-1.5 w-52 bg-slate-900 border border-slate-800 rounded-xl shadow-xl z-50 p-3 max-h-64 overflow-y-auto">
+                                    <div class="flex items-center justify-between border-b border-slate-800/80 pb-2 mb-2 text-[10px]">
+                                        <button onclick="selectAllIncomeCategories(true)" class="text-indigo-400 hover:text-indigo-300 font-semibold">Marcar todos</button>
+                                        <button onclick="selectAllIncomeCategories(false)" class="text-textmuted hover:text-textmain font-semibold">Desmarcar todos</button>
+                                    </div>
+                                    <div id="inc-cat-checkboxes" class="space-y-1.5 max-h-48 overflow-y-auto pr-1">
+                                        <!-- Will be populated dynamically -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="relative h-[280px]">
+                            <canvas id="incomePieChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="bg-card rounded-2xl p-6 border border-slate-800/60 shadow-sm lg:col-span-2 overflow-hidden flex flex-col h-[360px]">
+                        <h3 class="font-bold text-white text-base mb-4">Top Ingresos del Periodo</h3>
+                        <div class="overflow-y-auto overflow-x-auto flex-1 pr-1">
+                            <table class="w-full text-left text-xs whitespace-nowrap table-auto">
+                                <thead>
+                                    <tr class="text-textmuted border-b border-slate-800 bg-card sticky top-0 z-10">
+                                        <th class="pb-3 font-semibold px-2 bg-card">Fecha</th>
+                                        <th class="pb-3 font-semibold px-2 bg-card">Descripción</th>
+                                        <th class="pb-3 font-semibold px-2 bg-card">Categoría</th>
+                                        <th class="pb-3 font-semibold px-2 text-right bg-card">Monto</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="income-tabla-body" class="divide-y divide-slate-800/40">
+                                    <tr><td colspan="4" class="py-6 text-center text-textmuted animate-pulse">Cargando ingresos...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script>
+        const API_URL = "http://localhost:8000"; 
+        
+        // Colores y tipografía globales de Chart.js
+        Chart.defaults.color = '#64748b';
+        Chart.defaults.font.family = "Outfit, ui-sans-serif, system-ui, sans-serif";
+
+        let globalGranularidad = "mensual";
+        let activeTab = "overview";
+        
+        // Instancias de gráficos globales para poder destruirlas y recrearlas
+        let flujoChartInstance = null;
+        let pieChartInstance = null;
+        let trimestreChartInstance = null;
+        let originalCategoryData = null;
+        let excludedCategories = new Set();
+        let miniChartInstances = {};
+
+        let pasivoChartInstance = null;
+        let incomePieChartInstance = null;
+        let originalIncomeCategoryData = null;
+        let excludedIncomeCategories = new Set();
+
+        // Categorías a mostrar
+        const categoriasPresupuestoDefault = [
+            "Comida", "Casa", "Entretenimiento", "Facturas", 
+            "Transporte", "Autocuidado", "Viajes", "Gastos Variables", "Regalos"
+        ];
+        let categoriasSeleccionadas = [...categoriasPresupuestoDefault];
+
+        // Mostrar / Ocultar menú lateral
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const showBtn = document.getElementById('btn-show-sidebar');
+            sidebar.classList.toggle('hidden');
+            showBtn.classList.toggle('hidden');
+        }
+
+        // Cambiar entre pestañas
+        function switchTab(tab) {
+            activeTab = tab;
+            
+            const tabBtnOverview = document.getElementById('tab-btn-overview');
+            const tabBtnPresupuesto = document.getElementById('tab-btn-presupuesto');
+            const tabBtnCrecimiento = document.getElementById('tab-btn-crecimiento');
+            
+            const tabOverview = document.getElementById('tab-overview');
+            const tabPresupuesto = document.getElementById('tab-presupuesto');
+            const tabCrecimiento = document.getElementById('tab-crecimiento');
+            
+            const filterDates = document.getElementById('filter-dates');
+            const filterBudget = document.getElementById('filter-budget');
+            
+            const pageTitle = document.getElementById('page-title');
+            const pageSubtitle = document.getElementById('page-subtitle');
+
+            [tabBtnOverview, tabBtnPresupuesto, tabBtnCrecimiento].forEach(btn => {
+                if (btn) btn.className = "w-full flex items-center gap-3 px-4 py-2.5 text-textmuted hover:bg-slate-800/50 hover:text-textmain rounded-xl text-sm font-medium transition-all text-left";
+            });
+            [tabOverview, tabPresupuesto, tabCrecimiento].forEach(t => {
+                if (t) t.classList.add('hidden');
+            });
+
+            if (tab === 'overview') {
+                tabOverview.classList.remove('hidden');
+                filterDates.classList.remove('hidden');
+                filterBudget.classList.add('hidden');
+                tabBtnOverview.className = "w-full flex items-center gap-3 px-4 py-2.5 bg-accent/15 text-indigo-400 rounded-xl text-sm font-medium border border-accent/20 transition-all text-left";
+                
+                pageTitle.innerText = "Overview Financiero";
+                pageSubtitle.innerText = "Resumen de flujo de caja, gastos y balances consolidados.";
+                cargarOverview();
+            } else if (tab === 'presupuesto') {
+                tabPresupuesto.classList.remove('hidden');
+                filterDates.classList.add('hidden');
+                filterBudget.classList.remove('hidden');
+                tabBtnPresupuesto.className = "w-full flex items-center gap-3 px-4 py-2.5 bg-accent/15 text-indigo-400 rounded-xl text-sm font-medium border border-accent/20 transition-all text-left";
+                
+                pageTitle.innerText = "Cumplimiento de Presupuesto";
+                pageSubtitle.innerText = "Análisis comparativo de gastos contra límites establecidos mensualmente.";
+                inicializarFiltrosCategorias();
+                cargarPresupuestos();
+            } else if (tab === 'crecimiento') {
+                tabCrecimiento.classList.remove('hidden');
+                filterDates.classList.remove('hidden');
+                filterBudget.classList.add('hidden');
+                tabBtnCrecimiento.className = "w-full flex items-center gap-3 px-4 py-2.5 bg-accent/15 text-indigo-400 rounded-xl text-sm font-medium border border-accent/20 transition-all text-left";
+                
+                pageTitle.innerText = "Crecimiento e Inversiones";
+                pageSubtitle.innerText = "Análisis de ingresos pasivos, presupuestos de vida y evolución patrimonial.";
+                cargarCrecimiento();
+            }
+        }
+
+        // Configurar granularidad
+        function setGranularidad(gran) {
+            globalGranularidad = gran;
+            const btnMensual = document.getElementById('btn-gran-mensual');
+            const btnDiario = document.getElementById('btn-gran-diario');
+            
+            if (gran === 'mensual') {
+                btnMensual.className = "px-2.5 py-1 bg-accent text-white rounded-md transition-colors font-medium";
+                btnDiario.className = "px-2.5 py-1 text-textmuted hover:text-textmain rounded-md transition-colors font-medium";
+            } else {
+                btnDiario.className = "px-2.5 py-1 bg-accent text-white rounded-md transition-colors font-medium";
+                btnMensual.className = "px-2.5 py-1 text-textmuted hover:text-textmain rounded-md transition-colors font-medium";
+            }
+            cargarFlujoChart();
+        }
+
+        // Inicializar Checkboxes de categorías
+        function inicializarFiltrosCategorias() {
+            const container = document.getElementById('category-checkboxes');
+            if (container.children.length > 0) return; // Ya inicializado
+            
+            categoriasPresupuestoDefault.forEach(cat => {
+                const isChecked = categoriasSeleccionadas.includes(cat);
+                const button = document.createElement('button');
+                button.id = `cat-btn-${cat.replace(/\s+/g, '-')}`;
+                button.innerText = cat;
+                button.className = `px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
+                    isChecked 
+                    ? 'bg-accent/15 border-accent text-indigo-400 shadow-sm shadow-accent/10' 
+                    : 'bg-slate-900 border-slate-800 text-textmuted hover:text-textmain'
+                }`;
+                button.onclick = () => togglerCategoria(cat);
+                container.appendChild(button);
+            });
+        }
+
+        // Alternar categoría de presupuesto
+        function togglerCategoria(cat) {
+            const index = categoriasSeleccionadas.indexOf(cat);
+            const button = document.getElementById(`cat-btn-${cat.replace(/\s+/g, '-')}`);
+            if (index > -1) {
+                categoriasSeleccionadas.splice(index, 1);
+                button.className = 'px-3 py-1.5 rounded-xl text-xs font-semibold border bg-slate-900 border-slate-800 text-textmuted hover:text-textmain transition-all';
+            } else {
+                categoriasSeleccionadas.push(cat);
+                button.className = 'px-3 py-1.5 rounded-xl text-xs font-semibold border bg-accent/15 border-accent text-indigo-400 shadow-sm shadow-accent/10 transition-all';
+            }
+            cargarPresupuestos();
+        }
+
+        // Aplicar filtros de fecha
+        function aplicarFiltros() {
+            if (activeTab === 'overview') {
+                cargarOverview();
+            } else if (activeTab === 'crecimiento') {
+                cargarCrecimiento();
+            }
+        }
+
+        // Formatear monedas en Soles peruanos (PEN)
+        function formatMoneda(valor) {
+            return new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN', maximumFractionDigits: 0 }).format(valor);
+        }
+
+        // Cargar todos los datos del Overview (Tab 1)
+        async function cargarOverview() {
+            const desde = document.getElementById('input-desde').value;
+            const hasta = document.getElementById('input-hasta').value;
+
+            cargarKPIs(desde, hasta);
+            cargarFlujoChart(desde, hasta);
+            cargarGastosCategoria(desde, hasta);
+            cargarBalanceTrimestre(desde, hasta);
+            cargarTopGastos(desde, hasta);
+        }
+
+        // Obtener KPIs de resumen
+        async function cargarKPIs(desde, hasta) {
+            try {
+                const res = await fetch(`${API_URL}/flujo-caja?fecha_inicio=${desde}&fecha_fin=${hasta}&granularidad=mensual`);
+                const data = await res.json();
+                
+                let ingresoTotal = 0;
+                let gastoTotal = 0;
+                
+                data.ingresos.forEach(i => ingresoTotal += i);
+                data.gastos.forEach(g => gastoTotal += Math.abs(g));
+                
+                const balanceNeto = ingresoTotal - gastoTotal;
+                const porcentajeAhorro = ingresoTotal > 0 ? ((balanceNeto / ingresoTotal) * 100).toFixed(1) : 0;
+                
+                document.getElementById('kpi-ingresos').innerText = formatMoneda(ingresoTotal);
+                document.getElementById('kpi-gastos').innerText = formatMoneda(gastoTotal);
+                
+                const balEl = document.getElementById('kpi-balance');
+                balEl.innerText = formatMoneda(balanceNeto);
+                if (balanceNeto >= 0) {
+                    balEl.className = "text-2xl font-bold text-income mt-2";
+                } else {
+                    balEl.className = "text-2xl font-bold text-expense mt-2";
+                }
+
+                document.getElementById('kpi-ahorro').innerText = `${porcentajeAhorro}%`;
+                
+            } catch (err) {
+                console.error("Error al cargar KPIs:", err);
+            }
+        }
+
+        // Cargar Chart del Flujo de caja (Gastos negativos abajo, ingresos arriba)
+        async function cargarFlujoChart(desde, hasta) {
+            if (!desde) desde = document.getElementById('input-desde').value;
+            if (!hasta) hasta = document.getElementById('input-hasta').value;
+
+            try {
+                const res = await fetch(`${API_URL}/flujo-caja?fecha_inicio=${desde}&fecha_fin=${hasta}&granularidad=${globalGranularidad}`);
+                const data = await res.json();
+
+                if (flujoChartInstance) {
+                    flujoChartInstance.destroy();
+                }
+
+                const ctx = document.getElementById('flujoChart').getContext('2d');
+                flujoChartInstance = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: data.fechas,
+                        datasets: [
+                            {
+                                label: 'Balance Acumulado',
+                                type: 'line',
+                                data: data.acumulado,
+                                borderColor: '#818cf8',
+                                backgroundColor: 'rgba(129, 140, 248, 0.05)',
+                                borderWidth: 2,
+                                tension: 0.35,
+                                fill: true,
+                                order: 0,
+                                pointRadius: 1,
+                                pointHoverRadius: 5
+                            },
+                            {
+                                label: 'Ingresos',
+                                data: data.ingresos,
+                                backgroundColor: 'rgba(16, 185, 129, 0.85)',
+                                borderRadius: 6,
+                                order: 1,
+                                stack: 'flujo'
+                            },
+                            {
+                                label: 'Gastos',
+                                // Mantener como negativos para mostrar hacia abajo
+                                data: data.gastos.map(g => g > 0 ? -g : g),
+                                backgroundColor: 'rgba(244, 63, 94, 0.85)',
+                                borderRadius: 6,
+                                order: 1,
+                                stack: 'flujo'
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        interaction: { mode: 'index', intersect: false },
+                        animations: {
+                            active: {
+                                duration: 150
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                                labels: { boxWidth: 12, font: { size: 11 } }
+                            },
+                            tooltip: {
+                                animation: {
+                                    duration: 100
+                                }
+                            }
+                        },
+                        scales: {
+                            x: { 
+                                grid: { color: 'rgba(51, 65, 85, 0.1)' }, 
+                                ticks: { font: { size: 10 } },
+                                stacked: true
+                            },
+                            y: { 
+                                type: 'linear', 
+                                display: true, 
+                                position: 'left', 
+                                grid: { color: 'rgba(51, 65, 85, 0.2)' },
+                                ticks: { font: { size: 10 }, callback: v => formatMoneda(v) },
+                                stacked: true
+                            }
+                        }
+                    }
+                });
+
+            } catch (err) {
+                console.error("Error al cargar flujo chart:", err);
+            }
+        }
+
+        // Cargar Chart de Categorías
+        async function cargarGastosCategoria(desde, hasta) {
+            try {
+                if (!desde) desde = document.getElementById('input-desde').value;
+                if (!hasta) hasta = document.getElementById('input-hasta').value;
+
+                const res = await fetch(`${API_URL}/gastos-categoria?fecha_inicio=${desde}&fecha_fin=${hasta}`);
+                const data = await res.json();
+
+                originalCategoryData = data;
+                
+                renderCategoryCheckboxes();
+                actualizarPieChart();
+
+            } catch (err) {
+                console.error("Error al cargar categorias:", err);
+            }
+        }
+
+        function toggleCategoryDropdown(event) {
+            event.stopPropagation();
+            const dropdown = document.getElementById('cat-dropdown');
+            dropdown.classList.toggle('hidden');
+        }
+
+        function renderCategoryCheckboxes() {
+            const container = document.getElementById('cat-checkboxes');
+            if (!container || !originalCategoryData) return;
+
+            container.innerHTML = '';
+            
+            originalCategoryData.categorias.forEach(cat => {
+                const checked = !excludedCategories.has(cat);
+                
+                const div = document.createElement('div');
+                div.className = 'flex items-center gap-2 hover:bg-slate-800/40 p-1 rounded transition-colors';
+                
+                div.innerHTML = `
+                    <input type="checkbox" id="chk-cat-${cat}" 
+                           class="w-3.5 h-3.5 accent-indigo-500 rounded border-slate-700 bg-slate-900 focus:ring-indigo-500/20 cursor-pointer" 
+                           ${checked ? 'checked' : ''} 
+                           onchange="toggleCategorySelect('${cat}', this.checked)">
+                    <label for="chk-cat-${cat}" class="text-[11px] text-textmain cursor-pointer select-none truncate flex-1">${cat}</label>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function toggleCategorySelect(cat, isChecked) {
+            if (isChecked) {
+                excludedCategories.delete(cat);
+            } else {
+                excludedCategories.add(cat);
+            }
+            actualizarPieChart();
+        }
+
+        function selectAllCategories(selectAll) {
+            if (!originalCategoryData) return;
+            
+            originalCategoryData.categorias.forEach(cat => {
+                if (selectAll) {
+                    excludedCategories.delete(cat);
+                } else {
+                    excludedCategories.add(cat);
+                }
+            });
+            
+            renderCategoryCheckboxes();
+            actualizarPieChart();
+        }
+
+        function actualizarPieChart() {
+            if (!originalCategoryData) return;
+
+            if (pieChartInstance) {
+                pieChartInstance.destroy();
+            }
+
+            const ctx = document.getElementById('pieChart').getContext('2d');
+
+            const filteredCategorias = [];
+            const filteredMontos = [];
+
+            originalCategoryData.categorias.forEach((cat, index) => {
+                if (!excludedCategories.has(cat)) {
+                    filteredCategorias.push(cat);
+                    filteredMontos.push(originalCategoryData.montos[index]);
+                }
+            });
+
+            if (filteredCategorias.length === 0) {
+                ctx.clearRect(0, 0, 300, 300);
+                return;
+            }
+
+            const colores = ['#6366f1', '#10b981', '#f59e0b', '#f43f5e', '#8b5cf6', '#06b6d4', '#ec4899', '#14b8a6', '#f43f5e', '#8b5cf6', '#06b6d4', '#ec4899', '#14b8a6'];
+            const datasetColors = [];
+            for (let i = 0; i < filteredCategorias.length; i++) {
+                datasetColors.push(colores[i % colores.length]);
+            }
+
+            pieChartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: filteredCategorias,
+                    datasets: [{
+                        data: filteredMontos,
+                        backgroundColor: datasetColors,
+                        borderWidth: 2,
+                        borderColor: '#131926',
+                        hoverOffset: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { boxWidth: 10, padding: 12, font: { size: 10 } }
+                        }
+                    },
+                    cutout: '68%'
+                }
+            });
+        }
+
+        // Variables globales para el filtro de meses
+        const mesesNombres = [
+            { val: 1, name: "Enero" },
+            { val: 2, name: "Febrero" },
+            { val: 3, name: "Marzo" },
+            { val: 4, name: "Abril" },
+            { val: 5, name: "Mayo" },
+            { val: 6, name: "Junio" },
+            { val: 7, name: "Julio" },
+            { val: 8, name: "Agosto" },
+            { val: 9, name: "Septiembre" },
+            { val: 10, name: "Octubre" },
+            { val: 11, name: "Noviembre" },
+            { val: 12, name: "Diciembre" }
+        ];
+        let mesesSeleccionados = new Set([5]); // Mayo es el mes por defecto
+
+        function toggleMonthDropdown(event) {
+            event.stopPropagation();
+            const dropdown = document.getElementById('month-dropdown');
+            dropdown.classList.toggle('hidden');
+        }
+
+        function initMonthSelector() {
+            const container = document.getElementById('month-checkboxes');
+            if (!container) return;
+            container.innerHTML = '';
+            
+            mesesNombres.forEach(m => {
+                const checked = mesesSeleccionados.has(m.val);
+                const div = document.createElement('div');
+                div.className = 'flex items-center gap-2 hover:bg-slate-800/40 p-1 rounded transition-colors';
+                div.innerHTML = `
+                    <input type="checkbox" id="chk-month-${m.val}" 
+                           class="w-3.5 h-3.5 accent-indigo-500 rounded border-slate-700 bg-slate-900 focus:ring-indigo-500/20 cursor-pointer" 
+                           ${checked ? 'checked' : ''} 
+                           onchange="toggleMonthSelect(${m.val}, this.checked)">
+                    <label for="chk-month-${m.val}" class="text-[11px] text-textmain cursor-pointer select-none truncate flex-1">${m.name}</label>
+                `;
+                container.appendChild(div);
+            });
+            updateMonthBtnText();
+        }
+
+        function toggleMonthSelect(val, isChecked) {
+            if (isChecked) {
+                mesesSeleccionados.add(val);
+            } else {
+                mesesSeleccionados.delete(val);
+            }
+            updateMonthBtnText();
+            cargarPresupuestos();
+        }
+
+        function selectAllMonths(selectAll) {
+            if (selectAll) {
+                mesesNombres.forEach(m => mesesSeleccionados.add(m.val));
+            } else {
+                mesesSeleccionados.clear();
+            }
+            initMonthSelector();
+            cargarPresupuestos();
+        }
+
+        function updateMonthBtnText() {
+            const btnText = document.getElementById('selected-months-text');
+            if (!btnText) return;
+            
+            if (mesesSeleccionados.size === 0) {
+                btnText.textContent = "Ninguno";
+            } else if (mesesSeleccionados.size === 12) {
+                btnText.textContent = "Todos";
+            } else {
+                const selectedNames = mesesNombres
+                    .filter(m => mesesSeleccionados.has(m.val))
+                    .map(m => m.name.substring(0, 3));
+                btnText.textContent = selectedNames.join(", ");
+            }
+        }
+
+        // Close dropdown / modal when clicking outside
+        window.addEventListener('click', function(e) {
+            const dropdown = document.getElementById('cat-dropdown');
+            if (dropdown && !dropdown.classList.contains('hidden')) {
+                const btn = dropdown.previousElementSibling;
+                if (btn && !btn.contains(e.target) && !dropdown.contains(e.target)) {
+                    dropdown.classList.add('hidden');
+                }
+            }
+
+            const monthDropdown = document.getElementById('month-dropdown');
+            if (monthDropdown && !monthDropdown.classList.contains('hidden')) {
+                const btn = document.getElementById('btn-month-filter');
+                if (btn && !btn.contains(e.target) && !monthDropdown.contains(e.target)) {
+                    monthDropdown.classList.add('hidden');
+                }
+            }
+
+            const incCatDropdown = document.getElementById('inc-cat-dropdown');
+            if (incCatDropdown && !incCatDropdown.classList.contains('hidden')) {
+                const btn = incCatDropdown.previousElementSibling;
+                if (btn && !btn.contains(e.target) && !incCatDropdown.contains(e.target)) {
+                    incCatDropdown.classList.add('hidden');
+                }
+            }
+
+            const modal = document.getElementById('concept-modal');
+            if (e.target === modal) {
+                cerrarModalConceptos();
+            }
+        });
+
+        // ==========================================
+        // SECCIÓN CRECIMIENTO E INVERSIONES (TAB 3)
+        // ==========================================
+
+        async function cargarCrecimiento() {
+            const desde = document.getElementById('input-desde').value;
+            const hasta = document.getElementById('input-hasta').value;
+
+            cargarCrecimientoKPIs();
+            cargarPasivos();
+            cargarIngresosCategoria(desde, hasta);
+            cargarTopIngresos(desde, hasta);
+        }
+
+        async function cargarCrecimientoKPIs() {
+            try {
+                const res = await fetch(`${API_URL}/crecimiento-kpis`);
+                const data = await res.json();
+
+                document.getElementById('kpi-fondo-emergencia').textContent = formatMoneda(data.fondo_emergencia);
+                document.getElementById('kpi-supervivencia-estricta').textContent = formatMoneda(data.supervivencia_estricta);
+                document.getElementById('kpi-gastos-vida').textContent = formatMoneda(data.supervivencia_vida);
+                document.getElementById('kpi-mediana-ingreso').textContent = "S/ 0000";
+            } catch (err) {
+                console.error("Error al cargar KPIs de crecimiento:", err);
+            }
+        }
+
+        async function cargarPasivos() {
+            try {
+                const res = await fetch(`${API_URL}/ingreso-pasivo`);
+                const data = await res.json();
+
+                if (pasivoChartInstance) {
+                    pasivoChartInstance.destroy();
+                }
+
+                const ctx = document.getElementById('pasivoChart').getContext('2d');
+                pasivoChartInstance = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: data.fechas,
+                        datasets: [
+                            {
+                                label: 'Ingreso Pasivo Mensual',
+                                data: data.mensual,
+                                backgroundColor: 'rgba(16, 185, 129, 0.85)',
+                                borderRadius: 4,
+                                order: 1
+                            },
+                            {
+                                label: 'Ingreso Pasivo Acumulado',
+                                data: data.acumulado,
+                                backgroundColor: 'rgba(99, 102, 241, 0.85)',
+                                borderRadius: 4,
+                                order: 1
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                                labels: { boxWidth: 12, font: { size: 10 } }
+                            }
+                        },
+                        scales: {
+                            x: { grid: { display: false }, ticks: { font: { size: 9 } } },
+                            y: { 
+                                grid: { color: 'rgba(51, 65, 85, 0.1)' },
+                                ticks: { font: { size: 9 }, callback: v => formatMoneda(v) }
+                            }
+                        }
+                    }
+                });
+            } catch (err) {
+                console.error("Error al cargar ingresos pasivos:", err);
+            }
+        }
+
+        async function cargarIngresosCategoria(desde, hasta) {
+            try {
+                const res = await fetch(`${API_URL}/ingresos-categoria?fecha_inicio=${desde}&fecha_fin=${hasta}`);
+                const data = await res.json();
+
+                originalIncomeCategoryData = data;
+                renderIncomeCategoryCheckboxes();
+                actualizarIncomePieChart();
+            } catch (err) {
+                console.error("Error al cargar ingresos por categoría:", err);
+            }
+        }
+
+        function toggleIncomeCategoryDropdown(event) {
+            event.stopPropagation();
+            const dropdown = document.getElementById('inc-cat-dropdown');
+            dropdown.classList.toggle('hidden');
+        }
+
+        function renderIncomeCategoryCheckboxes() {
+            const container = document.getElementById('inc-cat-checkboxes');
+            if (!container || !originalIncomeCategoryData) return;
+
+            container.innerHTML = '';
+            originalIncomeCategoryData.categorias.forEach(cat => {
+                const checked = !excludedIncomeCategories.has(cat);
+                const div = document.createElement('div');
+                div.className = 'flex items-center gap-2 hover:bg-slate-800/40 p-1 rounded transition-colors';
+                div.innerHTML = `
+                    <input type="checkbox" id="chk-inc-cat-${cat}" 
+                           class="w-3.5 h-3.5 accent-indigo-500 rounded border-slate-700 bg-slate-900 focus:ring-indigo-500/20 cursor-pointer" 
+                           ${checked ? 'checked' : ''} 
+                           onchange="toggleIncomeCategorySelect('${cat}', this.checked)">
+                    <label for="chk-inc-cat-${cat}" class="text-[11px] text-textmain cursor-pointer select-none truncate flex-1">${cat}</label>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function toggleIncomeCategorySelect(cat, isChecked) {
+            if (isChecked) {
+                excludedIncomeCategories.delete(cat);
+            } else {
+                excludedIncomeCategories.add(cat);
+            }
+            actualizarIncomePieChart();
+        }
+
+        function selectAllIncomeCategories(selectAll) {
+            if (!originalIncomeCategoryData) return;
+            originalIncomeCategoryData.categorias.forEach(cat => {
+                if (selectAll) {
+                    excludedIncomeCategories.delete(cat);
+                } else {
+                    excludedIncomeCategories.add(cat);
+                }
+            });
+            renderIncomeCategoryCheckboxes();
+            actualizarIncomePieChart();
+        }
+
+        function actualizarIncomePieChart() {
+            if (!originalIncomeCategoryData) return;
+
+            if (incomePieChartInstance) {
+                incomePieChartInstance.destroy();
+            }
+
+            const ctx = document.getElementById('incomePieChart').getContext('2d');
+            const filteredCategorias = [];
+            const filteredMontos = [];
+
+            originalIncomeCategoryData.categorias.forEach((cat, index) => {
+                if (!excludedIncomeCategories.has(cat)) {
+                    filteredCategorias.push(cat);
+                    filteredMontos.push(originalIncomeCategoryData.montos[index]);
+                }
+            });
+
+            if (filteredCategorias.length === 0) {
+                ctx.clearRect(0, 0, 300, 300);
+                return;
+            }
+
+            const colores = ['#10b981', '#6366f1', '#f59e0b', '#8b5cf6', '#06b6d4', '#ec4899', '#14b8a6', '#f43f5e'];
+            const datasetColors = filteredCategorias.map((_, i) => colores[i % colores.length]);
+
+            incomePieChartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: filteredCategorias,
+                    datasets: [{
+                        data: filteredMontos,
+                        backgroundColor: datasetColors,
+                        borderWidth: 2,
+                        borderColor: '#131926',
+                        hoverOffset: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { boxWidth: 10, padding: 12, font: { size: 10 } }
+                        }
+                    },
+                    cutout: '68%'
+                }
+            });
+        }
+
+        async function cargarTopIngresos(desde, hasta) {
+            try {
+                const res = await fetch(`${API_URL}/top-ingresos?fecha_inicio=${desde}&fecha_fin=${hasta}&limite=100`);
+                const data = await res.json();
+
+                const tbody = document.getElementById('income-tabla-body');
+                tbody.innerHTML = '';
+
+                if (!data.ingresos || data.ingresos.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="4" class="py-6 text-center text-textmuted">No hay ingresos en este periodo.</td></tr>';
+                    return;
+                }
+
+                data.ingresos.forEach(ing => {
+                    tbody.innerHTML += `
+                        <tr class="hover:bg-slate-800/20 transition-colors">
+                            <td class="py-3 px-2 text-textmuted font-medium">${ing.fecha}</td>
+                            <td class="py-3 px-2 font-medium text-white truncate max-w-[160px]">${ing.descripcion}</td>
+                            <td class="py-3 px-2">
+                                <span class="px-2 py-0.5 rounded-full bg-slate-900 text-[10px] text-emerald-300 border border-slate-800 font-semibold">
+                                    ${ing.categoria}
+                                </span>
+                            </td>
+                            <td class="py-3 px-2 text-right font-bold text-income">
+                                ${formatMoneda(ing.monto)}
+                            </td>
+                        </tr>
+                    `;
+                });
+            } catch (err) {
+                console.error("Error al cargar top ingresos:", err);
+            }
+        }
+
+        // Abrir y Cerrar Modal de desglose de conceptos
+        async function abrirModalConceptos(categoria, mes) {
+            const modal = document.getElementById('concept-modal');
+            const title = document.getElementById('modal-title');
+            const subtitle = document.getElementById('modal-subtitle');
+            const tbody = document.getElementById('modal-table-body');
+            
+            title.textContent = `${categoria} - ${mes}`;
+            subtitle.textContent = `Detalle de conceptos ordenados de mayor a menor monto.`;
+            tbody.innerHTML = '<tr><td colspan="2" class="py-12 text-center text-textmuted animate-pulse">Cargando desglose de conceptos...</td></tr>';
+            
+            modal.classList.remove('hidden');
+            
+            try {
+                const fechaInicio = `${mes}-01`;
+                const parts = mes.split('-');
+                const year = parseInt(parts[0]);
+                const month = parseInt(parts[1]);
+                const lastDay = new Date(year, month, 0).getDate();
+                const fechaFin = `${mes}-${String(lastDay).padStart(2, '0')}`;
+                
+                const res = await fetch(`${API_URL}/top-gastos?fecha_inicio=${fechaInicio}&fecha_fin=${fechaFin}&categoria=${encodeURIComponent(categoria)}&limite=100`);
+                const data = await res.json();
+                
+                tbody.innerHTML = '';
+                
+                if (!data.gastos || data.gastos.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="2" class="py-6 text-center text-textmuted">No se encontraron transacciones en este periodo.</td></tr>';
+                    return;
+                }
+                
+                // Agrupar por concepto/descripcion
+                const agrupados = {};
+                data.gastos.forEach(g => {
+                    const desc = g.descripcion || "Sin concepto";
+                    agrupados[desc] = (agrupados[desc] || 0) + g.monto;
+                });
+                
+                const ordenados = Object.keys(agrupados).map(desc => ({
+                    descripcion: desc,
+                    monto: agrupados[desc]
+                })).sort((a, b) => b.monto - a.monto);
+                
+                ordenados.forEach(item => {
+                    tbody.innerHTML += `
+                        <tr class="hover:bg-slate-800/10 transition-colors">
+                            <td class="py-3 px-2 font-medium text-white">${item.descripcion}</td>
+                            <td class="py-3 px-2 text-right font-bold text-expense">${formatMoneda(item.monto)}</td>
+                        </tr>
+                    `;
+                });
+                
+            } catch (err) {
+                console.error("Error al cargar conceptos:", err);
+                tbody.innerHTML = '<tr><td colspan="2" class="py-6 text-center text-expense">Error al cargar la información.</td></tr>';
+            }
+        }
+
+        function cerrarModalConceptos() {
+            const modal = document.getElementById('concept-modal');
+            modal.classList.add('hidden');
+        }
+
+        // Cargar Chart de Balance Trimestral
+        async function cargarBalanceTrimestre(desde, hasta) {
+            try {
+                const res = await fetch(`${API_URL}/balance-trimestre?fecha_inicio=${desde}&fecha_fin=${hasta}`);
+                const data = await res.json();
+
+                if (trimestreChartInstance) {
+                    trimestreChartInstance.destroy();
+                }
+
+                const ctx = document.getElementById('trimestreChart').getContext('2d');
+                trimestreChartInstance = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: data.trimestres.map(t => {
+                            const date = new Date(t);
+                            const anio = date.getFullYear();
+                            const quarter = Math.floor(date.getMonth() / 3) + 1;
+                            return `${anio}-Q${quarter}`;
+                        }),
+                        datasets: [{
+                            label: 'Balance',
+                            data: data.balances,
+                            backgroundColor: data.balances.map(b => b >= 0 ? 'rgba(16, 185, 129, 0.85)' : 'rgba(244, 63, 94, 0.85)'),
+                            borderRadius: 6
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            x: { grid: { display: false }, ticks: { font: { size: 10 } } },
+                            y: { 
+                                grid: { color: 'rgba(51, 65, 85, 0.2)' },
+                                ticks: { font: { size: 10 }, callback: v => formatMoneda(v) }
+                            }
+                        }
+                    }
+                });
+
+            } catch (err) {
+                console.error("Error en balance por trimestre:", err);
+            }
+        }
+
+        // Cargar tabla de top gastos
+        async function cargarTopGastos(desde, hasta) {
+            try {
+                const res = await fetch(`${API_URL}/top-gastos?fecha_inicio=${desde}&fecha_fin=${hasta}&limite=100`);
+                const data = await res.json();
+                
+                const tbody = document.getElementById('tabla-body');
+                tbody.innerHTML = '';
+
+                if (data.gastos.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="4" class="py-6 text-center text-textmuted">No hay gastos en este periodo.</td></tr>';
+                    return;
+                }
+                
+                data.gastos.forEach(gasto => {
+                    tbody.innerHTML += `
+                        <tr class="hover:bg-slate-800/20 transition-colors">
+                            <td class="py-3 px-2 text-textmuted font-medium">${gasto.fecha}</td>
+                            <td class="py-3 px-2 font-medium text-white truncate max-w-[160px]">${gasto.descripcion}</td>
+                            <td class="py-3 px-2">
+                                <span class="px-2 py-0.5 rounded-full bg-slate-900 text-[10px] text-indigo-300 border border-slate-800 font-semibold">
+                                    ${gasto.categoria}
+                                </span>
+                            </td>
+                            <td class="py-3 px-2 text-right font-bold text-expense">
+                                ${formatMoneda(gasto.monto)}
+                            </td>
+                        </tr>
+                    `;
+                });
+            } catch (err) {
+                console.error("Error al cargar top gastos:", err);
+            }
+        }
+
+        // CARGAR DATOS DE PRESUPUESTO (Tab 2)
+        async function cargarPresupuestos() {
+            const anio = document.getElementById('select-year').value;
+            
+            let queryUrl = `${API_URL}/cumplimiento-presupuesto?anio=${anio}`;
+            
+            // Si hay meses seleccionados (si no están todos, agregamos filtros específicos)
+            if (mesesSeleccionados.size > 0 && mesesSeleccionados.size < 12) {
+                mesesSeleccionados.forEach(mes => {
+                    queryUrl += `&meses=${mes}`;
+                });
+            } else if (mesesSeleccionados.size === 0) {
+                // Forzar un valor que no traiga datos
+                queryUrl += `&meses=-1`;
+            }
+            
+            // Añadir categorías
+            if (categoriasSeleccionadas.length > 0) {
+                categoriasSeleccionadas.forEach(cat => {
+                    queryUrl += `&categorias=${encodeURIComponent(cat)}`;
+                });
+            } else {
+                queryUrl += `&categorias=NINGUNO`;
+            }
+
+            try {
+                const res = await fetch(queryUrl);
+                const data = await res.json();
+
+                renderPresupuestoVisualCharts(data);
+            } catch (err) {
+                console.error("Error al cargar presupuestos:", err);
+            }
+        }
+
+
+
+        // Renderizar minigráficos dinámicos para cumplimiento de presupuestos
+        function renderPresupuestoVisualCharts(datos) {
+            const container = document.getElementById('budget-charts-container');
+            
+            // Destruir gráficos anteriores
+            Object.values(miniChartInstances).forEach(inst => inst.destroy());
+            miniChartInstances = {};
+            container.innerHTML = '';
+
+            if (datos.length === 0) return;
+
+            // Agrupar por categoría
+            const datosAgrupados = {};
+            datos.forEach(row => {
+                if (!datosAgrupados[row.categoria]) {
+                    datosAgrupados[row.categoria] = {
+                        meses: [],
+                        gastos: [],
+                        presupuestos: []
+                    };
+                }
+                const mesAnio = row.fecha.substring(0, 7);
+                datosAgrupados[row.categoria].meses.push(mesAnio);
+                datosAgrupados[row.categoria].gastos.push(row.gasto_acumulado_mes);
+                datosAgrupados[row.categoria].presupuestos.push(row.presupuesto);
+            });
+
+            // Pintar un chart por categoría agrupada
+            Object.keys(datosAgrupados).forEach(cat => {
+                const info = datosAgrupados[cat];
+
+                const card = document.createElement('div');
+                card.className = "bg-card rounded-2xl p-5 border border-slate-800/60 shadow-sm flex flex-col justify-between";
+                
+                const header = document.createElement('div');
+                header.className = "flex justify-between items-start mb-3";
+                header.innerHTML = `
+                    <div>
+                        <h4 class="font-bold text-white text-sm">${cat}</h4>
+                        <span class="text-[10px] text-textmuted">Frecuencia Mensual</span>
+                    </div>
+                    <span class="px-2 py-0.5 text-[9px] bg-slate-900 border border-slate-800 text-indigo-400 font-bold rounded-lg uppercase tracking-wider">
+                        Presupuestal
+                    </span>
+                `;
+                card.appendChild(header);
+
+                const chartDiv = document.createElement('div');
+                chartDiv.className = "relative h-[160px] w-full mt-2";
+                const canvas = document.createElement('canvas');
+                canvas.id = `chart-budget-${cat.replace(/\s+/g, '-')}`;
+                chartDiv.appendChild(canvas);
+                card.appendChild(chartDiv);
+
+                container.appendChild(card);
+
+                const ctx = canvas.getContext('2d');
+                miniChartInstances[cat] = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: info.meses,
+                        datasets: [
+                            {
+                                label: 'Gasto Real',
+                                data: info.gastos,
+                                backgroundColor: info.gastos.map((g, idx) => {
+                                    const limite = info.presupuestos[idx];
+                                    return g > limite ? 'rgba(244, 63, 94, 0.85)' : 'rgba(99, 102, 241, 0.85)';
+                                }),
+                                borderRadius: 4,
+                                order: 1
+                            },
+                            {
+                                label: 'Límite Presupuesto',
+                                data: info.presupuestos,
+                                type: 'line',
+                                borderColor: '#10b981',
+                                borderDash: [3, 3],
+                                borderWidth: 1.2,
+                                fill: false,
+                                pointRadius: 2.2,
+                                pointBackgroundColor: '#10b981',
+                                pointHoverRadius: 4,
+                                order: 0
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        onClick: (event, activeElements) => {
+                            if (activeElements.length > 0) {
+                                const index = activeElements[0].index;
+                                const mes = info.meses[index];
+                                abrirModalConceptos(cat, mes);
+                            }
+                        },
+                        onHover: (event, chartElement) => {
+                            event.native.target.style.cursor = chartElement.length ? 'pointer' : 'default';
+                        },
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const datasetLabel = context.dataset.label || '';
+                                        const value = context.raw;
+                                        const index = context.dataIndex;
+                                        const limit = info.presupuestos[index];
+                                        let label = `${datasetLabel}: ${formatMoneda(value)}`;
+                                        
+                                        if (context.datasetIndex === 0 && limit > 0) {
+                                            const pct = ((value / limit) * 100).toFixed(0);
+                                            label += ` (${pct}% utilizado)`;
+                                        }
+                                        return label;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: { grid: { display: false }, ticks: { font: { size: 9 } } },
+                            y: { 
+                                grid: { color: 'rgba(51, 65, 85, 0.1)' },
+                                ticks: { font: { size: 9 }, callback: v => formatMoneda(v) }
+                            }
+                        }
+                    }
+                });
+            });
+        }
+
+        // Inicializar al cargar
+        window.addEventListener('DOMContentLoaded', () => {
+            initMonthSelector();
+            cargarOverview();
+        });
+    </script>
+</body>
+</html>

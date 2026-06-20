@@ -1,8 +1,25 @@
+# Python environment and cache
 venv/
-.env
+.venv/
+env/
 __pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+
+# Local configuration and credentials
+.env
 creds/
 *.json
+paginas_dashboard.txt
+
+# dbt directories
 logs/
 target/
 dbt_packages/
+dbt_modules/
+
+# OS metadata
+.DS_Store
+Thumbs.db
