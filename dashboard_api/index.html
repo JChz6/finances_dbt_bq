@@ -82,6 +82,22 @@
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6M17 14v6m-3-3h6"/></svg>
                         Crecimiento e Inversiones
                     </button>
+                    <button onclick="switchTab('hipoteca')" id="tab-btn-hipoteca" class="w-full flex items-center gap-3 px-4 py-2.5 text-textmuted hover:bg-slate-800/50 hover:text-textmain rounded-xl text-sm font-medium transition-all text-left">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                        Hipoteca Depa Miranda
+                    </button>
+                    <button onclick="switchTab('costovida')" id="tab-btn-costovida" class="w-full flex items-center gap-3 px-4 py-2.5 text-textmuted hover:bg-slate-800/50 hover:text-textmain rounded-xl text-sm font-medium transition-all text-left">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        Costo en Vida
+                    </button>
+                    <button onclick="switchTab('estabilizadores')" id="tab-btn-estabilizadores" class="w-full flex items-center gap-3 px-4 py-2.5 text-textmuted hover:bg-slate-800/50 hover:text-textmain rounded-xl text-sm font-medium transition-all text-left">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012-2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 002 2h2a2 2 0 002-2"/></svg>
+                        Estabilizadores y Disciplina
+                    </button>
+                    <button onclick="switchTab('social')" id="tab-btn-social" class="w-full flex items-center gap-3 px-4 py-2.5 text-textmuted hover:bg-slate-800/50 hover:text-textmain rounded-xl text-sm font-medium transition-all text-left">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                        Finanzas Sociales
+                    </button>
                 </nav>
             </div>
             
@@ -108,12 +124,12 @@
                 <!-- Filters Container -->
                 <div class="flex flex-wrap items-center gap-3">
                     <!-- Date Picker Filter (Tab Overview) -->
-                    <div id="filter-dates" class="flex items-center gap-2 bg-card px-3 py-1.5 rounded-xl border border-slate-800/80 text-xs">
+                    <div id="filter-dates" class="flex items-center gap-2.5 bg-card px-4 py-2 rounded-xl border border-slate-800/80 text-sm">
                         <span class="text-textmuted">Desde:</span>
-                        <input type="date" id="input-desde" class="bg-transparent text-white focus:outline-none focus:ring-1 focus:ring-accent rounded px-1.5 py-0.5 border border-slate-800" value="2026-01-01">
+                        <input type="date" id="input-desde" class="bg-transparent text-white focus:outline-none focus:ring-1 focus:ring-accent rounded px-2.5 py-1 border border-slate-800 text-sm" value="2026-01-01">
                         <span class="text-textmuted ml-1">Hasta:</span>
-                        <input type="date" id="input-hasta" class="bg-transparent text-white focus:outline-none focus:ring-1 focus:ring-accent rounded px-1.5 py-0.5 border border-slate-800" value="2026-06-15">
-                        <button onclick="aplicarFiltros()" class="ml-2 bg-accent hover:bg-accentHover text-white px-3 py-1 rounded-lg font-medium transition-colors">
+                        <input type="date" id="input-hasta" class="bg-transparent text-white focus:outline-none focus:ring-1 focus:ring-accent rounded px-2.5 py-1 border border-slate-800 text-sm" value="2026-06-15">
+                        <button onclick="aplicarFiltros()" class="ml-2 bg-accent hover:bg-accentHover text-white px-4 py-1.5 rounded-lg font-medium transition-colors text-sm">
                             Filtrar
                         </button>
                     </div>
@@ -328,12 +344,9 @@
                     </div>
                     <div class="bg-card rounded-2xl p-6 border border-slate-800/60 shadow-sm relative overflow-hidden">
                         <p class="text-textmuted text-xs uppercase font-semibold tracking-wider">Mediana Ingreso Neto</p>
-                        <h3 class="text-2xl font-bold text-textmuted mt-2" id="kpi-mediana-ingreso">S/ 0000</h3>
-                        <p class="text-[10px] text-yellow-500 mt-1 font-semibold flex items-center gap-1">
-                            <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>
-                            Vista pendiente en BigQuery
-                        </p>
-                        <div class="absolute right-4 bottom-4 text-textmuted/10"><svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg></div>
+                        <h3 class="text-2xl font-bold text-white mt-2" id="kpi-mediana-ingreso">S/ 0</h3>
+                        <p class="text-[10px] text-textmuted mt-1">Mediana de ingreso neto mensual</p>
+                        <div class="absolute right-4 bottom-4 text-indigo-400/10"><svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg></div>
                     </div>
                 </div>
 
@@ -350,12 +363,9 @@
                         <div>
                             <div class="flex items-center justify-between mb-4">
                                 <h3 class="font-bold text-white text-base">Ingreso Neto Mensual</h3>
-                                <span class="px-2 py-0.5 text-[9px] bg-yellow-500/10 border border-yellow-500/20 text-yellow-500 font-bold rounded-lg uppercase tracking-wider">Pendiente</span>
                             </div>
-                            <div class="relative h-[250px] flex flex-col items-center justify-center border border-dashed border-slate-850 rounded-xl bg-slate-900/25 p-6 text-center">
-                                <svg class="w-10 h-10 text-yellow-500/60 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-                                <p class="text-xs text-white font-medium">Gráfico no disponible</p>
-                                <p class="text-[10px] text-textmuted mt-1 max-w-xs">Esta vista requiere una vista consolidada de ingreso neto que aún no ha sido creada en la base de datos de BigQuery.</p>
+                            <div class="relative h-[320px]">
+                                <canvas id="ingresoNetoChart"></canvas>
                             </div>
                         </div>
                     </div>
@@ -409,6 +419,379 @@
                 </div>
             </div>
 
+            <!-- TAB 4: HIPOTECA DEPA MIRANDA -->
+            <div id="tab-hipoteca" class="hidden space-y-6">
+                <!-- KPI Summary cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div class="bg-card rounded-2xl p-6 border border-slate-800/60 shadow-sm relative overflow-hidden">
+                        <p class="text-textmuted text-xs uppercase font-semibold tracking-wider">Pagado en Cuotas</p>
+                        <h3 class="text-2xl font-bold text-white mt-2" id="kpi-hipoteca-pagado">S/ 0</h3>
+                        <p class="text-[10px] text-textmuted mt-1">Suma acumulada de cuotas mensuales pagadas</p>
+                        <div class="absolute right-4 bottom-4 text-emerald-400/10"><svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg></div>
+                    </div>
+                    <div class="bg-card rounded-2xl p-6 border border-slate-800/60 shadow-sm relative overflow-hidden">
+                        <p class="text-textmuted text-xs uppercase font-semibold tracking-wider">Amortizaciones a Capital</p>
+                        <h3 class="text-2xl font-bold text-indigo-400 mt-2" id="kpi-hipoteca-amortizaciones">S/ 0</h3>
+                        <p class="text-[10px] text-textmuted mt-1">Pagos extraordinarios directo al saldo de capital</p>
+                        <div class="absolute right-4 bottom-4 text-indigo-400/10"><svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6M17 14v6m-3-3h6"></path></svg></div>
+                    </div>
+                    <div class="bg-card rounded-2xl p-6 border border-slate-800/60 shadow-sm relative overflow-hidden">
+                        <p class="text-textmuted text-xs uppercase font-semibold tracking-wider">Gastos Colaterales</p>
+                        <h3 class="text-2xl font-bold text-expense mt-2" id="kpi-hipoteca-colaterales">S/ 0</h3>
+                        <p class="text-[10px] text-textmuted mt-1">Acondicionamiento y extras</p>
+                        <div class="absolute right-4 bottom-4 text-expense/10"><svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg></div>
+                    </div>
+                    <div class="bg-card rounded-2xl p-6 border border-slate-800/60 shadow-sm relative overflow-hidden flex flex-col justify-between">
+                        <div>
+                            <p class="text-textmuted text-xs uppercase font-semibold tracking-wider">Costo Total Acumulado</p>
+                            <h3 class="text-2xl font-bold text-emerald-400 mt-2" id="kpi-hipoteca-costototal">S/ 0</h3>
+                            <p class="text-[10px] text-textmuted mt-1">Suma total invertida en el inmueble a la fecha</p>
+                        </div>
+                        <div class="absolute right-4 bottom-4 text-emerald-400/10"><svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"></path></svg></div>
+                    </div>
+                </div>
+
+                <!-- Charts layout -->
+                <div class="space-y-6">
+                    <!-- stacked bar chart for distribution: Full Width -->
+                    <div class="bg-card rounded-2xl p-6 border border-slate-800/60 shadow-sm w-full">
+                        <h3 class="font-bold text-white text-base mb-4">Distribución de Cuota Mensual</h3>
+                        <div class="relative h-[360px]">
+                            <canvas id="hipotecaChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Row below containing Equity and Amortizations side by side -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <!-- Progress bar for Equity -->
+                        <div class="bg-card rounded-2xl p-6 border border-slate-800/60 shadow-sm flex flex-col justify-between">
+                            <div>
+                                <h3 class="font-bold text-white text-base mb-2">Progreso del Equity</h3>
+                                <p class="text-xs text-textmuted mb-6">Porcentaje de amortización y participación real sobre el inmueble.</p>
+                                
+                                <!-- Equity visual indicator -->
+                                <div class="flex items-end justify-between mb-2">
+                                    <span class="text-sm font-semibold text-textmuted">Participación actual</span>
+                                    <span class="text-2xl font-bold text-indigo-400" id="equity-percentage-title">0%</span>
+                                </div>
+                                
+                                <!-- Custom Horizontal Progress Bar -->
+                                <div class="w-full bg-slate-900 border border-slate-800 h-10 rounded-xl overflow-hidden flex shadow-inner relative mb-6">
+                                    <!-- Paid capital segment -->
+                                    <div id="equity-bar-paid" class="bg-gradient-to-r from-indigo-500 to-indigo-600 h-full flex items-center justify-center font-bold text-white text-xs transition-all duration-1000 shadow-lg shadow-indigo-500/20" style="width: 0%;">
+                                        <span id="equity-bar-paid-pct"></span>
+                                    </div>
+                                    <!-- Unpaid capital segment -->
+                                    <div id="equity-bar-remaining" class="bg-slate-800/65 h-full flex items-center justify-center text-textmuted text-xs transition-all duration-1000" style="width: 100%;">
+                                        <span id="equity-bar-remaining-pct">100%</span>
+                                    </div>
+                                </div>
+                                
+                                <!-- Break down -->
+                                <div class="space-y-4">
+                                    <div class="flex items-center justify-between border-b border-slate-800/40 pb-3">
+                                        <div class="flex items-center gap-2">
+                                            <div class="w-3 h-3 rounded bg-indigo-500"></div>
+                                            <span class="text-xs text-textmain">Capital Amortizado (Equity)</span>
+                                        </div>
+                                        <div class="text-right">
+                                            <span class="text-xs font-bold text-white block" id="equity-amount-paid">S/ 0</span>
+                                            <span class="text-[10px] text-textmuted" id="equity-pct-paid">0%</span>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center justify-between border-b border-slate-800/40 pb-3">
+                                        <div class="flex items-center gap-2">
+                                            <div class="w-3 h-3 rounded bg-slate-800"></div>
+                                            <span class="text-xs text-textmain">Capital por Amortizar (Deuda)</span>
+                                        </div>
+                                        <div class="text-right">
+                                            <span class="text-xs font-bold text-white block" id="equity-amount-remaining">S/ 0</span>
+                                            <span class="text-[10px] text-textmuted" id="equity-pct-remaining">0%</span>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center justify-between pt-1">
+                                        <span class="text-xs font-semibold text-textmuted">Valor Total de Capital</span>
+                                        <span class="text-sm font-bold text-emerald-400" id="equity-amount-total">S/ 0</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Amortizaciones Chart -->
+                        <div class="bg-card rounded-2xl p-6 border border-slate-800/60 shadow-sm flex flex-col justify-between">
+                            <div>
+                                <h3 class="font-bold text-white text-base mb-2">Amortizaciones Realizadas</h3>
+                                <p class="text-xs text-textmuted mb-6">Detalle de abonos extraordinarios a capital realizados hasta la fecha.</p>
+                                <div class="relative h-[240px] mb-4">
+                                    <canvas id="amortChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 5: COSTO EN VIDA -->
+            <div id="tab-costovida" class="hidden space-y-6">
+                <!-- Grid de Tarjetas KPI -->
+                <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
+                    <!-- Comida -->
+                    <div class="bg-card rounded-2xl p-4 border border-slate-800/60 shadow-sm">
+                        <span class="text-textmuted text-[10px] uppercase font-bold tracking-wider block mb-1">Comida</span>
+                        <div class="flex items-baseline gap-1.5">
+                            <span class="text-2xl font-bold text-white" id="kpi-costovida-comida">0.0</span>
+                            <span class="text-xs text-textmuted font-medium">hrs</span>
+                        </div>
+                    </div>
+                    <!-- Facturas -->
+                    <div class="bg-card rounded-2xl p-4 border border-slate-800/60 shadow-sm">
+                        <span class="text-textmuted text-[10px] uppercase font-bold tracking-wider block mb-1">Facturas</span>
+                        <div class="flex items-baseline gap-1.5">
+                            <span class="text-2xl font-bold text-indigo-400" id="kpi-costovida-facturas">0.0</span>
+                            <span class="text-xs text-textmuted font-medium">hrs</span>
+                        </div>
+                    </div>
+                    <!-- Regalos -->
+                    <div class="bg-card rounded-2xl p-4 border border-slate-800/60 shadow-sm">
+                        <span class="text-textmuted text-[10px] uppercase font-bold tracking-wider block mb-1">Regalos</span>
+                        <div class="flex items-baseline gap-1.5">
+                            <span class="text-2xl font-bold text-emerald-400" id="kpi-costovida-regalos">0.0</span>
+                            <span class="text-xs text-textmuted font-medium">hrs</span>
+                        </div>
+                    </div>
+                    <!-- Entretenimiento -->
+                    <div class="bg-card rounded-2xl p-4 border border-slate-800/60 shadow-sm">
+                        <span class="text-textmuted text-[10px] uppercase font-bold tracking-wider block mb-1">Entretenimiento</span>
+                        <div class="flex items-baseline gap-1.5">
+                            <span class="text-2xl font-bold text-amber-400" id="kpi-costovida-entretenimiento">0.0</span>
+                            <span class="text-xs text-textmuted font-medium">hrs</span>
+                        </div>
+                    </div>
+                    <!-- Transporte -->
+                    <div class="bg-card rounded-2xl p-4 border border-slate-800/60 shadow-sm">
+                        <span class="text-textmuted text-[10px] uppercase font-bold tracking-wider block mb-1">Transporte</span>
+                        <div class="flex items-baseline gap-1.5">
+                            <span class="text-2xl font-bold text-cyan-400" id="kpi-costovida-transporte">0.0</span>
+                            <span class="text-xs text-textmuted font-medium">hrs</span>
+                        </div>
+                    </div>
+                    <!-- Salud -->
+                    <div class="bg-card rounded-2xl p-4 border border-slate-800/60 shadow-sm">
+                        <span class="text-textmuted text-[10px] uppercase font-bold tracking-wider block mb-1">Salud</span>
+                        <div class="flex items-baseline gap-1.5">
+                            <span class="text-2xl font-bold text-rose-400" id="kpi-costovida-salud">0.0</span>
+                            <span class="text-xs text-textmuted font-medium">hrs</span>
+                        </div>
+                    </div>
+                    <!-- Inversiones -->
+                    <div class="bg-card rounded-2xl p-4 border border-slate-800/60 shadow-sm">
+                        <span class="text-textmuted text-[10px] uppercase font-bold tracking-wider block mb-1">Inversiones</span>
+                        <div class="flex items-baseline gap-1.5">
+                            <span class="text-2xl font-bold text-violet-400" id="kpi-costovida-inversiones">0.0</span>
+                            <span class="text-xs text-textmuted font-medium">hrs</span>
+                        </div>
+                    </div>
+                    <!-- Mujeres -->
+                    <div class="bg-card rounded-2xl p-4 border border-slate-800/60 shadow-sm">
+                        <span class="text-textmuted text-[10px] uppercase font-bold tracking-wider block mb-1">Mujeres</span>
+                        <div class="flex items-baseline gap-1.5">
+                            <span class="text-2xl font-bold text-purple-400" id="kpi-costovida-mujeres">0.0</span>
+                            <span class="text-xs text-textmuted font-medium">hrs</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Gráfico principal -->
+                <div class="grid grid-cols-1 gap-6">
+                    <div class="bg-card rounded-2xl p-6 border border-slate-800/60 shadow-sm flex flex-col justify-between">
+                        <div>
+                            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+                                <div>
+                                    <h3 class="font-bold text-white text-base mb-1">Distribución Mensual de Costo en Vida</h3>
+                                    <p class="text-xs text-textmuted">Costo en horas de trabajo efectivo por mes. Usa el selector inferior para des-seleccionar categorías del gráfico.</p>
+                                </div>
+                            </div>
+                            
+                            <!-- Selector de categorías para des-seleccionar -->
+                            <div class="mb-6 bg-slate-900/40 p-4 rounded-xl border border-slate-800/60">
+                                <span class="text-xs font-semibold text-textmuted uppercase tracking-wider block mb-3">Categorías en Gráfico:</span>
+                                <div class="flex flex-wrap gap-2.5" id="costovida-checkboxes">
+                                    <!-- Generado dinámicamente -->
+                                </div>
+                            </div>
+
+                            <div class="relative h-[400px] mb-4">
+                                <canvas id="costoVidaChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modal for showing costo en vida transaction details on bar click -->
+                <div id="costovida-modal" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                    <div class="bg-card w-full max-w-5xl rounded-2xl border border-slate-800/80 shadow-2xl flex flex-col max-h-[85vh] overflow-hidden animate-fade-in">
+                        <!-- Modal Header -->
+                        <div class="p-5 border-b border-slate-800/80 flex items-center justify-between">
+                            <div>
+                                <h3 id="cv-modal-title" class="text-sm font-bold text-white uppercase tracking-wider">Detalle de Costo en Vida</h3>
+                                <p id="cv-modal-subtitle" class="text-[10px] text-textmuted mt-0.5">Transacciones que componen esta categoría y mes.</p>
+                            </div>
+                            <button onclick="cerrarCostoVidaModal()" class="p-1.5 hover:bg-slate-800 rounded-lg text-textmuted hover:text-textmain transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                            </button>
+                        </div>
+                        
+                        <!-- Modal Content (Table) -->
+                        <div class="p-5 overflow-x-auto flex-1 pr-3">
+                            <table class="w-full text-left text-xs whitespace-nowrap table-auto border-collapse">
+                                <thead>
+                                    <tr class="text-textmuted border-b border-slate-800 bg-card sticky top-0 z-10">
+                                        <th class="pb-3 font-semibold px-2 bg-card">Fecha</th>
+                                        <th class="pb-3 font-semibold px-2 bg-card">Categoría</th>
+                                        <th class="pb-3 font-semibold px-2 bg-card">Subcategoría</th>
+                                        <th class="pb-3 font-semibold px-2 bg-card">Concepto</th>
+                                        <th class="pb-3 font-semibold px-2 text-right bg-card">Importe (S/)</th>
+                                        <th class="pb-3 font-semibold px-2 text-right bg-card">Costo (hrs)</th>
+                                        <th class="pb-3 font-semibold px-2 text-right bg-card">Hrs Trab. Mes</th>
+                                        <th class="pb-3 font-semibold px-2 text-right bg-card">Pago/Hora Mes (S/)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="cv-modal-table-body" class="divide-y divide-slate-800/40 text-textmain">
+                                    <!-- Loaded dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <!-- Modal Footer -->
+                        <div class="p-4 bg-slate-900/50 border-t border-slate-800/80 text-right">
+                            <button onclick="cerrarCostoVidaModal()" class="px-4 py-2 bg-slate-850 hover:bg-slate-800 border border-slate-800 hover:border-slate-700 text-white rounded-xl text-xs font-semibold transition-all">
+                                Cerrar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 6: ESTABILIZADORES Y DISCIPLINA -->
+            <div id="tab-estabilizadores" class="hidden space-y-6">
+                <!-- Gráfico principal -->
+                <div class="grid grid-cols-1 gap-6">
+                    <div class="bg-card rounded-2xl p-6 border border-slate-800/60 shadow-sm flex flex-col justify-between">
+                        <div>
+                            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+                                <div>
+                                    <h3 class="font-bold text-white text-base mb-1">Consumo Mensual de Artículos Estabilizadores</h3>
+                                    <p class="text-xs text-textmuted">Tracking de consumo y disciplina financiera. Selecciona/des-selecciona artículos utilizando el control inferior.</p>
+                                </div>
+                            </div>
+                            
+                            <!-- Selector de ítems para des-seleccionar -->
+                            <div class="mb-6 bg-slate-900/40 p-4 rounded-xl border border-slate-800/60">
+                                <span class="text-xs font-semibold text-textmuted uppercase tracking-wider block mb-3">Artículos Monitoreados:</span>
+                                <div class="flex flex-wrap gap-2.5" id="estabilizadores-checkboxes">
+                                    <!-- Generado dinámicamente -->
+                                </div>
+                            </div>
+
+                            <div class="relative h-[450px] mb-4">
+                                <canvas id="estabilizadoresChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 7: FINANZAS SOCIALES -->
+            <div id="tab-social" class="hidden space-y-6">
+                <!-- Tarjetas KPI -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                    <!-- Gasto Bruto -->
+                    <div class="bg-card rounded-2xl p-6 border border-slate-800/60 shadow-sm">
+                        <p class="text-textmuted text-xs uppercase font-semibold tracking-wider mb-2">Gasto Bruto</p>
+                        <h3 class="text-2xl font-bold text-white" id="kpi-social-bruto">S/ 0</h3>
+                        <span class="text-[10px] text-textmuted">Gastos de subcategoría Mujeres</span>
+                    </div>
+                    <!-- Reembolsos -->
+                    <div class="bg-card rounded-2xl p-6 border border-slate-800/60 shadow-sm">
+                        <p class="text-textmuted text-xs uppercase font-semibold tracking-wider mb-2">Reembolsos</p>
+                        <h3 class="text-2xl font-bold text-emerald-400" id="kpi-social-reembolsos">S/ 0</h3>
+                        <span class="text-[10px] text-textmuted">Reembolsos subcategoría Mujeres</span>
+                    </div>
+                    <!-- Gasto Neto -->
+                    <div class="bg-card rounded-2xl p-6 border border-slate-800/60 shadow-sm">
+                        <p class="text-textmuted text-xs uppercase font-semibold tracking-wider mb-2">Gasto Neto</p>
+                        <h3 class="text-2xl font-bold text-indigo-400" id="kpi-social-neto">S/ 0</h3>
+                        <span class="text-[10px] text-textmuted">Gasto Bruto menos Reembolsos</span>
+                    </div>
+                    <!-- Porcentaje Gasto Social -->
+                    <div class="bg-card rounded-2xl p-6 border border-slate-800/60 shadow-sm">
+                        <p class="text-textmuted text-xs uppercase font-semibold tracking-wider mb-2">Gasto Social / Ingreso</p>
+                        <h3 class="text-2xl font-bold text-pink-400" id="kpi-social-pct">0.00%</h3>
+                        <span class="text-[10px] text-textmuted">% de ingresos bruto mensuales</span>
+                    </div>
+                </div>
+
+                <!-- Gráficos de Tendencia y Proporción (Línea y Piechart) -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Tendencia de Gasto Social -->
+                    <div class="bg-card rounded-2xl p-6 border border-slate-800/60 shadow-sm lg:col-span-2 flex flex-col justify-between">
+                        <div>
+                            <h3 class="font-bold text-white text-base mb-2">Tendencia Mensual de Gasto</h3>
+                            <p class="text-xs text-textmuted mb-6">Evolución del gasto mensual en subcategoría Mujeres.</p>
+                            <div class="relative h-[300px] mb-4">
+                                <canvas id="socialTendenciaChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Proporción por Categoría -->
+                    <div class="bg-card rounded-2xl p-6 border border-slate-800/60 shadow-sm lg:col-span-1 flex flex-col justify-between">
+                        <div>
+                            <h3 class="font-bold text-white text-base mb-2">Gasto por Categoría</h3>
+                            <p class="text-xs text-textmuted mb-6">Proporción del gasto social por categoría en el periodo.</p>
+                            <div class="relative h-[250px] mb-4">
+                                <canvas id="socialPieChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Gráfico de Compartido con Personas (Barras Apiladas) -->
+                <div class="grid grid-cols-1 gap-6">
+                    <div class="bg-card rounded-2xl p-6 border border-slate-800/60 shadow-sm flex flex-col justify-between">
+                        <div>
+                            <h3 class="font-bold text-white text-base mb-2">Gasto Compartido por Persona</h3>
+                            <p class="text-xs text-textmuted mb-6">Agrupación mensual de gastos compartidos (clave 'C/') apilados por persona (campo 'valor').</p>
+                            <div class="relative h-[350px] mb-4">
+                                <canvas id="socialCompartidoChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tabla de Top 100 Gastos -->
+                <div class="bg-card rounded-2xl p-6 border border-slate-800/60 shadow-sm">
+                    <h3 class="font-bold text-white text-base mb-2">Top 100 Gastos del Periodo</h3>
+                    <p class="text-xs text-textmuted mb-6">Desglose de transacciones individuales correspondientes a la subcategoría Mujeres.</p>
+                    
+                    <div class="overflow-y-auto max-h-[350px] pr-2 scrollbar-thin scrollbar-thumb-slate-800">
+                        <table class="w-full text-left text-xs whitespace-nowrap table-auto border-collapse">
+                            <thead>
+                                <tr class="text-textmuted border-b border-slate-800 bg-card sticky top-0 z-10">
+                                    <th class="pb-3 font-semibold px-2 bg-card">Fecha</th>
+                                    <th class="pb-3 font-semibold px-2 bg-card">Concepto</th>
+                                    <th class="pb-3 font-semibold px-2 text-right bg-card">Importe (S/)</th>
+                                    <th class="pb-3 font-semibold px-2 bg-card pl-6">Asignado a</th>
+                                </tr>
+                            </thead>
+                            <tbody id="social-table-body" class="divide-y divide-slate-800/40 text-textmain">
+                                <!-- Loaded dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
         </main>
     </div>
 
@@ -431,9 +814,24 @@
         let miniChartInstances = {};
 
         let pasivoChartInstance = null;
+        let ingresoNetoChartInstance = null;
         let incomePieChartInstance = null;
         let originalIncomeCategoryData = null;
         let excludedIncomeCategories = new Set();
+        let hipotecaChartInstance = null;
+        let amortChartInstance = null;
+
+        let costoVidaChartInstance = null;
+        let originalCostoVidaData = null;
+        let excludedCostoVidaCategories = new Set();
+
+        let estabilizadoresChartInstance = null;
+        let originalEstabilizadoresData = null;
+        let excludedEstabilizadores = new Set();
+
+        let socialTendenciaChartInstance = null;
+        let socialPieChartInstance = null;
+        let socialCompartidoChartInstance = null;
 
         // Categorías a mostrar
         const categoriasPresupuestoDefault = [
@@ -457,10 +855,18 @@
             const tabBtnOverview = document.getElementById('tab-btn-overview');
             const tabBtnPresupuesto = document.getElementById('tab-btn-presupuesto');
             const tabBtnCrecimiento = document.getElementById('tab-btn-crecimiento');
+            const tabBtnHipoteca = document.getElementById('tab-btn-hipoteca');
+            const tabBtnCostoVida = document.getElementById('tab-btn-costovida');
+            const tabBtnEstabilizadores = document.getElementById('tab-btn-estabilizadores');
+            const tabBtnSocial = document.getElementById('tab-btn-social');
             
             const tabOverview = document.getElementById('tab-overview');
             const tabPresupuesto = document.getElementById('tab-presupuesto');
             const tabCrecimiento = document.getElementById('tab-crecimiento');
+            const tabHipoteca = document.getElementById('tab-hipoteca');
+            const tabCostoVida = document.getElementById('tab-costovida');
+            const tabEstabilizadores = document.getElementById('tab-estabilizadores');
+            const tabSocial = document.getElementById('tab-social');
             
             const filterDates = document.getElementById('filter-dates');
             const filterBudget = document.getElementById('filter-budget');
@@ -468,10 +874,10 @@
             const pageTitle = document.getElementById('page-title');
             const pageSubtitle = document.getElementById('page-subtitle');
 
-            [tabBtnOverview, tabBtnPresupuesto, tabBtnCrecimiento].forEach(btn => {
+            [tabBtnOverview, tabBtnPresupuesto, tabBtnCrecimiento, tabBtnHipoteca, tabBtnCostoVida, tabBtnEstabilizadores, tabBtnSocial].forEach(btn => {
                 if (btn) btn.className = "w-full flex items-center gap-3 px-4 py-2.5 text-textmuted hover:bg-slate-800/50 hover:text-textmain rounded-xl text-sm font-medium transition-all text-left";
             });
-            [tabOverview, tabPresupuesto, tabCrecimiento].forEach(t => {
+            [tabOverview, tabPresupuesto, tabCrecimiento, tabHipoteca, tabCostoVida, tabEstabilizadores, tabSocial].forEach(t => {
                 if (t) t.classList.add('hidden');
             });
 
@@ -503,6 +909,42 @@
                 pageTitle.innerText = "Crecimiento e Inversiones";
                 pageSubtitle.innerText = "Análisis de ingresos pasivos, presupuestos de vida y evolución patrimonial.";
                 cargarCrecimiento();
+            } else if (tab === 'hipoteca') {
+                tabHipoteca.classList.remove('hidden');
+                filterDates.classList.add('hidden');
+                filterBudget.classList.add('hidden');
+                tabBtnHipoteca.className = "w-full flex items-center gap-3 px-4 py-2.5 bg-accent/15 text-indigo-400 rounded-xl text-sm font-medium border border-accent/20 transition-all text-left";
+                
+                pageTitle.innerText = "Hipoteca Depa Miranda";
+                pageSubtitle.innerText = "Estado de cuotas, amortizaciones, gastos colaterales y equity del inmueble.";
+                cargarHipoteca();
+            } else if (tab === 'costovida') {
+                tabCostoVida.classList.remove('hidden');
+                filterDates.classList.remove('hidden');
+                filterBudget.classList.add('hidden');
+                tabBtnCostoVida.className = "w-full flex items-center gap-3 px-4 py-2.5 bg-accent/15 text-indigo-400 rounded-xl text-sm font-medium border border-accent/20 transition-all text-left";
+                
+                pageTitle.innerText = "Costo en Vida";
+                pageSubtitle.innerText = "Traducción de gastos financieros a horas de trabajo efectivo necesarias para cubrirlos.";
+                cargarCostoVida();
+            } else if (tab === 'estabilizadores') {
+                tabEstabilizadores.classList.remove('hidden');
+                filterDates.classList.remove('hidden');
+                filterBudget.classList.add('hidden');
+                tabBtnEstabilizadores.className = "w-full flex items-center gap-3 px-4 py-2.5 bg-accent/15 text-indigo-400 rounded-xl text-sm font-medium border border-accent/20 transition-all text-left";
+                
+                pageTitle.innerText = "Estabilizadores y Disciplina";
+                pageSubtitle.innerText = "Monitoreo del consumo de artículos y hábitos clave.";
+                cargarEstabilizadores();
+            } else if (tab === 'social') {
+                tabSocial.classList.remove('hidden');
+                filterDates.classList.remove('hidden');
+                filterBudget.classList.add('hidden');
+                tabBtnSocial.className = "w-full flex items-center gap-3 px-4 py-2.5 bg-accent/15 text-indigo-400 rounded-xl text-sm font-medium border border-accent/20 transition-all text-left";
+                
+                pageTitle.innerText = "Finanzas Sociales";
+                pageSubtitle.innerText = "Estadísticas del gasto asociado a la subcategoría Mujeres y aportes compartidos.";
+                cargarSocial();
             }
         }
 
@@ -562,6 +1004,12 @@
                 cargarOverview();
             } else if (activeTab === 'crecimiento') {
                 cargarCrecimiento();
+            } else if (activeTab === 'costovida') {
+                cargarCostoVida();
+            } else if (activeTab === 'estabilizadores') {
+                cargarEstabilizadores();
+            } else if (activeTab === 'social') {
+                cargarSocial();
             }
         }
 
@@ -852,7 +1300,7 @@
             { val: 11, name: "Noviembre" },
             { val: 12, name: "Diciembre" }
         ];
-        let mesesSeleccionados = new Set([5]); // Mayo es el mes por defecto
+        let mesesSeleccionados = new Set([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]); // Todo el año presente por defecto
 
         function toggleMonthDropdown(event) {
             event.stopPropagation();
@@ -957,23 +1405,83 @@
             const desde = document.getElementById('input-desde').value;
             const hasta = document.getElementById('input-hasta').value;
 
-            cargarCrecimientoKPIs();
+            cargarCrecimientoKPIs(desde, hasta);
             cargarPasivos();
             cargarIngresosCategoria(desde, hasta);
             cargarTopIngresos(desde, hasta);
+            cargarIngresoNetoChart(desde, hasta);
         }
 
-        async function cargarCrecimientoKPIs() {
+        async function cargarCrecimientoKPIs(desde, hasta) {
             try {
-                const res = await fetch(`${API_URL}/crecimiento-kpis`);
+                const res = await fetch(`${API_URL}/crecimiento-kpis?fecha_inicio=${desde}&fecha_fin=${hasta}`);
                 const data = await res.json();
 
                 document.getElementById('kpi-fondo-emergencia').textContent = formatMoneda(data.fondo_emergencia);
                 document.getElementById('kpi-supervivencia-estricta').textContent = formatMoneda(data.supervivencia_estricta);
                 document.getElementById('kpi-gastos-vida').textContent = formatMoneda(data.supervivencia_vida);
-                document.getElementById('kpi-mediana-ingreso').textContent = "S/ 0000";
+                document.getElementById('kpi-mediana-ingreso').textContent = formatMoneda(data.mediana_ingreso_neto);
             } catch (err) {
                 console.error("Error al cargar KPIs de crecimiento:", err);
+            }
+        }
+
+        async function cargarIngresoNetoChart(desde, hasta) {
+            try {
+                const res = await fetch(`${API_URL}/ingreso-neto-mensual?fecha_inicio=${desde}&fecha_fin=${hasta}`);
+                const data = await res.json();
+
+                if (ingresoNetoChartInstance) {
+                    ingresoNetoChartInstance.destroy();
+                }
+
+                const ctx = document.getElementById('ingresoNetoChart').getContext('2d');
+                ingresoNetoChartInstance = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: data.fechas,
+                        datasets: [
+                            {
+                                type: 'line',
+                                label: 'Tendencia Neto',
+                                data: data.neto,
+                                borderColor: 'rgba(99, 102, 241, 1)',
+                                borderWidth: 2,
+                                fill: false,
+                                tension: 0.35,
+                                pointRadius: 2,
+                                order: 1
+                            },
+                            {
+                                type: 'bar',
+                                label: 'Ingreso Neto',
+                                data: data.neto,
+                                backgroundColor: 'rgba(234, 179, 8, 0.85)',
+                                borderRadius: 4,
+                                order: 2
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                                labels: { boxWidth: 12, font: { size: 10 } }
+                            }
+                        },
+                        scales: {
+                            x: { grid: { display: false }, ticks: { font: { size: 9 } } },
+                            y: { 
+                                grid: { color: 'rgba(51, 65, 85, 0.1)' },
+                                ticks: { font: { size: 9 }, callback: v => formatMoneda(v) }
+                            }
+                        }
+                    }
+                });
+            } catch (err) {
+                console.error("Error al cargar gráfico de ingreso neto:", err);
             }
         }
 
@@ -1175,6 +1683,213 @@
                 });
             } catch (err) {
                 console.error("Error al cargar top ingresos:", err);
+            }
+        }
+
+        // ==========================================
+        // SECCIÓN HIPOTECA DEPA MIRANDA (TAB 4)
+        // ==========================================
+
+        async function cargarHipoteca() {
+            cargarHipotecaKPIs();
+            cargarHipotecaChart();
+            cargarHipotecaEquity();
+            cargarHipotecaAmortizaciones();
+        }
+
+        async function cargarHipotecaKPIs() {
+            try {
+                const res = await fetch(`${API_URL}/hipoteca-kpis`);
+                const data = await res.json();
+
+                document.getElementById('kpi-hipoteca-pagado').textContent = formatMoneda(data.pagado_en_cuotas);
+                document.getElementById('kpi-hipoteca-amortizaciones').textContent = formatMoneda(data.amortizaciones_capital);
+                document.getElementById('kpi-hipoteca-colaterales').textContent = formatMoneda(data.gastos_colaterales);
+                document.getElementById('kpi-hipoteca-costototal').textContent = formatMoneda(data.costo_total);
+            } catch (err) {
+                console.error("Error al cargar KPIs de hipoteca:", err);
+            }
+        }
+
+        async function cargarHipotecaChart() {
+            try {
+                const res = await fetch(`${API_URL}/hipoteca-distribucion`);
+                const data = await res.json();
+
+                if (hipotecaChartInstance) {
+                    hipotecaChartInstance.destroy();
+                }
+
+                const ctx = document.getElementById('hipotecaChart').getContext('2d');
+                hipotecaChartInstance = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: data.fechas,
+                        datasets: [
+                            {
+                                label: 'Capital',
+                                data: data.capital,
+                                backgroundColor: 'rgba(99, 102, 241, 0.85)', // Indigo
+                                borderRadius: 4
+                            },
+                            {
+                                label: 'Intereses',
+                                data: data.interes,
+                                backgroundColor: 'rgba(244, 63, 94, 0.85)', // Rose
+                                borderRadius: 4
+                            },
+                            {
+                                label: 'Seguros',
+                                data: data.seguros,
+                                backgroundColor: 'rgba(245, 158, 11, 0.85)', // Amber
+                                borderRadius: 4
+                            },
+                            {
+                                label: 'Ingreso Alquiler',
+                                data: data.alquiler,
+                                backgroundColor: 'rgba(16, 185, 129, 0.85)', // Green
+                                borderRadius: 4
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                                labels: { boxWidth: 12, font: { size: 10 } }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.dataset.label || '';
+                                        if (label) {
+                                            label += ': ';
+                                        }
+                                        if (context.parsed.y !== null) {
+                                            label += formatMoneda(context.parsed.y);
+                                        }
+                                        return label;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                stacked: true,
+                                grid: { display: false },
+                                ticks: { font: { size: 9 } }
+                            },
+                            y: {
+                                stacked: true,
+                                grid: { color: 'rgba(51, 65, 85, 0.1)' },
+                                ticks: { font: { size: 9 }, callback: v => formatMoneda(v) }
+                            }
+                        }
+                    }
+                });
+            } catch (err) {
+                console.error("Error al cargar gráfico de hipoteca:", err);
+            }
+        }
+
+        async function cargarHipotecaEquity() {
+            try {
+                const res = await fetch(`${API_URL}/hipoteca-equity`);
+                const data = await res.json();
+
+                const pagado = data.pagado || 0.0;
+                const pendiente = data.pendiente || 0.0;
+                const total = data.total || 0.0;
+
+                let pctPagado = 0;
+                let pctPendiente = 100;
+
+                if (total > 0) {
+                    pctPagado = (pagado / total) * 100;
+                    pctPendiente = (pendiente / total) * 100;
+                }
+
+                document.getElementById('equity-percentage-title').textContent = `${pctPagado.toFixed(1)}%`;
+                
+                document.getElementById('equity-amount-paid').textContent = formatMoneda(pagado);
+                document.getElementById('equity-pct-paid').textContent = `${pctPagado.toFixed(1)}%`;
+
+                document.getElementById('equity-amount-remaining').textContent = formatMoneda(pendiente);
+                document.getElementById('equity-pct-remaining').textContent = `${pctPendiente.toFixed(1)}%`;
+
+                document.getElementById('equity-amount-total').textContent = formatMoneda(total);
+
+                const barPaid = document.getElementById('equity-bar-paid');
+                const barRemaining = document.getElementById('equity-bar-remaining');
+
+                const barPaidPct = document.getElementById('equity-bar-paid-pct');
+                const barRemainingPct = document.getElementById('equity-bar-remaining-pct');
+
+                barPaid.style.width = `${pctPagado}%`;
+                barRemaining.style.width = `${pctPendiente}%`;
+
+                barPaidPct.textContent = pctPagado > 8 ? `${pctPagado.toFixed(1)}%` : '';
+                barRemainingPct.textContent = pctPendiente > 8 ? `${pctPendiente.toFixed(1)}%` : '';
+
+            } catch (err) {
+                console.error("Error al cargar equity de hipoteca:", err);
+            }
+        }
+
+        async function cargarHipotecaAmortizaciones() {
+            try {
+                const res = await fetch(`${API_URL}/hipoteca-amortizaciones`);
+                const data = await res.json();
+
+                if (amortChartInstance) {
+                    amortChartInstance.destroy();
+                }
+
+                const ctx = document.getElementById('amortChart').getContext('2d');
+                amortChartInstance = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: data.fechas,
+                        datasets: [
+                            {
+                                label: 'Amortización Extraordinaria',
+                                data: data.montos,
+                                backgroundColor: 'rgba(16, 185, 129, 0.85)', // Emerald
+                                borderRadius: 4
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return formatMoneda(context.parsed.y);
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                grid: { display: false },
+                                ticks: { font: { size: 9 } }
+                            },
+                            y: {
+                                grid: { color: 'rgba(51, 65, 85, 0.1)' },
+                                ticks: { font: { size: 9 }, callback: v => formatMoneda(v) }
+                            }
+                        }
+                    }
+                });
+            } catch (err) {
+                console.error("Error al cargar amortizaciones de hipoteca:", err);
             }
         }
 
@@ -1491,6 +2206,603 @@
                     }
                 });
             });
+        }
+
+        // SECCIÓN COSTO EN VIDA (TAB 5)
+        async function cargarCostoVida() {
+            const desde = document.getElementById('input-desde').value;
+            const hasta = document.getElementById('input-hasta').value;
+            
+            cargarCostoVidaKPIs(desde, hasta);
+            cargarCostoVidaChart(desde, hasta);
+        }
+
+        async function cargarCostoVidaKPIs(desde, hasta) {
+            try {
+                const res = await fetch(`${API_URL}/costo-vida-kpis?fecha_inicio=${desde}&fecha_fin=${hasta}`);
+                const data = await res.json();
+                
+                document.getElementById('kpi-costovida-comida').textContent = (data.comida || 0).toFixed(1);
+                document.getElementById('kpi-costovida-facturas').textContent = (data.facturas || 0).toFixed(1);
+                document.getElementById('kpi-costovida-regalos').textContent = (data.regalos || 0).toFixed(1);
+                document.getElementById('kpi-costovida-entretenimiento').textContent = (data.entretenimiento || 0).toFixed(1);
+                document.getElementById('kpi-costovida-transporte').textContent = (data.transporte || 0).toFixed(1);
+                document.getElementById('kpi-costovida-salud').textContent = (data.salud || 0).toFixed(1);
+                document.getElementById('kpi-costovida-inversiones').textContent = (data.inversiones || 0).toFixed(1);
+                document.getElementById('kpi-costovida-mujeres').textContent = (data.mujeres || 0).toFixed(1);
+            } catch (err) {
+                console.error("Error al cargar KPIs de costo de vida:", err);
+            }
+        }
+
+        async function cargarCostoVidaChart(desde, hasta) {
+            try {
+                const res = await fetch(`${API_URL}/costo-vida-grafico?fecha_inicio=${desde}&fecha_fin=${hasta}`);
+                const data = await res.json();
+                
+                originalCostoVidaData = data;
+                inicializarCostoVidaCheckboxes();
+                renderCostoVidaChart();
+            } catch (err) {
+                console.error("Error al cargar gráfico de costo de vida:", err);
+            }
+        }
+
+        function inicializarCostoVidaCheckboxes() {
+            const container = document.getElementById('costovida-checkboxes');
+            if (container.children.length > 0) return;
+            
+            const categories = ['Comida', 'Viajes', 'Regalos', 'Entretenimiento', 'Facturas', 'Salud', 'Transporte', 'Autocuidado', 'Inversiones'];
+            
+            categories.forEach(cat => {
+                const chip = document.createElement('button');
+                chip.id = `cv-btn-${cat.replace(/\s+/g, '-')}`;
+                chip.type = 'button';
+                chip.className = 'px-3 py-1.5 rounded-xl text-xs font-semibold border bg-accent/15 border-accent text-indigo-400 shadow-sm shadow-accent/10 transition-all';
+                chip.textContent = cat;
+                chip.onclick = () => toggleCostoVidaCategory(cat);
+                container.appendChild(chip);
+            });
+        }
+
+        function toggleCostoVidaCategory(cat) {
+            if (excludedCostoVidaCategories.has(cat)) {
+                excludedCostoVidaCategories.delete(cat);
+                document.getElementById(`cv-btn-${cat.replace(/\s+/g, '-')}`).className = 'px-3 py-1.5 rounded-xl text-xs font-semibold border bg-accent/15 border-accent text-indigo-400 shadow-sm shadow-accent/10 transition-all';
+            } else {
+                excludedCostoVidaCategories.add(cat);
+                document.getElementById(`cv-btn-${cat.replace(/\s+/g, '-')}`).className = 'px-3 py-1.5 rounded-xl text-xs font-semibold border bg-slate-900 border-slate-800 text-textmuted hover:text-textmain transition-all';
+            }
+            renderCostoVidaChart();
+        }
+
+        function renderCostoVidaChart() {
+            if (!originalCostoVidaData) return;
+            
+            if (costoVidaChartInstance) {
+                costoVidaChartInstance.destroy();
+            }
+            
+            const data = originalCostoVidaData;
+            const colors = {
+                'Comida': 'rgba(99, 102, 241, 0.85)',       // Indigo
+                'Viajes': 'rgba(236, 72, 153, 0.85)',       // Pink
+                'Regalos': 'rgba(16, 185, 129, 0.85)',      // Emerald
+                'Entretenimiento': 'rgba(245, 158, 11, 0.85)', // Amber
+                'Facturas': 'rgba(6, 182, 212, 0.85)',     // Cyan
+                'Salud': 'rgba(244, 63, 94, 0.85)',        // Rose
+                'Transporte': 'rgba(139, 92, 246, 0.85)',   // Purple
+                'Autocuidado': 'rgba(148, 163, 184, 0.85)',  // Slate
+                'Inversiones': 'rgba(167, 139, 250, 0.85)'   // Violet-400
+            };
+            
+            const datasets = [];
+            for (const [cat, montos] of Object.entries(data.datos)) {
+                if (!excludedCostoVidaCategories.has(cat)) {
+                    datasets.push({
+                        label: cat,
+                        data: montos,
+                        backgroundColor: colors[cat] || 'rgba(255, 255, 255, 0.5)',
+                        borderRadius: 4
+                    });
+                }
+            }
+            
+            const ctx = document.getElementById('costoVidaChart').getContext('2d');
+            costoVidaChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: data.meses,
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    onClick: (event, activeElements) => {
+                        if (activeElements.length > 0) {
+                            const activeElement = activeElements[0];
+                            const dataIndex = activeElement.index;
+                            const datasetIndex = activeElement.datasetIndex;
+                            
+                            const mes = originalCostoVidaData.meses[dataIndex];
+                            const datasetLabel = costoVidaChartInstance.data.datasets[datasetIndex].label;
+                            
+                            abrirCostoVidaModal(datasetLabel, mes);
+                        }
+                    },
+                    onHover: (event, chartElement) => {
+                        event.native.target.style.cursor = chartElement.length ? 'pointer' : 'default';
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: { boxWidth: 12, font: { size: 10 } }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.y !== null) {
+                                        label += context.parsed.y.toFixed(1) + ' hrs';
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            stacked: true,
+                            grid: { display: false },
+                            ticks: { font: { size: 9 } }
+                        },
+                        y: {
+                            stacked: true,
+                            grid: { color: 'rgba(51, 65, 85, 0.1)' },
+                            ticks: { 
+                                font: { size: 9 }, 
+                                callback: v => v.toFixed(1) + ' hrs'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        async function abrirCostoVidaModal(categoria, mes) {
+            const modal = document.getElementById('costovida-modal');
+            const title = document.getElementById('cv-modal-title');
+            const subtitle = document.getElementById('cv-modal-subtitle');
+            const tbody = document.getElementById('cv-modal-table-body');
+            
+            title.textContent = `Desglose: ${categoria} - ${mes}`;
+            subtitle.textContent = `Detalle de transacciones ordenadas de mayor a menor costo en horas.`;
+            tbody.innerHTML = '<tr><td colspan="8" class="py-12 text-center text-textmuted animate-pulse">Cargando desglose de costo en vida...</td></tr>';
+            
+            modal.classList.remove('hidden');
+            
+            try {
+                const fechaInicio = `${mes}-01`;
+                const parts = mes.split('-');
+                const year = parseInt(parts[0]);
+                const month = parseInt(parts[1]);
+                const lastDay = new Date(year, month, 0).getDate();
+                const fechaFin = `${mes}-${String(lastDay).padStart(2, '0')}`;
+                
+                const res = await fetch(`${API_URL}/costo-vida-detalles?categoria=${encodeURIComponent(categoria)}&fecha_inicio=${fechaInicio}&fecha_fin=${fechaFin}`);
+                const data = await res.json();
+                
+                tbody.innerHTML = '';
+                
+                if (!data || data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="8" class="py-6 text-center text-textmuted">No se encontraron transacciones en este periodo.</td></tr>';
+                    return;
+                }
+                
+                data.forEach(item => {
+                    const subcatText = item.subcategoria ? item.subcategoria : '<span class="text-textmuted/40">-</span>';
+                    tbody.innerHTML += `
+                        <tr class="hover:bg-slate-800/10 transition-colors border-b border-slate-800/30">
+                            <td class="py-3 px-2">${item.fecha}</td>
+                            <td class="py-3 px-2 font-medium text-white">${item.categoria}</td>
+                            <td class="py-3 px-2">${subcatText}</td>
+                            <td class="py-3 px-2 text-textmuted">${item.concepto}</td>
+                            <td class="py-3 px-2 text-right font-semibold text-expense">${formatMoneda(item.importe_moneda_principal)}</td>
+                            <td class="py-3 px-2 text-right font-bold text-indigo-400">${item.costo_en_horas.toFixed(1)} hrs</td>
+                            <td class="py-3 px-2 text-right text-textmuted">${item.horas_trabajadas_mes.toFixed(0)} hrs</td>
+                            <td class="py-3 px-2 text-right text-textmuted">${formatMoneda(item.pago_por_hora_mes)}/hr</td>
+                        </tr>
+                    `;
+                });
+                
+            } catch (err) {
+                console.error("Error al cargar detalles de costo de vida:", err);
+                tbody.innerHTML = '<tr><td colspan="8" class="py-6 text-center text-expense">Error al cargar la información.</td></tr>';
+            }
+        }
+
+        function cerrarCostoVidaModal() {
+            const modal = document.getElementById('costovida-modal');
+            modal.classList.add('hidden');
+        }
+
+        // SECCIÓN ESTABILIZADORES (TAB 6)
+        async function cargarEstabilizadores() {
+            const desde = document.getElementById('input-desde').value;
+            const hasta = document.getElementById('input-hasta').value;
+            
+            try {
+                const res = await fetch(`${API_URL}/estabilizadores?fecha_inicio=${desde}&fecha_fin=${hasta}`);
+                const data = await res.json();
+                
+                originalEstabilizadoresData = data;
+                inicializarEstabilizadoresCheckboxes();
+                renderEstabilizadoresChart();
+            } catch (err) {
+                console.error("Error al cargar estabilizadores:", err);
+            }
+        }
+
+        function inicializarEstabilizadoresCheckboxes() {
+            const container = document.getElementById('estabilizadores-checkboxes');
+            if (container.children.length > 0) return;
+            
+            const categories = ['Pan', 'Pancito', 'Cerveza', 'Whisky', 'Café (Comida)', 'Café (Entretenimiento)', 'Popcorn'];
+            
+            categories.forEach(cat => {
+                const chip = document.createElement('button');
+                chip.id = `est-btn-${cat.replace(/\s+/g, '-').replace(/[()]/g, '')}`;
+                chip.type = 'button';
+                chip.className = 'px-3 py-1.5 rounded-xl text-xs font-semibold border bg-accent/15 border-accent text-indigo-400 shadow-sm shadow-accent/10 transition-all';
+                chip.textContent = cat;
+                chip.onclick = () => toggleEstabilizadorCategory(cat);
+                container.appendChild(chip);
+            });
+        }
+
+        function toggleEstabilizadorCategory(cat) {
+            const chipId = `est-btn-${cat.replace(/\s+/g, '-').replace(/[()]/g, '')}`;
+            if (excludedEstabilizadores.has(cat)) {
+                excludedEstabilizadores.delete(cat);
+                document.getElementById(chipId).className = 'px-3 py-1.5 rounded-xl text-xs font-semibold border bg-accent/15 border-accent text-indigo-400 shadow-sm shadow-accent/10 transition-all';
+            } else {
+                excludedEstabilizadores.add(cat);
+                document.getElementById(chipId).className = 'px-3 py-1.5 rounded-xl text-xs font-semibold border bg-slate-900 border-slate-800 text-textmuted hover:text-textmain transition-all';
+            }
+            renderEstabilizadoresChart();
+        }
+
+        function renderEstabilizadoresChart() {
+            if (!originalEstabilizadoresData) return;
+            
+            if (estabilizadoresChartInstance) {
+                estabilizadoresChartInstance.destroy();
+            }
+            
+            const data = originalEstabilizadoresData;
+            const colors = {
+                'Pan': 'rgba(251, 191, 36, 0.85)',                 // Amber
+                'Pancito': 'rgba(245, 158, 11, 0.85)',             // Orange
+                'Cerveza': 'rgba(239, 68, 68, 0.85)',              // Red
+                'Whisky': 'rgba(185, 28, 28, 0.85)',               // Dark Red
+                'Café (Comida)': 'rgba(120, 113, 108, 0.85)',       // Stone
+                'Café (Entretenimiento)': 'rgba(78, 71, 68, 0.85)', // Dark Stone
+                'Popcorn': 'rgba(16, 185, 129, 0.85)'              // Emerald
+            };
+            
+            const datasets = [];
+            for (const [cat, montos] of Object.entries(data.datos)) {
+                if (!excludedEstabilizadores.has(cat)) {
+                    datasets.push({
+                        label: cat,
+                        data: montos,
+                        backgroundColor: colors[cat] || 'rgba(255, 255, 255, 0.5)',
+                        borderRadius: 4
+                    });
+                }
+            }
+            
+            const ctx = document.getElementById('estabilizadoresChart').getContext('2d');
+            estabilizadoresChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: data.meses,
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: { boxWidth: 12, font: { size: 10 } }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.y !== null) {
+                                        label += formatMoneda(context.parsed.y);
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            stacked: true,
+                            grid: { display: false },
+                            ticks: { font: { size: 9 } }
+                        },
+                        y: {
+                            stacked: true,
+                            grid: { color: 'rgba(51, 65, 85, 0.1)' },
+                            ticks: { 
+                                font: { size: 9 }, 
+                                callback: v => formatMoneda(v)
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // SECCIÓN FINANZAS SOCIALES (TAB 7)
+        async function cargarSocial() {
+            const desde = document.getElementById('input-desde').value;
+            const hasta = document.getElementById('input-hasta').value;
+            
+            cargarSocialKPIs(desde, hasta);
+            cargarSocialTendencia(desde, hasta);
+            cargarSocialPie(desde, hasta);
+            cargarSocialCompartido(desde, hasta);
+            cargarSocialTopGastos(desde, hasta);
+        }
+
+        async function cargarSocialKPIs(desde, hasta) {
+            try {
+                const res = await fetch(`${API_URL}/social-kpis?fecha_inicio=${desde}&fecha_fin=${hasta}`);
+                const data = await res.json();
+                
+                document.getElementById('kpi-social-bruto').textContent = formatMoneda(data.gasto_bruto);
+                document.getElementById('kpi-social-reembolsos').textContent = formatMoneda(data.reembolsos);
+                document.getElementById('kpi-social-neto').textContent = formatMoneda(data.gasto_neto);
+                document.getElementById('kpi-social-pct').textContent = `${data.porc_social.toFixed(2)}%`;
+            } catch (err) {
+                console.error("Error al cargar KPIs sociales:", err);
+            }
+        }
+
+        async function cargarSocialTendencia(desde, hasta) {
+            try {
+                const res = await fetch(`${API_URL}/social-tendencia?fecha_inicio=${desde}&fecha_fin=${hasta}`);
+                const data = await res.json();
+                
+                if (socialTendenciaChartInstance) {
+                    socialTendenciaChartInstance.destroy();
+                }
+                
+                const ctx = document.getElementById('socialTendenciaChart').getContext('2d');
+                socialTendenciaChartInstance = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: data.meses,
+                        datasets: [{
+                            label: 'Gasto Mujeres',
+                            data: data.gastos,
+                            borderColor: 'rgba(244, 63, 94, 1)', // Pink-500
+                            backgroundColor: 'rgba(244, 63, 94, 0.1)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.3,
+                            pointBackgroundColor: 'rgba(244, 63, 94, 1)'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return `Gasto: ${formatMoneda(context.parsed.y)}`;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: { grid: { display: false }, ticks: { font: { size: 9 } } },
+                            y: {
+                                grid: { color: 'rgba(51, 65, 85, 0.1)' },
+                                ticks: { font: { size: 9 }, callback: v => formatMoneda(v) }
+                            }
+                        }
+                    }
+                });
+            } catch (err) {
+                console.error("Error al cargar tendencia social:", err);
+            }
+        }
+
+        async function cargarSocialPie(desde, hasta) {
+            try {
+                const res = await fetch(`${API_URL}/social-categoria?fecha_inicio=${desde}&fecha_fin=${hasta}`);
+                const data = await res.json();
+                
+                if (socialPieChartInstance) {
+                    socialPieChartInstance.destroy();
+                }
+                
+                const ctx = document.getElementById('socialPieChart').getContext('2d');
+                socialPieChartInstance = new Chart(ctx, {
+                    type: 'pie',
+                    data: {
+                        labels: data.categorias,
+                        datasets: [{
+                            data: data.montos,
+                            backgroundColor: [
+                                'rgba(244, 63, 94, 0.85)',  // Rose
+                                'rgba(99, 102, 241, 0.85)', // Indigo
+                                'rgba(16, 185, 129, 0.85)', // Emerald
+                                'rgba(245, 158, 11, 0.85)', // Amber
+                                'rgba(139, 92, 246, 0.85)', // Purple
+                                'rgba(6, 182, 212, 0.85)',  // Cyan
+                                'rgba(236, 72, 153, 0.85)'  // Pink
+                            ],
+                            borderWidth: 1,
+                            borderColor: '#0f172a'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'right',
+                                labels: { boxWidth: 10, font: { size: 8 } }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const label = context.label || '';
+                                        const val = context.parsed;
+                                        return ` ${label}: ${formatMoneda(val)}`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            } catch (err) {
+                console.error("Error al cargar piechart social:", err);
+            }
+        }
+
+        async function cargarSocialCompartido(desde, hasta) {
+            try {
+                const res = await fetch(`${API_URL}/social-compartido?fecha_inicio=${desde}&fecha_fin=${hasta}`);
+                const data = await res.json();
+                
+                if (socialCompartidoChartInstance) {
+                    socialCompartidoChartInstance.destroy();
+                }
+                
+                const datasets = [];
+                const colors = [
+                    'rgba(99, 102, 241, 0.85)', // Indigo
+                    'rgba(16, 185, 129, 0.85)', // Emerald
+                    'rgba(245, 158, 11, 0.85)', // Amber
+                    'rgba(244, 63, 94, 0.85)',  // Rose
+                    'rgba(6, 182, 212, 0.85)'   // Cyan
+                ];
+
+                const colorMapping = {
+                    'dayira': 'rgba(244, 180, 200, 0.85)', // Rosa pastel
+                    'diana': 'rgba(239, 68, 68, 0.85)',   // Rojo
+                    'planta': 'rgba(34, 197, 94, 0.85)',  // Verde
+                    'odin': 'rgba(255, 255, 255, 0.85)',   // Blanco
+                    'odín': 'rgba(255, 255, 255, 0.85)'    // Blanco
+                };
+                
+                let colorIdx = 0;
+                for (const [val, montos] of Object.entries(data.datos)) {
+                    const valKey = val.toLowerCase();
+                    let bgColor;
+                    if (colorMapping[valKey]) {
+                        bgColor = colorMapping[valKey];
+                    } else {
+                        bgColor = colors[colorIdx % colors.length];
+                        colorIdx++;
+                    }
+                    datasets.push({
+                        label: val,
+                        data: montos,
+                        backgroundColor: bgColor,
+                        borderRadius: 4
+                    });
+                }
+                
+                const ctx = document.getElementById('socialCompartidoChart').getContext('2d');
+                socialCompartidoChartInstance = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: data.meses,
+                        datasets: datasets
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                                labels: { boxWidth: 12, font: { size: 10 } }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.dataset.label || '';
+                                        if (label) {
+                                            label += ': ';
+                                        }
+                                        if (context.parsed.y !== null) {
+                                            label += formatMoneda(context.parsed.y);
+                                        }
+                                        return label;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: { stacked: true, grid: { display: false }, ticks: { font: { size: 9 } } },
+                            y: {
+                                stacked: true,
+                                grid: { color: 'rgba(51, 65, 85, 0.1)' },
+                                ticks: { font: { size: 9 }, callback: v => formatMoneda(v) }
+                            }
+                        }
+                    }
+                });
+            } catch (err) {
+                console.error("Error al cargar compartido social:", err);
+            }
+        }
+
+        async function cargarSocialTopGastos(desde, hasta) {
+            try {
+                const res = await fetch(`${API_URL}/social-top-gastos?fecha_inicio=${desde}&fecha_fin=${hasta}`);
+                const data = await res.json();
+                
+                const tbody = document.getElementById('social-table-body');
+                tbody.innerHTML = '';
+                
+                if (data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="4" class="py-6 text-center text-textmuted">No se encontraron transacciones en este periodo.</td></tr>';
+                    return;
+                }
+                
+                data.forEach(item => {
+                    tbody.innerHTML += `
+                        <tr class="hover:bg-slate-800/10 transition-colors border-b border-slate-800/30">
+                            <td class="py-3 px-2">${item.fecha}</td>
+                            <td class="py-3 px-2 font-medium text-white">${item.concepto}</td>
+                            <td class="py-3 px-2 text-right font-bold text-expense">${formatMoneda(item.importe)}</td>
+                            <td class="py-3 px-2 pl-6 text-textmuted">${item.valor || '<span class="text-textmuted/40">-</span>'}</td>
+                        </tr>
+                    `;
+                });
+            } catch (err) {
+                console.error("Error al cargar top de gastos sociales:", err);
+                const tbody = document.getElementById('social-table-body');
+                tbody.innerHTML = '<tr><td colspan="4" class="py-6 text-center text-expense">Error al cargar la información.</td></tr>';
+            }
         }
 
         // Inicializar al cargar
