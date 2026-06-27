@@ -1,10 +1,32 @@
 import os
 from typing import List, Optional
 from fastapi import FastAPI, Query
+from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
 from google.cloud import bigquery
 
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "creds/html-dashboarder-creds.json"
+def find_credentials():
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    project_root = os.path.dirname(current_dir)
+    search_dirs = [
+        os.path.join(current_dir, "creds"),
+        os.path.join(project_root, "creds"),
+        "creds"
+    ]
+    preferred_names = ["trabajador_bq.json", "html-dashboarder-creds.json"]
+    for d in search_dirs:
+        if os.path.exists(d) and os.path.isdir(d):
+            for name in preferred_names:
+                p = os.path.join(d, name)
+                if os.path.exists(p):
+                    return os.path.abspath(p)
+            for f in os.listdir(d):
+                if f.endswith(".json"):
+                    return os.path.abspath(os.path.join(d, f))
+    return "creds/html-dashboarder-creds.json"
+
+creds_path = find_credentials()
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = creds_path
 app = FastAPI(title="Wealth Dashboard API")
 
 app.add_middleware(
@@ -16,6 +38,14 @@ app.add_middleware(
 )
 
 client = bigquery.Client()
+
+@app.get("/", response_class=HTMLResponse)
+def read_index():
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    index_path = os.path.join(current_dir, "index.html")
+    with open(index_path, "r", encoding="utf-8") as f:
+        html_content = f.read()
+    return HTMLResponse(content=html_content)
 
 @app.get("/flujo-caja")
 def obtener_flujo_caja(
