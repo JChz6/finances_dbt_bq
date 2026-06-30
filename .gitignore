@@ -20,6 +20,9 @@ target/
 dbt_packages/
 dbt_modules/
 
+#refrences
+references/
+
 # OS metadata
 .DS_Store
 Thumbs.db

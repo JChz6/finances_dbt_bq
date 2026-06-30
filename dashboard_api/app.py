@@ -4,7 +4,8 @@ from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
 from google.cloud import bigquery
 
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "creds/html-dashboarder-creds.json"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.path.join(BASE_DIR, "creds", "html-dashboarder-creds.json")
 app = FastAPI(title="Wealth Dashboard API")
 
 app.add_middleware(
@@ -16,6 +17,17 @@ app.add_middleware(
 )
 
 client = bigquery.Client()
+
+@app.get("/ultima-actualizacion")
+def obtener_ultima_actualizacion():
+    query = "SELECT MAX(fecha_carga) as ultima_actualizacion FROM `big-query-406221.finanzas_personales_mds.fact_transactions`"
+    try:
+        resultados = list(client.query(query).result())
+        if resultados and resultados[0].ultima_actualizacion:
+            return {"ultima_actualizacion": str(resultados[0].ultima_actualizacion)}
+    except Exception as e:
+        print("Error al obtener ultima actualizacion:", e)
+    return {"ultima_actualizacion": "Desconocida"}
 
 @app.get("/flujo-caja")
 def obtener_flujo_caja(
