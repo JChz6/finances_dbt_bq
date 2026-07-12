@@ -152,13 +152,22 @@
                     <!-- Budget Filters (Tab Presupuesto) -->
                     <div id="filter-budget" class="hidden flex flex-wrap items-center gap-3">
                         <div class="flex items-center gap-2 bg-card px-3 py-1.5 rounded-xl border border-slate-800/80 text-xs">
-                            <span class="text-textmuted">Año:</span>
-                            <select id="select-year" onchange="cargarPresupuestos()" class="bg-transparent text-white focus:outline-none focus:ring-1 focus:ring-accent rounded px-1 py-0.5 border border-slate-800">
-                                <option value="2026" selected>2026</option>
-                                <option value="2025">2025</option>
-                                <option value="2024">2024</option>
-                                <option value="2023">2023</option>
-                            </select>
+                            <span class="text-textmuted">Año(s):</span>
+                            <div class="relative inline-block text-left">
+                                <button id="btn-year-filter" onclick="toggleYearDropdown(event)" class="bg-card hover:bg-slate-800 text-white focus:outline-none focus:ring-1 focus:ring-accent rounded-xl px-2.5 py-1.5 border border-slate-800 text-xs flex items-center gap-1.5 transition-all">
+                                    <span id="selected-years-text">2026</span>
+                                    <svg class="w-3 h-3 text-textmuted" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                                </button>
+                                <div id="year-dropdown" class="hidden absolute left-0 mt-1.5 w-44 bg-slate-950 border border-slate-800 rounded-xl shadow-xl z-50 p-3 max-h-64 overflow-y-auto">
+                                    <div class="flex items-center justify-between border-b border-slate-800/80 pb-2 mb-2 text-[10px]">
+                                        <button onclick="selectAllYears(true)" class="text-accent hover:text-accentHover font-semibold">Todos</button>
+                                        <button onclick="selectAllYears(false)" class="text-textmuted hover:text-textmain font-semibold">Ninguno</button>
+                                    </div>
+                                    <div id="year-checkboxes" class="space-y-1.5 pr-1">
+                                        <!-- Will be populated dynamically by JS -->
+                                    </div>
+                                </div>
+                            </div>
                              <span class="text-textmuted ml-2">Mes(es):</span>
                               <div class="relative inline-block text-left">
                                   <button id="btn-month-filter" onclick="toggleMonthDropdown(event)" class="bg-card hover:bg-slate-800 text-white focus:outline-none focus:ring-1 focus:ring-accent rounded-xl px-2.5 py-1.5 border border-slate-800 text-xs flex items-center gap-1.5 transition-all">
@@ -1347,6 +1356,71 @@
             { val: 12, name: "Diciembre" }
         ];
         let mesesSeleccionados = new Set(Array.from({length: new Date().getMonth() + 1}, (_, i) => i + 1)); // Por defecto, hasta el mes actual
+        
+        // Variables y funciones para el filtro de años
+        const aniosDisponibles = [2026, 2025, 2024, 2023];
+        let aniosSeleccionados = new Set([2026]); // Por defecto, 2026
+        
+        function toggleYearDropdown(event) {
+            event.stopPropagation();
+            const dropdown = document.getElementById('year-dropdown');
+            dropdown.classList.toggle('hidden');
+        }
+        
+        function initYearSelector() {
+            const container = document.getElementById('year-checkboxes');
+            if (!container) return;
+            container.innerHTML = '';
+            
+            aniosDisponibles.forEach(y => {
+                const checked = aniosSeleccionados.has(y);
+                const div = document.createElement('div');
+                div.className = 'flex items-center gap-2 hover:bg-slate-800/40 p-1 rounded transition-colors';
+                div.innerHTML = `
+                    <input type="checkbox" id="chk-year-${y}" 
+                           class="w-3.5 h-3.5 accent-indigo-500 rounded border-slate-700 bg-slate-900 focus:ring-indigo-500/20 cursor-pointer" 
+                           ${checked ? 'checked' : ''} 
+                           onchange="toggleYearSelect(${y}, this.checked)">
+                    <label for="chk-year-${y}" class="text-[11px] text-textmain cursor-pointer select-none truncate flex-1">${y}</label>
+                `;
+                container.appendChild(div);
+            });
+            updateYearBtnText();
+        }
+        
+        function toggleYearSelect(val, isChecked) {
+            if (isChecked) {
+                aniosSeleccionados.add(val);
+            } else {
+                aniosSeleccionados.delete(val);
+            }
+            updateYearBtnText();
+            cargarPresupuestos();
+        }
+        
+        function selectAllYears(selectAll) {
+            if (selectAll) {
+                aniosDisponibles.forEach(y => aniosSeleccionados.add(y));
+            } else {
+                aniosSeleccionados.clear();
+            }
+            initYearSelector();
+            cargarPresupuestos();
+        }
+        
+        function updateYearBtnText() {
+            const btnText = document.getElementById('selected-years-text');
+            if (!btnText) return;
+            
+            if (aniosSeleccionados.size === 0) {
+                btnText.textContent = "Ninguno";
+            } else if (aniosSeleccionados.size === aniosDisponibles.length) {
+                btnText.textContent = "Todos (Histórico)";
+            } else {
+                const selected = Array.from(aniosSeleccionados).sort((a, b) => b - a);
+                btnText.textContent = selected.join(", ");
+            }
+        }
 
         function toggleMonthDropdown(event) {
             event.stopPropagation();
@@ -1429,6 +1503,14 @@
                 }
             }
 
+            const yearDropdown = document.getElementById('year-dropdown');
+            if (yearDropdown && !yearDropdown.classList.contains('hidden')) {
+                const btn = document.getElementById('btn-year-filter');
+                if (btn && !btn.contains(e.target) && !yearDropdown.contains(e.target)) {
+                    yearDropdown.classList.add('hidden');
+                }
+            }
+
             const incCatDropdown = document.getElementById('inc-cat-dropdown');
             if (incCatDropdown && !incCatDropdown.classList.contains('hidden')) {
                 const btn = incCatDropdown.previousElementSibling;
@@ -1473,6 +1555,21 @@
             }
         }
 
+        function calcularMediaMovil(data, windowSize = 3) {
+            if (!data || data.length === 0) return [];
+            const result = [];
+            for (let i = 0; i < data.length; i++) {
+                let sum = 0;
+                let count = 0;
+                for (let j = Math.max(0, i - windowSize + 1); j <= i; j++) {
+                    sum += data[j];
+                    count++;
+                }
+                result.push(count > 0 ? sum / count : 0);
+            }
+            return result;
+        }
+
         async function cargarIngresoNetoChart(desde, hasta) {
             try {
                 const res = await fetch(`${API_URL}/ingreso-neto-mensual?fecha_inicio=${desde}&fecha_fin=${hasta}`);
@@ -1490,14 +1587,25 @@
                         datasets: [
                             {
                                 type: 'line',
-                                label: 'Tendencia Neto',
-                                data: data.neto,
+                                label: 'Media Móvil (6m)',
+                                data: calcularMediaMovil(data.neto, 6),
                                 borderColor: 'rgba(255, 255, 255, 1)',
                                 borderWidth: 2,
                                 fill: false,
-                                tension: 0.35,
-                                pointRadius: 2,
+                                tension: 0.45,
+                                pointRadius: 1.5,
                                 order: 1
+                            },
+                            {
+                                type: 'line',
+                                label: 'Media Móvil (12m)',
+                                data: calcularMediaMovil(data.neto, 12),
+                                borderColor: 'rgba(148, 163, 184, 0.9)',
+                                borderWidth: 2,
+                                fill: false,
+                                tension: 0.45,
+                                pointRadius: 1.5,
+                                order: 2
                             },
                             {
                                 type: 'bar',
@@ -1505,7 +1613,7 @@
                                 data: data.neto,
                                 backgroundColor: 'rgba(74, 222, 128, 0.85)',
                                 borderRadius: 4,
-                                order: 2
+                                order: 3
                             }
                         ]
                     },
@@ -2160,28 +2268,27 @@
 
         // CARGAR DATOS DE PRESUPUESTO (Tab 2)
         async function cargarPresupuestos() {
-            const anio = document.getElementById('select-year').value;
+            const params = new URLSearchParams();
             
-            let queryUrl = `${API_URL}/cumplimiento-presupuesto?anio=${anio}`;
-            
-            // Si hay meses seleccionados (si no están todos, agregamos filtros específicos)
+            if (aniosSeleccionados.size > 0 && aniosSeleccionados.size < aniosDisponibles.length) {
+                aniosSeleccionados.forEach(y => params.append('anios', y));
+            } else if (aniosSeleccionados.size === 0) {
+                params.append('anios', -1);
+            }
+
             if (mesesSeleccionados.size > 0 && mesesSeleccionados.size < 12) {
-                mesesSeleccionados.forEach(mes => {
-                    queryUrl += `&meses=${mes}`;
-                });
+                mesesSeleccionados.forEach(mes => params.append('meses', mes));
             } else if (mesesSeleccionados.size === 0) {
-                // Forzar un valor que no traiga datos
-                queryUrl += `&meses=-1`;
+                params.append('meses', -1);
             }
-            
-            // Añadir categorías
+
             if (categoriasSeleccionadas.length > 0) {
-                categoriasSeleccionadas.forEach(cat => {
-                    queryUrl += `&categorias=${encodeURIComponent(cat)}`;
-                });
+                categoriasSeleccionadas.forEach(cat => params.append('categorias', cat));
             } else {
-                queryUrl += `&categorias=NINGUNO`;
+                params.append('categorias', 'NINGUNO');
             }
+
+            const queryUrl = `${API_URL}/cumplimiento-presupuesto?${params.toString()}`;
 
             try {
                 const res = await fetch(queryUrl);
@@ -2977,6 +3084,7 @@
                     console.error("Error obteniendo ultima actualizacion", err);
                 });
 
+            initYearSelector();
             initMonthSelector();
             cargarOverview();
         });

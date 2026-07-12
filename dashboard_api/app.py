@@ -265,13 +265,14 @@ def obtener_top_gastos(
 
 @app.get("/cumplimiento-presupuesto")
 def obtener_cumplimiento_presupuesto(
-    anio: Optional[int] = None,
+    anios: Optional[List[int]] = Query(None),
     meses: Optional[List[int]] = Query(None),
     categorias: Optional[List[str]] = Query(None)
 ):
     filtros = []
-    if anio:
-        filtros.append(f"EXTRACT(YEAR FROM date(fecha)) = {anio}")
+    if anios:
+        anios_formatted = ", ".join([str(y) for y in anios])
+        filtros.append(f"EXTRACT(YEAR FROM date(fecha)) IN ({anios_formatted})")
     if meses:
         meses_formatted = ", ".join([str(m) for m in meses])
         filtros.append(f"EXTRACT(MONTH FROM date(fecha)) IN ({meses_formatted})")
