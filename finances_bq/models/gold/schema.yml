@@ -91,3 +91,40 @@ models:
       # --- AUDITORÍA ---
       - name: fecha_carga
         description: "Timestamp de la carga incremental para trazabilidad de datos."
+
+  - name: plan_inversion
+    description: >
+      Modelo Gold que calcula la distribución mensual del dinero disponible para ahorro e inversión
+      después de restar los gastos proyectados y la cuota de la hipoteca. Define asignaciones específicas
+      para cuenta de alto rendimiento (27%), amortización de hipoteca (10%) y Fibras (63%, dividido en FIBPRIME y FIBCCAP).
+    columns:
+      - name: fecha
+        description: "Fecha del mes correspondiente (primer día del mes)."
+        tests:
+          - not_null
+          - unique
+      - name: month_id
+        description: "Identificador numérico del mes en formato YYYYMM."
+        tests:
+          - not_null
+          - unique
+      - name: bruto_mensual
+        description: "Suma total de los ingresos mensuales (Salario, Freelance, Pasivo)."
+      - name: neto_mensual_estimado
+        description: "Ingresos netos estimados mensuales (Bruto menos Impuestos, Jubilación y Comisiones)."
+      - name: neto_despues_de_vida
+        description: "Ingreso neto disponible después de restar el gasto proyectado para el mes (El gasto proyectado es la suma de todos los presupuestos excluyendo las deudas e hipotecas y agregando un colchón del 18% sobre ese importe)."
+      - name: cuota_mensual
+        description: "Monto de la cuota de hipoteca correspondiente al mes. Cruzado con hipotecas_materialized"
+      - name: disponible_ahorro_inversion
+        description: "Monto neto final disponible para ahorro e inversión (neto_despues_de_vida menos cuota_mensual)."
+      - name: cuenta_alto_rendimiento
+        description: "Monto del disponible destinado a cuenta de ahorro de alto rendimiento (27%)."
+      - name: amortizacion_hipoteca
+        description: "Monto del disponible destinado a prepago o amortización de la hipoteca (10%)."
+      - name: fibras
+        description: "Monto total destinado a inversión en FIBRAS (63%)."
+      - name: fibprime
+        description: "Monto asignado a FIBPRIME (70% del presupuesto total de Fibras)."
+      - name: fibccap
+        description: "Monto asignado a FIBCCAP (30% del presupuesto total de Fibras)."
