@@ -19,10 +19,10 @@
                     },
                     colors: {
                         darkbg: '#121212', 
-                        card: '#1E1E1E', 
-                        accent: '#8B5CF6',
-                        accentHover: '#7C3AED',
-                        income: '#C6F68D', 
+                        card: '#1A1A1A', 
+                        accent: '#4ADE80',
+                        accentHover: '#22C55E',
+                        income: '#4ADE80', 
                         expense: '#f43f5e',
                         textmain: '#F3F4F6', 
                         textmuted: '#9CA3AF',
@@ -67,9 +67,9 @@
             <div>
                 <div class="flex items-center justify-between mb-8">
                     <div class="flex items-center gap-3">
-                        <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-pink-500 flex items-center justify-center font-bold text-white shadow-lg shadow-indigo-500/20">W</div>
+                        <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-accent to-emerald-500 flex items-center justify-center font-bold text-white shadow-lg shadow-accent/20">W</div>
                         <div>
-                            <h1 class="text-lg font-bold tracking-tight">Wealth<span class="text-indigo-400 font-light">Dash</span></h1>
+                            <h1 class="text-lg font-bold tracking-tight">Wealth<span class="text-accent font-light">Dash</span></h1>
                             <span class="text-[10px] text-textmuted uppercase tracking-widest font-semibold">Consola de Control</span>
                         </div>
                     </div>
@@ -80,7 +80,7 @@
                 </div>
                 
                 <nav class="space-y-1.5" id="sidebar-nav">
-                    <button onclick="switchTab('overview')" id="tab-btn-overview" class="w-full flex items-center gap-3 px-4 py-2.5 bg-accent/15 text-indigo-400 rounded-xl text-sm font-medium border border-accent/20 transition-all text-left">
+                    <button onclick="switchTab('overview')" id="tab-btn-overview" class="w-full flex items-center gap-3 px-4 py-2.5 bg-accent/15 text-accent rounded-xl text-sm font-medium border border-accent/20 transition-all text-left">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2v-4zM14 16a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2v-4z"/></svg>
                         Overview General
                     </button>
@@ -112,7 +112,7 @@
             </div>
             
             <div class="mt-8 pt-4 border-t border-slate-800/80 text-[11px] text-textmuted flex flex-col gap-1">
-                <div>Conectado a <span class="text-indigo-400">BigQuery</span></div>
+                <div>Conectado a <span class="text-accent">BigQuery</span></div>
                 <div id="ultima-actualizacion" class="text-[9px] text-slate-500">Última actualización: Cargando...</div>
             </div>
         </aside>
@@ -167,7 +167,7 @@
                                   </button>
                                   <div id="month-dropdown" class="hidden absolute left-0 mt-1.5 w-44 bg-slate-950 border border-slate-800 rounded-xl shadow-xl z-50 p-3 max-h-64 overflow-y-auto">
                                       <div class="flex items-center justify-between border-b border-slate-800/80 pb-2 mb-2 text-[10px]">
-                                          <button onclick="selectAllMonths(true)" class="text-indigo-400 hover:text-indigo-300 font-semibold">Todos</button>
+                                          <button onclick="selectAllMonths(true)" class="text-accent hover:text-accentHover font-semibold">Todos</button>
                                           <button onclick="selectAllMonths(false)" class="text-textmuted hover:text-textmain font-semibold">Ninguno</button>
                                       </div>
                                       <div id="month-checkboxes" class="space-y-1.5 pr-1">
@@ -184,29 +184,29 @@
             <div id="tab-overview" class="space-y-6">
                 <!-- KPI Summary cards -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <div class="bg-card rounded-2xl p-5 border border-slate-800/60 shadow-sm relative overflow-hidden">
-                        <p class="text-textmuted text-xs uppercase font-semibold tracking-wider">Ingresos Totales</p>
-                        <h3 class="text-2xl font-bold text-income mt-2" id="kpi-ingresos">$0</h3>
+                    <div class="bg-card rounded-3xl p-6 border border-slate-800/60 shadow-sm relative overflow-hidden">
+                        <p class="text-textmuted text-sm font-medium tracking-wide">Ingresos Totales</p>
+                        <h3 class="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-medium text-income mt-1" id="kpi-ingresos">$0</h3>
                         <p class="text-[10px] text-textmuted mt-1" id="kpi-ingresos-desc">En el periodo seleccionado</p>
                         <div class="absolute right-4 bottom-4 text-income/10"><svg class="w-12 h-12" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path></svg></div>
                     </div>
-                    <div class="bg-card rounded-2xl p-5 border border-slate-800/60 shadow-sm relative overflow-hidden">
-                        <p class="text-textmuted text-xs uppercase font-semibold tracking-wider">Gastos Totales</p>
-                        <h3 class="text-2xl font-bold text-expense mt-2" id="kpi-gastos">$0</h3>
+                    <div class="bg-card rounded-3xl p-6 border border-slate-800/60 shadow-sm relative overflow-hidden">
+                        <p class="text-textmuted text-sm font-medium tracking-wide">Gastos Totales</p>
+                        <h3 class="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-medium text-white mt-1" id="kpi-gastos">$0</h3>
                         <p class="text-[10px] text-textmuted mt-1" id="kpi-gastos-desc">En el periodo seleccionado</p>
-                        <div class="absolute right-4 bottom-4 text-expense/10"><svg class="w-12 h-12" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path></svg></div>
+                        <div class="absolute right-4 bottom-4 text-white/5"><svg class="w-12 h-12" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path></svg></div>
                     </div>
-                    <div class="bg-card rounded-2xl p-5 border border-slate-800/60 shadow-sm relative overflow-hidden">
-                        <p class="text-textmuted text-xs uppercase font-semibold tracking-wider">Balance Neto</p>
-                        <h3 class="text-2xl font-bold text-white mt-2" id="kpi-balance">$0</h3>
+                    <div class="bg-card rounded-3xl p-6 border border-slate-800/60 shadow-sm relative overflow-hidden">
+                        <p class="text-textmuted text-sm font-medium tracking-wide">Balance Neto</p>
+                        <h3 class="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-medium text-white mt-1" id="kpi-balance">$0</h3>
                         <p class="text-[10px] text-textmuted mt-1" id="kpi-balance-desc">Ingresos - Gastos</p>
                         <div class="absolute right-4 bottom-4 text-white/5"><svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg></div>
                     </div>
-                    <div class="bg-card rounded-2xl p-5 border border-slate-800/60 shadow-sm relative overflow-hidden">
-                        <p class="text-textmuted text-xs uppercase font-semibold tracking-wider">Porcentaje de flujo</p>
-                        <h3 class="text-2xl font-bold text-indigo-400 mt-2" id="kpi-ahorro">0%</h3>
+                    <div class="bg-card rounded-3xl p-6 border border-slate-800/60 shadow-sm relative overflow-hidden">
+                        <p class="text-textmuted text-sm font-medium tracking-wide">Porcentaje de flujo</p>
+                        <h3 class="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-medium text-white mt-1" id="kpi-ahorro">0%</h3>
                         <p class="text-[10px] text-textmuted mt-1" id="kpi-ahorro-desc">Liquidez al final del periodo</p>
-                        <div class="absolute right-4 bottom-4 text-indigo-400/10"><svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg></div>
+                        <div class="absolute right-4 bottom-4 text-white/5"><svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg></div>
                     </div>
                 </div>
 
@@ -232,12 +232,12 @@
                             <!-- Dropdown for category select -->
                             <div class="relative">
                                 <button onclick="toggleCategoryDropdown(event)" class="px-2.5 py-1.5 bg-slate-900 border border-slate-800 hover:border-slate-700 hover:bg-slate-800 text-[11px] text-textmain rounded-lg flex items-center gap-1.5 transition-all">
-                                    <svg class="w-3.5 h-3.5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 8.293A1 1 0 013 7.586V4z"/></svg>
+                                    <svg class="w-3.5 h-3.5 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 8.293A1 1 0 013 7.586V4z"/></svg>
                                     Filtrar
                                 </button>
                                 <div id="cat-dropdown" class="hidden absolute right-0 mt-1.5 w-52 bg-slate-900 border border-slate-800 rounded-xl shadow-xl z-50 p-3 max-h-64 overflow-y-auto">
                                     <div class="flex items-center justify-between border-b border-slate-800/80 pb-2 mb-2 text-[10px]">
-                                        <button onclick="selectAllCategories(true)" class="text-indigo-400 hover:text-indigo-300 font-semibold">Marcar todos</button>
+                                        <button onclick="selectAllCategories(true)" class="text-accent hover:text-accentHover font-semibold">Marcar todos</button>
                                         <button onclick="selectAllCategories(false)" class="text-textmuted hover:text-textmain font-semibold">Desmarcar todos</button>
                                     </div>
                                     <div id="cat-checkboxes" class="space-y-1.5 max-h-48 overflow-y-auto pr-1">
@@ -263,7 +263,7 @@
                     <div class="bg-card rounded-2xl p-6 border border-slate-800/60 shadow-sm lg:col-span-2 overflow-hidden flex flex-col h-[360px]">
                         <h3 class="font-bold text-white text-base mb-4">Top Gastos del Periodo</h3>
                         <div class="overflow-y-auto overflow-x-auto flex-1 pr-1">
-                            <table class="w-full text-left text-xs whitespace-nowrap table-auto">
+                            <table class="w-full text-left text-xs table-auto">
                                 <thead>
                                     <tr class="text-textmuted border-b border-slate-800 bg-card sticky top-0 z-10">
                                         <th class="pb-3 font-semibold px-2 bg-card">Fecha</th>
@@ -338,30 +338,36 @@
             <!-- TAB 3: CRECIMIENTO E INVERSIONES -->
             <div id="tab-crecimiento" class="hidden space-y-6">
                 <!-- KPI Summary cards -->
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    <div class="bg-card rounded-2xl p-6 border border-slate-800/60 shadow-sm relative overflow-hidden">
-                        <p class="text-textmuted text-xs uppercase font-semibold tracking-wider">Fondo de Emergencia</p>
-                        <h3 class="text-2xl font-bold text-white mt-2" id="kpi-fondo-emergencia">S/ 0</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-5 gap-6">
+                    <div class="bg-card rounded-3xl p-6 border border-accent/40 shadow-sm shadow-accent/5 relative overflow-hidden ring-1 ring-accent/10">
+                        <p class="text-textmuted text-sm font-medium tracking-wide">Índice de Libertad</p>
+                        <h3 class="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-semibold text-accent mt-1" id="kpi-libertad">0%</h3>
+                        <p class="text-[10px] text-textmuted mt-1">Supervivencia cubierta por pasivos</p>
+                        <div class="absolute right-4 bottom-4 text-accent/10"><svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg></div>
+                    </div>
+                    <div class="bg-card rounded-3xl p-6 border border-slate-800/60 shadow-sm relative overflow-hidden">
+                        <p class="text-textmuted text-sm font-medium tracking-wide">Fondo de Emergencia</p>
+                        <h3 class="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-medium text-accent mt-1" id="kpi-fondo-emergencia">S/ 0</h3>
                         <p class="text-[10px] text-textmuted mt-1">Valor objetivo constante (S/ 30,000)</p>
                         <div class="absolute right-4 bottom-4 text-emerald-400/10"><svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg></div>
                     </div>
-                    <div class="bg-card rounded-2xl p-6 border border-slate-800/60 shadow-sm relative overflow-hidden">
-                        <p class="text-textmuted text-xs uppercase font-semibold tracking-wider">Supervivencia Estricta</p>
-                        <h3 class="text-2xl font-bold text-expense mt-2" id="kpi-supervivencia-estricta">S/ 0</h3>
+                    <div class="bg-card rounded-3xl p-6 border border-slate-800/60 shadow-sm relative overflow-hidden">
+                        <p class="text-textmuted text-sm font-medium tracking-wide">Supervivencia Estricta</p>
+                        <h3 class="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-medium text-white mt-1" id="kpi-supervivencia-estricta">S/ 0</h3>
                         <p class="text-[10px] text-textmuted mt-1">Categorías indispensables seleccionadas</p>
-                        <div class="absolute right-4 bottom-4 text-expense/10"><svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg></div>
+                        <div class="absolute right-4 bottom-4 text-white/5"><svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg></div>
                     </div>
-                    <div class="bg-card rounded-2xl p-6 border border-slate-800/60 shadow-sm relative overflow-hidden">
-                        <p class="text-textmuted text-xs uppercase font-semibold tracking-wider">Gastos de Vida</p>
-                        <h3 class="text-2xl font-bold text-indigo-400 mt-2" id="kpi-gastos-vida">S/ 0</h3>
+                    <div class="bg-card rounded-3xl p-6 border border-slate-800/60 shadow-sm relative overflow-hidden">
+                        <p class="text-textmuted text-sm font-medium tracking-wide">Gastos de Vida</p>
+                        <h3 class="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-medium text-white mt-1" id="kpi-gastos-vida">S/ 0</h3>
                         <p class="text-[10px] text-textmuted mt-1">Presupuesto total de vida mensual</p>
-                        <div class="absolute right-4 bottom-4 text-indigo-400/10"><svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg></div>
+                        <div class="absolute right-4 bottom-4 text-white/5"><svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg></div>
                     </div>
-                    <div class="bg-card rounded-2xl p-6 border border-slate-800/60 shadow-sm relative overflow-hidden">
-                        <p class="text-textmuted text-xs uppercase font-semibold tracking-wider">Mediana Ingreso Neto</p>
-                        <h3 class="text-2xl font-bold text-white mt-2" id="kpi-mediana-ingreso">S/ 0</h3>
+                    <div class="bg-card rounded-3xl p-6 border border-slate-800/60 shadow-sm relative overflow-hidden">
+                        <p class="text-textmuted text-sm font-medium tracking-wide">Mediana Ingreso Neto</p>
+                        <h3 class="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-medium text-accent mt-1" id="kpi-mediana-ingreso">S/ 0</h3>
                         <p class="text-[10px] text-textmuted mt-1">Mediana de ingreso neto mensual</p>
-                        <div class="absolute right-4 bottom-4 text-indigo-400/10"><svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg></div>
+                        <div class="absolute right-4 bottom-4 text-white/5"><svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg></div>
                     </div>
                 </div>
 
@@ -386,6 +392,16 @@
                     </div>
                 </div>
 
+                <!-- Evolutivo Libertad layout -->
+                <div class="grid grid-cols-1 mt-6 gap-6">
+                    <div class="bg-card rounded-2xl p-6 border border-slate-800/60 shadow-sm">
+                        <h3 class="font-bold text-white text-base mb-4">Evolutivo: Brecha de Libertad</h3>
+                        <div class="relative h-[320px]">
+                            <canvas id="libertadChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Category Breakdown and Top Incomes Table -->
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <div class="bg-card rounded-2xl p-6 border border-slate-800/60 shadow-sm flex flex-col relative">
@@ -394,12 +410,12 @@
                             <!-- Dropdown for category select -->
                             <div class="relative">
                                 <button onclick="toggleIncomeCategoryDropdown(event)" class="px-2.5 py-1.5 bg-slate-900 border border-slate-800 hover:border-slate-700 hover:bg-slate-800 text-[11px] text-textmain rounded-lg flex items-center gap-1.5 transition-all">
-                                    <svg class="w-3.5 h-3.5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 8.293A1 1 0 013 7.586V4z"/></svg>
+                                    <svg class="w-3.5 h-3.5 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 8.293A1 1 0 013 7.586V4z"/></svg>
                                     Filtrar
                                 </button>
                                 <div id="inc-cat-dropdown" class="hidden absolute right-0 mt-1.5 w-52 bg-slate-900 border border-slate-800 rounded-xl shadow-xl z-50 p-3 max-h-64 overflow-y-auto">
                                     <div class="flex items-center justify-between border-b border-slate-800/80 pb-2 mb-2 text-[10px]">
-                                        <button onclick="selectAllIncomeCategories(true)" class="text-indigo-400 hover:text-indigo-300 font-semibold">Marcar todos</button>
+                                        <button onclick="selectAllIncomeCategories(true)" class="text-accent hover:text-accentHover font-semibold">Marcar todos</button>
                                         <button onclick="selectAllIncomeCategories(false)" class="text-textmuted hover:text-textmain font-semibold">Desmarcar todos</button>
                                     </div>
                                     <div id="inc-cat-checkboxes" class="space-y-1.5 max-h-48 overflow-y-auto pr-1">
@@ -416,7 +432,7 @@
                     <div class="bg-card rounded-2xl p-6 border border-slate-800/60 shadow-sm lg:col-span-2 overflow-hidden flex flex-col h-[360px]">
                         <h3 class="font-bold text-white text-base mb-4">Top Ingresos del Periodo</h3>
                         <div class="overflow-y-auto overflow-x-auto flex-1 pr-1">
-                            <table class="w-full text-left text-xs whitespace-nowrap table-auto">
+                            <table class="w-full text-left text-xs table-auto">
                                 <thead>
                                     <tr class="text-textmuted border-b border-slate-800 bg-card sticky top-0 z-10">
                                         <th class="pb-3 font-semibold px-2 bg-card">Fecha</th>
@@ -438,28 +454,28 @@
             <div id="tab-hipoteca" class="hidden space-y-6">
                 <!-- KPI Summary cards -->
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    <div class="bg-card rounded-2xl p-6 border border-slate-800/60 shadow-sm relative overflow-hidden">
-                        <p class="text-textmuted text-xs uppercase font-semibold tracking-wider">Pagado en Cuotas</p>
-                        <h3 class="text-2xl font-bold text-white mt-2" id="kpi-hipoteca-pagado">S/ 0</h3>
+                    <div class="bg-card rounded-3xl p-6 border border-slate-800/60 shadow-sm relative overflow-hidden">
+                        <p class="text-textmuted text-sm font-medium tracking-wide">Pagado en Cuotas</p>
+                        <h3 class="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-medium text-white mt-1" id="kpi-hipoteca-pagado">S/ 0</h3>
                         <p class="text-[10px] text-textmuted mt-1">Suma acumulada de cuotas mensuales pagadas</p>
                         <div class="absolute right-4 bottom-4 text-emerald-400/10"><svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg></div>
                     </div>
-                    <div class="bg-card rounded-2xl p-6 border border-slate-800/60 shadow-sm relative overflow-hidden">
-                        <p class="text-textmuted text-xs uppercase font-semibold tracking-wider">Amortizaciones a Capital</p>
-                        <h3 class="text-2xl font-bold text-indigo-400 mt-2" id="kpi-hipoteca-amortizaciones">S/ 0</h3>
+                    <div class="bg-card rounded-3xl p-6 border border-slate-800/60 shadow-sm relative overflow-hidden">
+                        <p class="text-textmuted text-sm font-medium tracking-wide">Amortizaciones a Capital</p>
+                        <h3 class="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-medium text-white mt-1" id="kpi-hipoteca-amortizaciones">S/ 0</h3>
                         <p class="text-[10px] text-textmuted mt-1">Pagos extraordinarios directo al saldo de capital</p>
-                        <div class="absolute right-4 bottom-4 text-indigo-400/10"><svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6M17 14v6m-3-3h6"></path></svg></div>
+                        <div class="absolute right-4 bottom-4 text-white/5"><svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6M17 14v6m-3-3h6"></path></svg></div>
                     </div>
-                    <div class="bg-card rounded-2xl p-6 border border-slate-800/60 shadow-sm relative overflow-hidden">
-                        <p class="text-textmuted text-xs uppercase font-semibold tracking-wider">Gastos Colaterales</p>
-                        <h3 class="text-2xl font-bold text-expense mt-2" id="kpi-hipoteca-colaterales">S/ 0</h3>
+                    <div class="bg-card rounded-3xl p-6 border border-slate-800/60 shadow-sm relative overflow-hidden">
+                        <p class="text-textmuted text-sm font-medium tracking-wide">Gastos Colaterales</p>
+                        <h3 class="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-medium text-white mt-1" id="kpi-hipoteca-colaterales">S/ 0</h3>
                         <p class="text-[10px] text-textmuted mt-1">Acondicionamiento y extras</p>
-                        <div class="absolute right-4 bottom-4 text-expense/10"><svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg></div>
+                        <div class="absolute right-4 bottom-4 text-white/5"><svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg></div>
                     </div>
                     <div class="bg-card rounded-2xl p-6 border border-slate-800/60 shadow-sm relative overflow-hidden flex flex-col justify-between">
                         <div>
-                            <p class="text-textmuted text-xs uppercase font-semibold tracking-wider">Costo Total Acumulado</p>
-                            <h3 class="text-2xl font-bold text-emerald-400 mt-2" id="kpi-hipoteca-costototal">S/ 0</h3>
+                            <p class="text-textmuted text-sm font-medium tracking-wide">Costo Total Acumulado</p>
+                            <h3 class="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-medium text-accent mt-1" id="kpi-hipoteca-costototal">S/ 0</h3>
                             <p class="text-[10px] text-textmuted mt-1">Suma total invertida en el inmueble a la fecha</p>
                         </div>
                         <div class="absolute right-4 bottom-4 text-emerald-400/10"><svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"></path></svg></div>
@@ -487,7 +503,7 @@
                                 <!-- Equity visual indicator -->
                                 <div class="flex items-end justify-between mb-2">
                                     <span class="text-sm font-semibold text-textmuted">Participación actual</span>
-                                    <span class="text-2xl font-bold text-indigo-400" id="equity-percentage-title">0%</span>
+                                    <span class="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-medium text-white" id="equity-percentage-title">0%</span>
                                 </div>
                                 
                                 <!-- Custom Horizontal Progress Bar -->
@@ -526,7 +542,7 @@
                                     </div>
                                     <div class="flex items-center justify-between pt-1">
                                         <span class="text-xs font-semibold text-textmuted">Valor Total de Capital</span>
-                                        <span class="text-sm font-bold text-emerald-400" id="equity-amount-total">S/ 0</span>
+                                        <span class="text-sm font-bold text-accent" id="equity-amount-total">S/ 0</span>
                                     </div>
                                 </div>
                             </div>
@@ -549,12 +565,12 @@
             <!-- TAB 5: COSTO EN VIDA -->
             <div id="tab-costovida" class="hidden space-y-6">
                 <!-- Grid de Tarjetas KPI -->
-                <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-9 gap-4">
                     <!-- Comida -->
                     <div class="bg-card rounded-2xl p-4 border border-slate-800/60 shadow-sm">
                         <span class="text-textmuted text-[10px] uppercase font-bold tracking-wider block mb-1">Comida</span>
                         <div class="flex items-baseline gap-1.5">
-                            <span class="text-2xl font-bold text-white" id="kpi-costovida-comida">0.0</span>
+                            <span class="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-medium text-indigo-400" id="kpi-costovida-comida">0.0</span>
                             <span class="text-xs text-textmuted font-medium">hrs</span>
                         </div>
                     </div>
@@ -562,7 +578,7 @@
                     <div class="bg-card rounded-2xl p-4 border border-slate-800/60 shadow-sm">
                         <span class="text-textmuted text-[10px] uppercase font-bold tracking-wider block mb-1">Facturas</span>
                         <div class="flex items-baseline gap-1.5">
-                            <span class="text-2xl font-bold text-indigo-400" id="kpi-costovida-facturas">0.0</span>
+                            <span class="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-medium text-cyan-400" id="kpi-costovida-facturas">0.0</span>
                             <span class="text-xs text-textmuted font-medium">hrs</span>
                         </div>
                     </div>
@@ -570,7 +586,7 @@
                     <div class="bg-card rounded-2xl p-4 border border-slate-800/60 shadow-sm">
                         <span class="text-textmuted text-[10px] uppercase font-bold tracking-wider block mb-1">Regalos</span>
                         <div class="flex items-baseline gap-1.5">
-                            <span class="text-2xl font-bold text-emerald-400" id="kpi-costovida-regalos">0.0</span>
+                            <span class="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-medium text-emerald-400" id="kpi-costovida-regalos">0.0</span>
                             <span class="text-xs text-textmuted font-medium">hrs</span>
                         </div>
                     </div>
@@ -578,7 +594,7 @@
                     <div class="bg-card rounded-2xl p-4 border border-slate-800/60 shadow-sm">
                         <span class="text-textmuted text-[10px] uppercase font-bold tracking-wider block mb-1">Entretenimiento</span>
                         <div class="flex items-baseline gap-1.5">
-                            <span class="text-2xl font-bold text-amber-400" id="kpi-costovida-entretenimiento">0.0</span>
+                            <span class="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-medium text-amber-400" id="kpi-costovida-entretenimiento">0.0</span>
                             <span class="text-xs text-textmuted font-medium">hrs</span>
                         </div>
                     </div>
@@ -586,7 +602,7 @@
                     <div class="bg-card rounded-2xl p-4 border border-slate-800/60 shadow-sm">
                         <span class="text-textmuted text-[10px] uppercase font-bold tracking-wider block mb-1">Transporte</span>
                         <div class="flex items-baseline gap-1.5">
-                            <span class="text-2xl font-bold text-cyan-400" id="kpi-costovida-transporte">0.0</span>
+                            <span class="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-medium text-purple-400" id="kpi-costovida-transporte">0.0</span>
                             <span class="text-xs text-textmuted font-medium">hrs</span>
                         </div>
                     </div>
@@ -594,7 +610,7 @@
                     <div class="bg-card rounded-2xl p-4 border border-slate-800/60 shadow-sm">
                         <span class="text-textmuted text-[10px] uppercase font-bold tracking-wider block mb-1">Salud</span>
                         <div class="flex items-baseline gap-1.5">
-                            <span class="text-2xl font-bold text-rose-400" id="kpi-costovida-salud">0.0</span>
+                            <span class="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-medium text-rose-400" id="kpi-costovida-salud">0.0</span>
                             <span class="text-xs text-textmuted font-medium">hrs</span>
                         </div>
                     </div>
@@ -602,7 +618,7 @@
                     <div class="bg-card rounded-2xl p-4 border border-slate-800/60 shadow-sm">
                         <span class="text-textmuted text-[10px] uppercase font-bold tracking-wider block mb-1">Inversiones</span>
                         <div class="flex items-baseline gap-1.5">
-                            <span class="text-2xl font-bold text-violet-400" id="kpi-costovida-inversiones">0.0</span>
+                            <span class="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-medium text-violet-400" id="kpi-costovida-inversiones">0.0</span>
                             <span class="text-xs text-textmuted font-medium">hrs</span>
                         </div>
                     </div>
@@ -610,7 +626,15 @@
                     <div class="bg-card rounded-2xl p-4 border border-slate-800/60 shadow-sm">
                         <span class="text-textmuted text-[10px] uppercase font-bold tracking-wider block mb-1">Mujeres</span>
                         <div class="flex items-baseline gap-1.5">
-                            <span class="text-2xl font-bold text-purple-400" id="kpi-costovida-mujeres">0.0</span>
+                            <span class="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-medium text-fuchsia-400" id="kpi-costovida-mujeres">0.0</span>
+                            <span class="text-xs text-textmuted font-medium">hrs</span>
+                        </div>
+                    </div>
+                    <!-- Equipo de trabajo -->
+                    <div class="bg-card rounded-2xl p-4 border border-slate-800/60 shadow-sm">
+                        <span class="text-textmuted text-[10px] uppercase font-bold tracking-wider block mb-1">Equipo de Trabajo</span>
+                        <div class="flex items-baseline gap-1.5">
+                            <span class="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-medium text-orange-400" id="kpi-costovida-equipo-trabajo">0.0</span>
                             <span class="text-xs text-textmuted font-medium">hrs</span>
                         </div>
                     </div>
@@ -705,7 +729,7 @@
                                 <div class="flex items-center justify-between mb-3">
                                     <span class="text-xs font-semibold text-textmuted uppercase tracking-wider block">Artículos Monitoreados:</span>
                                     <div class="flex items-center gap-3 text-[10px] font-semibold">
-                                        <button onclick="marcarTodosEstabilizadores()" class="text-indigo-400 hover:text-indigo-300 transition-colors">Marcar todos</button>
+                                        <button onclick="marcarTodosEstabilizadores()" class="text-accent hover:text-white transition-colors">Marcar todos</button>
                                         <button onclick="desmarcarTodosEstabilizadores()" class="text-textmuted hover:text-textmain transition-colors">Desmarcar todos</button>
                                     </div>
                                 </div>
@@ -729,25 +753,25 @@
                     <!-- Gasto Bruto -->
                     <div class="bg-card rounded-2xl p-6 border border-slate-800/60 shadow-sm">
                         <p class="text-textmuted text-xs uppercase font-semibold tracking-wider mb-2">Gasto Bruto</p>
-                        <h3 class="text-2xl font-bold text-white" id="kpi-social-bruto">S/ 0</h3>
+                        <h3 class="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-medium text-white" id="kpi-social-bruto">S/ 0</h3>
                         <span class="text-[10px] text-textmuted">Gastos de subcategoría Mujeres</span>
                     </div>
                     <!-- Reembolsos -->
                     <div class="bg-card rounded-2xl p-6 border border-slate-800/60 shadow-sm">
                         <p class="text-textmuted text-xs uppercase font-semibold tracking-wider mb-2">Reembolsos</p>
-                        <h3 class="text-2xl font-bold text-emerald-400" id="kpi-social-reembolsos">S/ 0</h3>
+                        <h3 class="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-medium text-accent" id="kpi-social-reembolsos">S/ 0</h3>
                         <span class="text-[10px] text-textmuted">Reembolsos subcategoría Mujeres</span>
                     </div>
                     <!-- Gasto Neto -->
                     <div class="bg-card rounded-2xl p-6 border border-slate-800/60 shadow-sm">
                         <p class="text-textmuted text-xs uppercase font-semibold tracking-wider mb-2">Gasto Neto</p>
-                        <h3 class="text-2xl font-bold text-indigo-400" id="kpi-social-neto">S/ 0</h3>
+                        <h3 class="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-medium text-white" id="kpi-social-neto">S/ 0</h3>
                         <span class="text-[10px] text-textmuted">Gasto Bruto menos Reembolsos</span>
                     </div>
                     <!-- Porcentaje Gasto Social -->
                     <div class="bg-card rounded-2xl p-6 border border-slate-800/60 shadow-sm">
                         <p class="text-textmuted text-xs uppercase font-semibold tracking-wider mb-2">Gasto Social / Ingreso</p>
-                        <h3 class="text-2xl font-bold text-pink-400" id="kpi-social-pct">0.00%</h3>
+                        <h3 class="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-medium text-white" id="kpi-social-pct">0.00%</h3>
                         <span class="text-[10px] text-textmuted">% de ingresos bruto mensuales</span>
                     </div>
                 </div>
@@ -836,6 +860,7 @@
 
         let pasivoChartInstance = null;
         let ingresoNetoChartInstance = null;
+        let libertadChartInstance = null;
         let incomePieChartInstance = null;
         let originalIncomeCategoryData = null;
         let excludedIncomeCategories = new Set();
@@ -857,7 +882,7 @@
         // Categorías a mostrar
         const categoriasPresupuestoDefault = [
             "Comida", "Casa", "Entretenimiento", "Facturas", 
-            "Transporte", "Autocuidado", "Viajes", "Gastos Variables", "Regalos"
+            "Transporte", "Autocuidado", "Viajes", "Gastos Variables", "Regalos", "Equipo de trabajo"
         ];
         let categoriasSeleccionadas = [...categoriasPresupuestoDefault];
 
@@ -906,7 +931,7 @@
                 tabOverview.classList.remove('hidden');
                 filterDates.classList.remove('hidden');
                 filterBudget.classList.add('hidden');
-                tabBtnOverview.className = "w-full flex items-center gap-3 px-4 py-2.5 bg-accent/15 text-indigo-400 rounded-xl text-sm font-medium border border-accent/20 transition-all text-left";
+                tabBtnOverview.className = "w-full flex items-center gap-3 px-4 py-2.5 bg-accent/15 text-accent rounded-xl text-sm font-medium border border-accent/20 transition-all text-left";
                 
                 pageTitle.innerText = "Overview Financiero";
                 pageSubtitle.innerText = "Resumen de flujo de caja, gastos y balances consolidados.";
@@ -915,7 +940,7 @@
                 tabPresupuesto.classList.remove('hidden');
                 filterDates.classList.add('hidden');
                 filterBudget.classList.remove('hidden');
-                tabBtnPresupuesto.className = "w-full flex items-center gap-3 px-4 py-2.5 bg-accent/15 text-indigo-400 rounded-xl text-sm font-medium border border-accent/20 transition-all text-left";
+                tabBtnPresupuesto.className = "w-full flex items-center gap-3 px-4 py-2.5 bg-accent/15 text-accent rounded-xl text-sm font-medium border border-accent/20 transition-all text-left";
                 
                 pageTitle.innerText = "Cumplimiento de Presupuesto";
                 pageSubtitle.innerText = "Análisis comparativo de gastos contra límites establecidos mensualmente.";
@@ -925,7 +950,7 @@
                 tabCrecimiento.classList.remove('hidden');
                 filterDates.classList.remove('hidden');
                 filterBudget.classList.add('hidden');
-                tabBtnCrecimiento.className = "w-full flex items-center gap-3 px-4 py-2.5 bg-accent/15 text-indigo-400 rounded-xl text-sm font-medium border border-accent/20 transition-all text-left";
+                tabBtnCrecimiento.className = "w-full flex items-center gap-3 px-4 py-2.5 bg-accent/15 text-accent rounded-xl text-sm font-medium border border-accent/20 transition-all text-left";
                 
                 pageTitle.innerText = "Crecimiento e Inversiones";
                 pageSubtitle.innerText = "Análisis de ingresos pasivos, presupuestos de vida y evolución patrimonial.";
@@ -934,7 +959,7 @@
                 tabHipoteca.classList.remove('hidden');
                 filterDates.classList.add('hidden');
                 filterBudget.classList.add('hidden');
-                tabBtnHipoteca.className = "w-full flex items-center gap-3 px-4 py-2.5 bg-accent/15 text-indigo-400 rounded-xl text-sm font-medium border border-accent/20 transition-all text-left";
+                tabBtnHipoteca.className = "w-full flex items-center gap-3 px-4 py-2.5 bg-accent/15 text-accent rounded-xl text-sm font-medium border border-accent/20 transition-all text-left";
                 
                 pageTitle.innerText = "Hipoteca Depa Miranda";
                 pageSubtitle.innerText = "Estado de cuotas, amortizaciones, gastos colaterales y equity del inmueble.";
@@ -943,7 +968,7 @@
                 tabCostoVida.classList.remove('hidden');
                 filterDates.classList.remove('hidden');
                 filterBudget.classList.add('hidden');
-                tabBtnCostoVida.className = "w-full flex items-center gap-3 px-4 py-2.5 bg-accent/15 text-indigo-400 rounded-xl text-sm font-medium border border-accent/20 transition-all text-left";
+                tabBtnCostoVida.className = "w-full flex items-center gap-3 px-4 py-2.5 bg-accent/15 text-accent rounded-xl text-sm font-medium border border-accent/20 transition-all text-left";
                 
                 pageTitle.innerText = "Costo en Vida";
                 pageSubtitle.innerText = "Traducción de gastos financieros a horas de trabajo efectivo necesarias para cubrirlos.";
@@ -952,7 +977,7 @@
                 tabEstabilizadores.classList.remove('hidden');
                 filterDates.classList.remove('hidden');
                 filterBudget.classList.add('hidden');
-                tabBtnEstabilizadores.className = "w-full flex items-center gap-3 px-4 py-2.5 bg-accent/15 text-indigo-400 rounded-xl text-sm font-medium border border-accent/20 transition-all text-left";
+                tabBtnEstabilizadores.className = "w-full flex items-center gap-3 px-4 py-2.5 bg-accent/15 text-accent rounded-xl text-sm font-medium border border-accent/20 transition-all text-left";
                 
                 pageTitle.innerText = "Estabilizadores y Disciplina";
                 pageSubtitle.innerText = "Monitoreo del consumo de artículos y hábitos clave.";
@@ -961,7 +986,7 @@
                 tabSocial.classList.remove('hidden');
                 filterDates.classList.remove('hidden');
                 filterBudget.classList.add('hidden');
-                tabBtnSocial.className = "w-full flex items-center gap-3 px-4 py-2.5 bg-accent/15 text-indigo-400 rounded-xl text-sm font-medium border border-accent/20 transition-all text-left";
+                tabBtnSocial.className = "w-full flex items-center gap-3 px-4 py-2.5 bg-accent/15 text-accent rounded-xl text-sm font-medium border border-accent/20 transition-all text-left";
                 
                 pageTitle.innerText = "Finanzas Sociales";
                 pageSubtitle.innerText = "Estadísticas del gasto asociado a la subcategoría Mujeres y aportes compartidos.";
@@ -997,7 +1022,7 @@
                 button.innerText = cat;
                 button.className = `px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
                     isChecked 
-                    ? 'bg-accent/15 border-accent text-indigo-400 shadow-sm shadow-accent/10' 
+                    ? 'bg-accent/15 border-accent text-accent shadow-sm shadow-accent/10' 
                     : 'bg-slate-900 border-slate-800 text-textmuted hover:text-textmain'
                 }`;
                 button.onclick = () => togglerCategoria(cat);
@@ -1014,7 +1039,7 @@
                 button.className = 'px-3 py-1.5 rounded-xl text-xs font-semibold border bg-slate-900 border-slate-800 text-textmuted hover:text-textmain transition-all';
             } else {
                 categoriasSeleccionadas.push(cat);
-                button.className = 'px-3 py-1.5 rounded-xl text-xs font-semibold border bg-accent/15 border-accent text-indigo-400 shadow-sm shadow-accent/10 transition-all';
+                button.className = 'px-3 py-1.5 rounded-xl text-xs font-semibold border bg-accent/15 border-accent text-accent shadow-sm shadow-accent/10 transition-all';
             }
             cargarPresupuestos();
         }
@@ -1072,9 +1097,9 @@
                 const balEl = document.getElementById('kpi-balance');
                 balEl.innerText = formatMoneda(balanceNeto);
                 if (balanceNeto >= 0) {
-                    balEl.className = "text-2xl font-bold text-income mt-2";
+                    balEl.className = "text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-medium text-income mt-1";
                 } else {
-                    balEl.className = "text-2xl font-bold text-expense mt-2";
+                    balEl.className = "text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-medium text-white mt-1";
                 }
 
                 document.getElementById('kpi-ahorro').innerText = `${porcentajeAhorro}%`;
@@ -1108,7 +1133,7 @@
                                 type: 'line',
                                 data: data.acumulado,
                                 borderColor: '#818cf8',
-                                backgroundColor: 'rgba(129, 140, 248, 0.05)',
+                                backgroundColor: 'rgba(255, 255, 255, 0.05)',
                                 borderWidth: 2,
                                 tension: 0.35,
                                 fill: true,
@@ -1119,8 +1144,8 @@
                             {
                                 label: 'Ingresos',
                                 data: data.ingresos,
-                                backgroundColor: 'rgba(16, 185, 129, 0.85)',
-                                borderRadius: 6,
+                                backgroundColor: 'rgba(74, 222, 128, 0.85)',
+                                borderRadius: 4,
                                 order: 1,
                                 stack: 'flujo'
                             },
@@ -1128,8 +1153,8 @@
                                 label: 'Gastos',
                                 // Mantener como negativos para mostrar hacia abajo
                                 data: data.gastos.map(g => g > 0 ? -g : g),
-                                backgroundColor: 'rgba(244, 63, 94, 0.85)',
-                                borderRadius: 6,
+                                backgroundColor: 'rgba(75, 85, 99, 0.85)',
+                                borderRadius: 4,
                                 order: 1,
                                 stack: 'flujo'
                             }
@@ -1274,7 +1299,7 @@
                 return;
             }
 
-            const colores = ['#6366f1', '#10b981', '#f59e0b', '#f43f5e', '#8b5cf6', '#06b6d4', '#ec4899', '#14b8a6', '#f43f5e', '#8b5cf6', '#06b6d4', '#ec4899', '#14b8a6'];
+            const colores = ['#4ade80', '#ffffff', '#9ca3af', '#4b5563', '#22c55e', '#6b7280', '#15803d', '#374151', '#d1d5db', '#1f2937'];
             const datasetColors = [];
             for (let i = 0; i < filteredCategorias.length; i++) {
                 datasetColors.push(colores[i % colores.length]);
@@ -1431,6 +1456,7 @@
             cargarIngresosCategoria(desde, hasta);
             cargarTopIngresos(desde, hasta);
             cargarIngresoNetoChart(desde, hasta);
+            cargarLibertad();
         }
 
         async function cargarCrecimientoKPIs(desde, hasta) {
@@ -1466,7 +1492,7 @@
                                 type: 'line',
                                 label: 'Tendencia Neto',
                                 data: data.neto,
-                                borderColor: 'rgba(99, 102, 241, 1)',
+                                borderColor: 'rgba(255, 255, 255, 1)',
                                 borderWidth: 2,
                                 fill: false,
                                 tension: 0.35,
@@ -1477,7 +1503,7 @@
                                 type: 'bar',
                                 label: 'Ingreso Neto',
                                 data: data.neto,
-                                backgroundColor: 'rgba(234, 179, 8, 0.85)',
+                                backgroundColor: 'rgba(74, 222, 128, 0.85)',
                                 borderRadius: 4,
                                 order: 2
                             }
@@ -1506,6 +1532,80 @@
             }
         }
 
+        async function cargarLibertad() {
+            try {
+                const res = await fetch(`${API_URL}/libertad-financiera`);
+                const data = await res.json();
+                
+                document.getElementById('kpi-libertad').textContent = `${data.latest_cobertura}%`;
+                
+                if (libertadChartInstance) {
+                    libertadChartInstance.destroy();
+                }
+                
+                const ctx = document.getElementById('libertadChart').getContext('2d');
+                libertadChartInstance = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: data.fechas,
+                        datasets: [
+                            {
+                                type: 'line',
+                                label: 'Gastos Indispensables',
+                                data: data.indispensable,
+                                borderColor: 'rgba(75, 85, 99, 1)',
+                                backgroundColor: 'transparent',
+                                borderWidth: 2,
+                                pointBackgroundColor: 'rgba(75, 85, 99, 1)',
+                                pointRadius: 3,
+                                order: 1
+                            },
+                            {
+                                type: 'line',
+                                label: 'Ingresos Pasivos',
+                                data: data.pasivo,
+                                borderColor: 'rgba(74, 222, 128, 1)',
+                                backgroundColor: 'rgba(74, 222, 128, 0.2)',
+                                borderWidth: 2,
+                                fill: true,
+                                pointBackgroundColor: 'rgba(74, 222, 128, 1)',
+                                pointRadius: 3,
+                                order: 2
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                                labels: { color: '#94a3b8', font: { family: "'Inter', sans-serif" } }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                grid: { color: 'rgba(51, 65, 85, 0.4)', drawBorder: false },
+                                ticks: {
+                                    color: '#94a3b8',
+                                    callback: function(value) {
+                                        return 'S/ ' + value.toLocaleString('en-US');
+                                    }
+                                }
+                            },
+                            x: {
+                                grid: { display: false },
+                                ticks: { color: '#94a3b8' }
+                            }
+                        }
+                    }
+                });
+            } catch (err) {
+                console.error("Error al cargar libertad financiera:", err);
+            }
+        }
+
         async function cargarPasivos() {
             try {
                 const res = await fetch(`${API_URL}/ingreso-pasivo`);
@@ -1524,14 +1624,14 @@
                             {
                                 label: 'Ingreso Pasivo Mensual',
                                 data: data.mensual,
-                                backgroundColor: 'rgba(16, 185, 129, 0.85)',
+                                backgroundColor: 'rgba(74, 222, 128, 0.85)',
                                 borderRadius: 4,
                                 order: 1
                             },
                             {
                                 label: 'Ingreso Pasivo Acumulado',
                                 data: data.acumulado,
-                                backgroundColor: 'rgba(99, 102, 241, 0.85)',
+                                backgroundColor: 'rgba(255, 255, 255, 0.85)',
                                 borderRadius: 4,
                                 order: 1
                             }
@@ -1644,7 +1744,7 @@
                 return;
             }
 
-            const colores = ['#10b981', '#6366f1', '#f59e0b', '#8b5cf6', '#06b6d4', '#ec4899', '#14b8a6', '#f43f5e'];
+            const colores = ['#4ade80', '#ffffff', '#9ca3af', '#4b5563', '#22c55e', '#6b7280', '#15803d', '#374151'];
             const datasetColors = filteredCategorias.map((_, i) => colores[i % colores.length]);
 
             incomePieChartInstance = new Chart(ctx, {
@@ -1750,13 +1850,13 @@
                             {
                                 label: 'Capital',
                                 data: data.capital,
-                                backgroundColor: 'rgba(99, 102, 241, 0.85)', // Indigo
+                                backgroundColor: 'rgba(74, 222, 128, 0.85)', // Green
                                 borderRadius: 4
                             },
                             {
                                 label: 'Intereses',
                                 data: data.interes,
-                                backgroundColor: 'rgba(244, 63, 94, 0.85)', // Rose
+                                backgroundColor: 'rgba(75, 85, 99, 0.85)', // Rose
                                 borderRadius: 4
                             },
                             {
@@ -1768,7 +1868,7 @@
                             {
                                 label: 'Ingreso Alquiler',
                                 data: data.alquiler,
-                                backgroundColor: 'rgba(16, 185, 129, 0.85)', // Green
+                                backgroundColor: 'rgba(255, 255, 255, 0.85)', // White
                                 borderRadius: 4
                             }
                         ]
@@ -1877,7 +1977,7 @@
                             {
                                 label: 'Amortización Extraordinaria',
                                 data: data.montos,
-                                backgroundColor: 'rgba(16, 185, 129, 0.85)', // Emerald
+                                backgroundColor: 'rgba(74, 222, 128, 0.85)', // Emerald
                                 borderRadius: 4
                             }
                         ]
@@ -1961,14 +2061,14 @@
                     tbody.innerHTML += `
                         <tr class="hover:bg-slate-800/10 transition-colors">
                             <td class="py-3 px-2 font-medium text-white">${item.descripcion}</td>
-                            <td class="py-3 px-2 text-right font-bold text-expense">${formatMoneda(item.monto)}</td>
+                            <td class="py-3 px-2 text-right font-bold text-white">${formatMoneda(item.monto)}</td>
                         </tr>
                     `;
                 });
                 
             } catch (err) {
                 console.error("Error al cargar conceptos:", err);
-                tbody.innerHTML = '<tr><td colspan="2" class="py-6 text-center text-expense">Error al cargar la información.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="2" class="py-6 text-center text-white">Error al cargar la información.</td></tr>';
             }
         }
 
@@ -2000,8 +2100,8 @@
                         datasets: [{
                             label: 'Balance',
                             data: data.balances,
-                            backgroundColor: data.balances.map(b => b >= 0 ? 'rgba(16, 185, 129, 0.85)' : 'rgba(244, 63, 94, 0.85)'),
-                            borderRadius: 6
+                            backgroundColor: data.balances.map(b => b >= 0 ? 'rgba(74, 222, 128, 0.85)' : 'rgba(75, 85, 99, 0.85)'),
+                            borderRadius: 4
                         }]
                     },
                     options: {
@@ -2043,11 +2143,11 @@
                             <td class="py-3 px-2 text-textmuted font-medium">${gasto.fecha}</td>
                             <td class="py-3 px-2 font-medium text-white truncate max-w-[160px]">${gasto.descripcion}</td>
                             <td class="py-3 px-2">
-                                <span class="px-2 py-0.5 rounded-full bg-slate-900 text-[10px] text-indigo-300 border border-slate-800 font-semibold">
+                                <span class="px-2 py-0.5 rounded-full bg-slate-900 text-[10px] text-textmuted border border-slate-800 font-semibold">
                                     ${gasto.categoria}
                                 </span>
                             </td>
-                            <td class="py-3 px-2 text-right font-bold text-expense">
+                            <td class="py-3 px-2 text-right font-bold text-accent">
                                 ${formatMoneda(gasto.monto)}
                             </td>
                         </tr>
@@ -2136,7 +2236,7 @@
                         <h4 class="font-bold text-white text-sm">${cat}</h4>
                         <span class="text-[10px] text-textmuted">Frecuencia Mensual</span>
                     </div>
-                    <span class="px-2 py-0.5 text-[9px] bg-slate-900 border border-slate-800 text-indigo-400 font-bold rounded-lg uppercase tracking-wider">
+                    <span class="px-2 py-0.5 text-[9px] bg-slate-900 border border-slate-800 text-accent font-bold rounded-lg uppercase tracking-wider">
                         Presupuestal
                     </span>
                 `;
@@ -2162,7 +2262,7 @@
                                 data: info.gastos,
                                 backgroundColor: info.gastos.map((g, idx) => {
                                     const limite = info.presupuestos[idx];
-                                    return g > limite ? 'rgba(244, 63, 94, 0.85)' : 'rgba(99, 102, 241, 0.85)';
+                                    return g > limite ? 'rgba(156, 163, 175, 0.85)' : 'rgba(74, 222, 128, 0.85)';
                                 }),
                                 borderRadius: 4,
                                 order: 1
@@ -2251,6 +2351,7 @@
                 document.getElementById('kpi-costovida-salud').textContent = (data.salud || 0).toFixed(1);
                 document.getElementById('kpi-costovida-inversiones').textContent = (data.inversiones || 0).toFixed(1);
                 document.getElementById('kpi-costovida-mujeres').textContent = (data.mujeres || 0).toFixed(1);
+                document.getElementById('kpi-costovida-equipo-trabajo').textContent = (data.equipo_trabajo || 0).toFixed(1);
             } catch (err) {
                 console.error("Error al cargar KPIs de costo de vida:", err);
             }
@@ -2273,13 +2374,13 @@
             const container = document.getElementById('costovida-checkboxes');
             if (container.children.length > 0) return;
             
-            const categories = ['Comida', 'Viajes', 'Regalos', 'Entretenimiento', 'Facturas', 'Salud', 'Transporte', 'Autocuidado', 'Inversiones'];
+            const categories = ['Comida', 'Viajes', 'Regalos', 'Entretenimiento', 'Facturas', 'Salud', 'Transporte', 'Autocuidado', 'Inversiones', 'Equipo de trabajo'];
             
             categories.forEach(cat => {
                 const chip = document.createElement('button');
                 chip.id = `cv-btn-${cat.replace(/\s+/g, '-')}`;
                 chip.type = 'button';
-                chip.className = 'px-3 py-1.5 rounded-xl text-xs font-semibold border bg-accent/15 border-accent text-indigo-400 shadow-sm shadow-accent/10 transition-all';
+                chip.className = 'px-3 py-1.5 rounded-xl text-xs font-semibold border bg-accent/15 border-accent text-accent shadow-sm shadow-accent/10 transition-all';
                 chip.textContent = cat;
                 chip.onclick = () => toggleCostoVidaCategory(cat);
                 container.appendChild(chip);
@@ -2289,7 +2390,7 @@
         function toggleCostoVidaCategory(cat) {
             if (excludedCostoVidaCategories.has(cat)) {
                 excludedCostoVidaCategories.delete(cat);
-                document.getElementById(`cv-btn-${cat.replace(/\s+/g, '-')}`).className = 'px-3 py-1.5 rounded-xl text-xs font-semibold border bg-accent/15 border-accent text-indigo-400 shadow-sm shadow-accent/10 transition-all';
+                document.getElementById(`cv-btn-${cat.replace(/\s+/g, '-')}`).className = 'px-3 py-1.5 rounded-xl text-xs font-semibold border bg-accent/15 border-accent text-accent shadow-sm shadow-accent/10 transition-all';
             } else {
                 excludedCostoVidaCategories.add(cat);
                 document.getElementById(`cv-btn-${cat.replace(/\s+/g, '-')}`).className = 'px-3 py-1.5 rounded-xl text-xs font-semibold border bg-slate-900 border-slate-800 text-textmuted hover:text-textmain transition-all';
@@ -2314,7 +2415,8 @@
                 'Salud': 'rgba(244, 63, 94, 0.85)',        // Rose
                 'Transporte': 'rgba(139, 92, 246, 0.85)',   // Purple
                 'Autocuidado': 'rgba(148, 163, 184, 0.85)',  // Slate
-                'Inversiones': 'rgba(167, 139, 250, 0.85)'   // Violet-400
+                'Inversiones': 'rgba(167, 139, 250, 0.85)',  // Violet-400
+                'Equipo de trabajo': 'rgba(249, 115, 22, 0.85)' // Orange-500
             };
             
             const datasets = [];
@@ -2431,8 +2533,8 @@
                             <td class="py-3 px-2 font-medium text-white">${item.categoria}</td>
                             <td class="py-3 px-2">${subcatText}</td>
                             <td class="py-3 px-2 text-textmuted">${item.concepto}</td>
-                            <td class="py-3 px-2 text-right font-semibold text-expense">${formatMoneda(item.importe_moneda_principal)}</td>
-                            <td class="py-3 px-2 text-right font-bold text-indigo-400">${item.costo_en_horas.toFixed(1)} hrs</td>
+                            <td class="py-3 px-2 text-right font-semibold text-white">${formatMoneda(item.importe_moneda_principal)}</td>
+                            <td class="py-3 px-2 text-right font-bold text-white">${item.costo_en_horas.toFixed(1)} hrs</td>
                             <td class="py-3 px-2 text-right text-textmuted">${item.horas_trabajadas_mes.toFixed(0)} hrs</td>
                             <td class="py-3 px-2 text-right text-textmuted">${formatMoneda(item.pago_por_hora_mes)}/hr</td>
                         </tr>
@@ -2441,7 +2543,7 @@
                 
             } catch (err) {
                 console.error("Error al cargar detalles de costo de vida:", err);
-                tbody.innerHTML = '<tr><td colspan="8" class="py-6 text-center text-expense">Error al cargar la información.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="8" class="py-6 text-center text-white">Error al cargar la información.</td></tr>';
             }
         }
 
@@ -2477,7 +2579,7 @@
                 const chip = document.createElement('button');
                 chip.id = `est-btn-${cat.replace(/\s+/g, '-').replace(/[()]/g, '')}`;
                 chip.type = 'button';
-                chip.className = 'px-3 py-1.5 rounded-xl text-xs font-semibold border bg-accent/15 border-accent text-indigo-400 shadow-sm shadow-accent/10 transition-all';
+                chip.className = 'px-3 py-1.5 rounded-xl text-xs font-semibold border bg-accent/15 border-accent text-accent shadow-sm shadow-accent/10 transition-all';
                 chip.textContent = cat;
                 chip.onclick = () => toggleEstabilizadorCategory(cat);
                 container.appendChild(chip);
@@ -2490,7 +2592,7 @@
             categories.forEach(cat => {
                 const chipId = `est-btn-${cat.replace(/\s+/g, '-', 'g').replace(/[()]/g, '')}`;
                 const chip = document.getElementById(chipId);
-                if (chip) chip.className = 'px-3 py-1.5 rounded-xl text-xs font-semibold border bg-accent/15 border-accent text-indigo-400 shadow-sm shadow-accent/10 transition-all';
+                if (chip) chip.className = 'px-3 py-1.5 rounded-xl text-xs font-semibold border bg-accent/15 border-accent text-accent shadow-sm shadow-accent/10 transition-all';
             });
             renderEstabilizadoresChart();
         }
@@ -2510,7 +2612,7 @@
             const chipId = `est-btn-${cat.replace(/\s+/g, '-').replace(/[()]/g, '')}`;
             if (excludedEstabilizadores.has(cat)) {
                 excludedEstabilizadores.delete(cat);
-                document.getElementById(chipId).className = 'px-3 py-1.5 rounded-xl text-xs font-semibold border bg-accent/15 border-accent text-indigo-400 shadow-sm shadow-accent/10 transition-all';
+                document.getElementById(chipId).className = 'px-3 py-1.5 rounded-xl text-xs font-semibold border bg-accent/15 border-accent text-accent shadow-sm shadow-accent/10 transition-all';
             } else {
                 excludedEstabilizadores.add(cat);
                 document.getElementById(chipId).className = 'px-3 py-1.5 rounded-xl text-xs font-semibold border bg-slate-900 border-slate-800 text-textmuted hover:text-textmain transition-all';
@@ -2640,7 +2742,7 @@
                         datasets: [{
                             label: 'Gasto Mujeres',
                             data: data.gastos,
-                            borderColor: 'rgba(244, 63, 94, 1)', // Pink-500
+                            borderColor: 'rgba(156, 163, 175, 1)', // Pink-500
                             backgroundColor: 'rgba(244, 63, 94, 0.1)',
                             borderWidth: 2,
                             fill: true,
@@ -2836,7 +2938,7 @@
                         <tr class="hover:bg-slate-800/10 transition-colors border-b border-slate-800/30">
                             <td class="py-3 px-2">${item.fecha}</td>
                             <td class="py-3 px-2 font-medium text-white">${item.concepto}</td>
-                            <td class="py-3 px-2 text-right font-bold text-expense">${formatMoneda(item.importe)}</td>
+                            <td class="py-3 px-2 text-right font-bold text-accent">${formatMoneda(item.importe)}</td>
                             <td class="py-3 px-2 pl-6 text-textmuted">${item.valor || '<span class="text-textmuted/40">-</span>'}</td>
                         </tr>
                     `;
@@ -2844,7 +2946,7 @@
             } catch (err) {
                 console.error("Error al cargar top de gastos sociales:", err);
                 const tbody = document.getElementById('social-table-body');
-                tbody.innerHTML = '<tr><td colspan="4" class="py-6 text-center text-expense">Error al cargar la información.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="4" class="py-6 text-center text-white">Error al cargar la información.</td></tr>';
             }
         }
 

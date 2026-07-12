@@ -23,10 +23,11 @@ def find_credentials():
             for f in os.listdir(d):
                 if f.endswith(".json"):
                     return os.path.abspath(os.path.join(d, f))
-    return "creds/html-dashboarder-creds.json"
+    return None
 
 creds_path = find_credentials()
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = creds_path
+if creds_path:
+    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = creds_path
 app = FastAPI(title="Wealth Dashboard API")
 
 app.add_middleware(
@@ -469,6 +470,71 @@ def obtener_ingreso_pasivo():
         print("Error en ingreso_pasivo:", e)
         return {"fechas": [], "mensual": [], "acumulado": []}
 
+@app.get("/libertad-financiera")
+def obtener_libertad_financiera():
+    query = """
+        WITH pasivo AS (
+            SELECT
+                CAST(DATE_TRUNC(date(txn_time), MONTH) AS STRING) AS fecha,
+                SUM(importe_moneda_principal) AS pasivo
+            FROM `big-query-406221.finanzas_personales_mds.fact_transactions`
+            WHERE categoria = 'Pasivo'
+            GROUP BY 1
+        ),
+        indispensable AS (
+            SELECT
+                CAST(DATE_TRUNC(date(txn_time), MONTH) AS STRING) AS fecha,
+                SUM(importe_moneda_principal) AS indispensable
+            FROM `big-query-406221.finanzas_personales_mds.fact_transactions`
+            WHERE categoria IN ('Comida', 'Transporte', 'Facturas', 'Deudas', 'Salud', 'Gastos Variables')
+              AND ingreso_gasto = 'Gastos'
+            GROUP BY 1
+        )
+        SELECT 
+            COALESCE(p.fecha, i.fecha) AS fecha,
+            COALESCE(p.pasivo, 0) AS pasivo,
+            COALESCE(i.indispensable, 0) AS indispensable
+        FROM pasivo p
+        FULL OUTER JOIN indispensable i ON p.fecha = i.fecha
+        ORDER BY fecha
+    """
+    try:
+        resultados = client.query(query).result()
+        fechas = []
+        pasivo = []
+        indispensable = []
+        cobertura = []
+        
+        for fila in resultados:
+            if not fila.fecha: continue
+            f_pas = float(fila.pasivo or 0.0)
+            f_ind = float(fila.indispensable or 0.0)
+            fechas.append(fila.fecha[:7])
+            pasivo.append(f_pas)
+            indispensable.append(f_ind)
+            cobertura.append(round((f_pas / f_ind * 100), 1) if f_ind > 0 else 0.0)
+            
+        import datetime
+        current_month = datetime.date.today().strftime("%Y-%m")
+        latest_cobertura = 0.0
+        if fechas:
+            if fechas[-1] == current_month and len(cobertura) > 1:
+                # If current month has no passive income (or is incomplete), use previous month
+                latest_cobertura = cobertura[-2]
+            else:
+                latest_cobertura = cobertura[-1]
+            
+        return {
+            "fechas": fechas[-12:],
+            "pasivo": pasivo[-12:],
+            "indispensable": indispensable[-12:],
+            "cobertura": cobertura[-12:],
+            "latest_cobertura": latest_cobertura
+        }
+    except Exception as e:
+        print("Error en libertad_financiera:", e)
+        return {"fechas": [], "pasivo": [], "indispensable": [], "cobertura": [], "latest_cobertura": 0.0}
+
 @app.get("/top-ingresos")
 def obtener_top_ingresos(
     fecha_inicio: str,
@@ -719,7 +785,8 @@ def obtener_costo_vida_kpis(fecha_inicio: Optional[str] = None, fecha_fin: Optio
             "transporte": 0.0,
             "salud": 0.0,
             "inversiones": 0.0,
-            "mujeres": 0.0
+            "mujeres": 0.0,
+            "equipo_trabajo": 0.0
         }
         
         for fila in resultados:
@@ -747,6 +814,8 @@ def obtener_costo_vida_kpis(fecha_inicio: Optional[str] = None, fecha_fin: Optio
                     kpis["salud"] += horas
                 elif cat_lower == "inversiones":
                     kpis["inversiones"] += horas
+                elif cat_lower == "equipo de trabajo":
+                    kpis["equipo_trabajo"] += horas
                     
         return kpis
     except Exception as e:
@@ -759,7 +828,8 @@ def obtener_costo_vida_kpis(fecha_inicio: Optional[str] = None, fecha_fin: Optio
             "transporte": 0.0,
             "salud": 0.0,
             "inversiones": 0.0,
-            "mujeres": 0.0
+            "mujeres": 0.0,
+            "equipo_trabajo": 0.0
         }
 
 @app.get("/costo-vida-detalles")
@@ -838,7 +908,7 @@ def obtener_costo_vida_grafico(fecha_inicio: Optional[str] = None, fecha_fin: Op
             categoria,
             SUM(costo_en_horas) AS costo_en_horas_mes
         FROM `big-query-406221.finanzas_personales_mds.agg_costo_en_vida`
-        WHERE categoria IN ('Comida', 'Viajes', 'Regalos', 'Entretenimiento', 'Facturas', 'Salud', 'Transporte', 'Autocuidado', 'Inversiones')
+        WHERE categoria IN ('Comida', 'Viajes', 'Regalos', 'Entretenimiento', 'Facturas', 'Salud', 'Transporte', 'Autocuidado', 'Inversiones', 'Equipo de trabajo')
         AND COALESCE(subcategoria, 'no_subcat') NOT IN ('Mujeres')
           {where_clause}
         GROUP BY 1, 2
@@ -848,7 +918,7 @@ def obtener_costo_vida_grafico(fecha_inicio: Optional[str] = None, fecha_fin: Op
         resultados = client.query(query).result()
         datos_map = {}
         meses_set = set()
-        categorias_set = {'Comida', 'Viajes', 'Regalos', 'Entretenimiento', 'Facturas', 'Salud', 'Transporte', 'Autocuidado', 'Inversiones'}
+        categorias_set = {'Comida', 'Viajes', 'Regalos', 'Entretenimiento', 'Facturas', 'Salud', 'Transporte', 'Autocuidado', 'Inversiones', 'Equipo de trabajo'}
         
         for fila in resultados:
             mes_str = fila.mes[:7] if fila.mes else "Desconocido"
