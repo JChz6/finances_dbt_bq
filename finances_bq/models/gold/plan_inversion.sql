@@ -52,7 +52,7 @@ calculo_de_disponible AS (
     pc.month_id,
     pc.bruto_mensual,
     pc.neto_mensual_estimado,
-    -- 3. Sobre el neto, resta los gastos de vida (fijado en 3K)
+    -- 3. Sobre el neto, resta los gastos de vida
     (neto_mensual_estimado - gp.gasto_proyectado) AS neto_despues_de_vida,
     cuota_mensual,
       -- 4. A eso, le resta la cuota de la hipoteca correspondiente a ese mes
@@ -70,9 +70,7 @@ SELECT
   cuota_mensual,
   disponible_ahorro_inversion,
   FLOOR(disponible_ahorro_inversion * 0.27) AS cuenta_alto_rendimiento,
-  FLOOR(disponible_ahorro_inversion * 0.1) AS amortizacion_hipoteca,
-  FLOOR(disponible_ahorro_inversion * 0.63) AS fibras,
-  FLOOR(disponible_ahorro_inversion * 0.63 * 0.7) AS fibprime,
-  FLOOR(disponible_ahorro_inversion * 0.63 * 0.3) AS fibccap,
+  FLOOR(disponible_ahorro_inversion * 0.28) AS amortizacion_hipoteca,
+  FLOOR(disponible_ahorro_inversion * 0.45) AS fibprime,
 FROM calculo_de_disponible
 

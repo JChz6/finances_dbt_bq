@@ -51,21 +51,13 @@ acumulados AS(
     -- ROlling SUM de inversiones mensuales en CAR
     SUM(invertido_cuentas_alto_rendimiento) OVER(
       PARTITION BY  r.month_id ORDER BY txn_time ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS cuentas_alto_rendimiento_inversion_acumulada,
-    -- Join con asignación mensual a FIBRAS
-    pi.fibras AS fibras_asignado,
-    -- Rolling SUM de inversiones totales en FIBRAS
-    SUM(invertido_fibras) OVER(
-      PARTITION BY  r.month_id ORDER BY txn_time ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS fibras_inversion_acumulada,
+
     -- JOin con asignación a FIBPRIME
     pi.fibprime AS fibprime_asignado, 
     -- Rolling SUM de inversion mensual en FIBPRIME
     SUM(IF(concepto = 'FIBPRIME', importe_moneda_principal, 0)) OVER(
       PARTITION BY  r.month_id ORDER BY txn_time ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS fibprime_inversion_acumulada,
-    -- Join con asignación a FIBCCAP
-    pi.fibccap AS fibccap_asignado,
-    -- Rolling SUM de inversiones en FIBCCAP
-    SUM(IF(concepto = 'FIBCCAP', importe_moneda_principal, 0)) OVER(
-      PARTITION BY  r.month_id ORDER BY txn_time ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS fibccap_inversion_acumulada,
+
     -- JOin, destinado mensual a prepagos
     pi.amortizacion_hipoteca AS prepagos_asignado,
     -- Rolling SUM de inversiones en prepagos
@@ -84,18 +76,16 @@ SELECT
   bruto_mensual_acumulado,
   cuentas_alto_rendimiento_asignado,
   cuentas_alto_rendimiento_inversion_acumulada,
-  fibras_asignado,
-  fibras_inversion_acumulada,
+  
   fibprime_asignado,
   fibprime_inversion_acumulada,
-  fibccap_asignado,
-  fibccap_inversion_acumulada,
+  
   prepagos_asignado,
   prepagos_inversion_acumulada,
   cuentas_alto_rendimiento_asignado - cuentas_alto_rendimiento_inversion_acumulada AS cuentas_alto_rendimiento_restante,
-  fibras_asignado - fibras_inversion_acumulada AS fibras_restante,
+  
   fibprime_asignado - fibprime_inversion_acumulada AS fibprime_restante,
-  fibccap_asignado - fibccap_inversion_acumulada AS fibccap_restante,
+  
   prepagos_asignado - prepagos_inversion_acumulada AS prepagos_restante
 FROM acumulados
 QUALIFY ROW_NUMBER() OVER(PARTITION BY month_id ORDER BY fecha DESC) = 1
