@@ -196,8 +196,8 @@
             <!-- TAB 1: OVERVIEW -->
             <div id="tab-overview" class="space-y-6">
                 <!-- KPI Summary cards -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
-                    <div class="bg-card rounded-3xl p-6 border border-slate-800/60 shadow-sm relative overflow-hidden">
+                <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+                    <div class="col-span-2 lg:col-span-1 bg-card rounded-3xl p-6 border border-slate-800/60 shadow-sm relative overflow-hidden">
                         <p class="text-textmuted text-sm font-medium tracking-wide">Ingresos Totales</p>
                         <h3 class="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-medium text-income mt-1" id="kpi-ingresos">$0</h3>
                         <p class="text-[10px] text-textmuted mt-1" id="kpi-ingresos-desc">En el periodo seleccionado</p>
@@ -381,8 +381,8 @@
             <!-- TAB 3: CRECIMIENTO E INVERSIONES -->
             <div id="tab-crecimiento" class="hidden space-y-6">
                 <!-- KPI Summary cards -->
-                <div class="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-5 gap-6">
-                    <div class="bg-card rounded-3xl p-6 border border-accent/40 shadow-sm shadow-accent/5 relative overflow-hidden ring-1 ring-accent/10">
+                <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-6">
+                    <div class="col-span-2 md:col-span-1 bg-card rounded-3xl p-6 border border-accent/40 shadow-sm shadow-accent/5 relative overflow-hidden ring-1 ring-accent/10">
                         <p class="text-textmuted text-sm font-medium tracking-wide">Índice de Libertad</p>
                         <h3 class="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-semibold text-accent mt-1" id="kpi-libertad">0%</h3>
                         <p class="text-[10px] text-textmuted mt-1">Supervivencia cubierta por pasivos</p>
@@ -415,7 +415,7 @@
                 </div>
 
                 <!-- Gasto de consumo vs construcción de patrimonio vs ahorro de caja (suman 100% del ingreso), y apalancamiento -->
-                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+                <div class="grid grid-cols-2 md:grid-cols-2 xl:grid-cols-4 gap-6">
                     <div class="bg-card rounded-2xl p-6 border border-slate-800/60 shadow-sm relative overflow-hidden">
                         <p class="text-textmuted text-sm font-medium tracking-wide">% Gasto de Consumo</p>
                         <h3 class="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-medium text-white mt-1" id="kpi-tasa-gasto">0%</h3>
@@ -531,8 +531,8 @@
             <!-- TAB: PATRIMONIO NETO -->
             <div id="tab-patrimonio" class="hidden space-y-6">
                 <!-- KPI Summary cards -->
-                <div class="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-6 gap-6">
-                    <div class="bg-card rounded-3xl p-6 border border-accent/40 shadow-sm shadow-accent/5 relative overflow-hidden ring-1 ring-accent/10">
+                <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-6">
+                    <div class="col-span-2 md:col-span-1 bg-card rounded-3xl p-6 border border-accent/40 shadow-sm shadow-accent/5 relative overflow-hidden ring-1 ring-accent/10">
                         <p class="text-textmuted text-sm font-medium tracking-wide">Patrimonio Neto</p>
                         <h3 class="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-semibold text-accent mt-1" id="kpi-pn-total">S/ 0</h3>
                         <p class="text-[10px] text-textmuted mt-1">Activos reales menos deuda pendiente</p>
@@ -562,7 +562,7 @@
                         <p class="text-[10px] text-textmuted mt-1">Caja acumulada en cuentas regulares</p>
                         <div class="absolute right-4 bottom-4 text-emerald-400/10"><svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h1m4 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2z"></path></svg></div>
                     </div>
-                    <div class="bg-card rounded-3xl p-6 border border-slate-800/60 shadow-sm relative overflow-hidden">
+                    <div class="col-span-2 md:col-span-1 bg-card rounded-3xl p-6 border border-slate-800/60 shadow-sm relative overflow-hidden">
                         <p class="text-textmuted text-sm font-medium tracking-wide">Hipoteca Pendiente</p>
                         <h3 class="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-medium text-expense mt-1" id="kpi-pn-pendiente">S/ 0</h3>
                         <p class="text-[10px] text-textmuted mt-1">Capital que falta por amortizar</p>
@@ -585,7 +585,7 @@
             <!-- TAB 4: HIPOTECA DEPA MIRANDA -->
             <div id="tab-hipoteca" class="hidden space-y-6">
                 <!-- KPI Summary cards -->
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     <div class="bg-card rounded-3xl p-6 border border-slate-800/60 shadow-sm relative overflow-hidden">
                         <p class="text-textmuted text-sm font-medium tracking-wide">Pagado en Cuotas</p>
                         <h3 class="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-medium text-white mt-1" id="kpi-hipoteca-pagado">S/ 0</h3>
@@ -881,7 +881,7 @@
             <!-- TAB 7: FINANZAS SOCIALES -->
             <div id="tab-social" class="hidden space-y-6">
                 <!-- Tarjetas KPI -->
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
                     <!-- Gasto Bruto -->
                     <div class="bg-card rounded-2xl p-6 border border-slate-800/60 shadow-sm">
                         <p class="text-textmuted text-xs uppercase font-semibold tracking-wider mb-2">Gasto Bruto</p>
