@@ -92,6 +92,10 @@
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6M17 14v6m-3-3h6"/></svg>
                         Crecimiento e Inversiones
                     </button>
+                    <button onclick="switchTab('patrimonio')" id="tab-btn-patrimonio" class="w-full flex items-center gap-3 px-4 py-2.5 text-textmuted hover:bg-slate-800/50 hover:text-textmain rounded-xl text-sm font-medium transition-all text-left">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m-9 4h.01M4 7h16a1 1 0 011 1v9a2 2 0 01-2 2H5a2 2 0 01-2-2V8a1 1 0 011-1z"/></svg>
+                        Patrimonio Neto
+                    </button>
                     <button onclick="switchTab('hipoteca')" id="tab-btn-hipoteca" class="w-full flex items-center gap-3 px-4 py-2.5 text-textmuted hover:bg-slate-800/50 hover:text-textmain rounded-xl text-sm font-medium transition-all text-left">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
                         Hipoteca Depa Miranda
@@ -192,30 +196,40 @@
             <!-- TAB 1: OVERVIEW -->
             <div id="tab-overview" class="space-y-6">
                 <!-- KPI Summary cards -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
                     <div class="bg-card rounded-3xl p-6 border border-slate-800/60 shadow-sm relative overflow-hidden">
                         <p class="text-textmuted text-sm font-medium tracking-wide">Ingresos Totales</p>
                         <h3 class="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-medium text-income mt-1" id="kpi-ingresos">$0</h3>
                         <p class="text-[10px] text-textmuted mt-1" id="kpi-ingresos-desc">En el periodo seleccionado</p>
+                        <p class="text-[10px] mt-1" id="kpi-ingresos-delta"></p>
                         <div class="absolute right-4 bottom-4 text-income/10"><svg class="w-12 h-12" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path></svg></div>
                     </div>
                     <div class="bg-card rounded-3xl p-6 border border-slate-800/60 shadow-sm relative overflow-hidden">
                         <p class="text-textmuted text-sm font-medium tracking-wide">Gastos Totales</p>
                         <h3 class="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-medium text-white mt-1" id="kpi-gastos">$0</h3>
                         <p class="text-[10px] text-textmuted mt-1" id="kpi-gastos-desc">En el periodo seleccionado</p>
+                        <p class="text-[10px] mt-1" id="kpi-gastos-delta"></p>
                         <div class="absolute right-4 bottom-4 text-white/5"><svg class="w-12 h-12" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path></svg></div>
                     </div>
                     <div class="bg-card rounded-3xl p-6 border border-slate-800/60 shadow-sm relative overflow-hidden">
                         <p class="text-textmuted text-sm font-medium tracking-wide">Balance Neto</p>
                         <h3 class="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-medium text-white mt-1" id="kpi-balance">$0</h3>
                         <p class="text-[10px] text-textmuted mt-1" id="kpi-balance-desc">Ingresos - Gastos</p>
+                        <p class="text-[10px] mt-1" id="kpi-balance-delta"></p>
                         <div class="absolute right-4 bottom-4 text-white/5"><svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg></div>
                     </div>
                     <div class="bg-card rounded-3xl p-6 border border-slate-800/60 shadow-sm relative overflow-hidden">
-                        <p class="text-textmuted text-sm font-medium tracking-wide">Porcentaje de flujo</p>
+                        <p class="text-textmuted text-sm font-medium tracking-wide">Tasa de Ahorro</p>
                         <h3 class="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-medium text-white mt-1" id="kpi-ahorro">0%</h3>
-                        <p class="text-[10px] text-textmuted mt-1" id="kpi-ahorro-desc">Liquidez al final del periodo</p>
+                        <p class="text-[10px] text-textmuted mt-1" id="kpi-ahorro-desc">(Ingresos - Gastos) / Ingresos</p>
+                        <p class="text-[10px] mt-1" id="kpi-ahorro-delta"></p>
                         <div class="absolute right-4 bottom-4 text-white/5"><svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg></div>
+                    </div>
+                    <div class="bg-card rounded-3xl p-6 border border-slate-800/60 shadow-sm relative overflow-hidden">
+                        <p class="text-textmuted text-sm font-medium tracking-wide">Costo en Vida</p>
+                        <h3 class="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-medium text-white mt-1" id="kpi-costovida-total">0.0 hrs</h3>
+                        <p class="text-[10px] text-textmuted mt-1">Horas de trabajo del gasto del periodo</p>
+                        <div class="absolute right-4 bottom-4 text-white/5"><svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg></div>
                     </div>
                 </div>
 
@@ -300,6 +314,26 @@
                     </div>
                 </div>
 
+                <!-- Resumen agregado del último mes con datos -->
+                <div id="budget-summary-card" class="hidden bg-card rounded-2xl p-5 border border-slate-800/60 shadow-sm">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div>
+                            <span class="text-xs text-textmuted uppercase tracking-wider font-semibold block mb-1" id="budget-summary-mes">Resumen del mes</span>
+                            <h3 class="text-xl sm:text-2xl font-semibold text-white" id="budget-summary-categorias">0 de 0 categorías sobre presupuesto</h3>
+                        </div>
+                        <div class="flex items-center gap-6">
+                            <div>
+                                <p class="text-[10px] text-textmuted uppercase tracking-wider">Gastado / Presupuestado</p>
+                                <p class="text-sm font-semibold text-white" id="budget-summary-montos">S/ 0 / S/ 0</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-[10px] text-textmuted uppercase tracking-wider">% Utilizado</p>
+                                <p class="text-2xl font-bold" id="budget-summary-pct">0%</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Budget grid cards (Dynamic visual analysis) -->
                 <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6" id="budget-charts-container">
                     <!-- Los minigráficos de cumplimiento se pintarán aquí -->
@@ -380,6 +414,30 @@
                     </div>
                 </div>
 
+                <!-- Gasto de consumo vs construcción de patrimonio vs ahorro de caja (suman 100% del ingreso), y apalancamiento -->
+                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+                    <div class="bg-card rounded-2xl p-6 border border-slate-800/60 shadow-sm relative overflow-hidden">
+                        <p class="text-textmuted text-sm font-medium tracking-wide">% Gasto de Consumo</p>
+                        <h3 class="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-medium text-white mt-1" id="kpi-tasa-gasto">0%</h3>
+                        <p class="text-[10px] text-textmuted mt-1">Gastos reales, sin FIBRAS ni amortización voluntaria</p>
+                    </div>
+                    <div class="bg-card rounded-2xl p-6 border border-accent/40 shadow-sm relative overflow-hidden">
+                        <p class="text-textmuted text-sm font-medium tracking-wide">% Construcción de Patrimonio</p>
+                        <h3 class="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-medium text-accent mt-1" id="kpi-tasa-patrimonio">0%</h3>
+                        <p class="text-[10px] text-textmuted mt-1">FIBRAS + cuentas alto rendimiento + amortización voluntaria, sobre ingresos</p>
+                    </div>
+                    <div class="bg-card rounded-2xl p-6 border border-slate-800/60 shadow-sm relative overflow-hidden">
+                        <p class="text-textmuted text-sm font-medium tracking-wide">% Ahorro de Caja</p>
+                        <h3 class="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-medium text-white mt-1" id="kpi-tasa-ahorro-caja">0%</h3>
+                        <p class="text-[10px] text-textmuted mt-1">Residual: 100% - gasto - patrimonio (cash ocioso)</p>
+                    </div>
+                    <div class="bg-card rounded-2xl p-6 border border-slate-800/60 shadow-sm relative overflow-hidden">
+                        <p class="text-textmuted text-sm font-medium tracking-wide">Ratio Deuda / Ingreso (DTI)</p>
+                        <h3 class="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-medium text-white mt-1" id="kpi-dti">0%</h3>
+                        <p class="text-[10px] text-textmuted mt-1">Cuota indispensable / mediana de ingreso neto</p>
+                    </div>
+                </div>
+
                 <!-- Charts layout -->
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <div class="bg-card rounded-2xl p-6 border border-slate-800/60 shadow-sm">
@@ -407,6 +465,17 @@
                         <h3 class="font-bold text-white text-base mb-4">Evolutivo: Brecha de Libertad</h3>
                         <div class="relative h-[320px]">
                             <canvas id="libertadChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Esencial vs Discrecional -->
+                <div class="grid grid-cols-1 gap-6">
+                    <div class="bg-card rounded-2xl p-6 border border-slate-800/60 shadow-sm">
+                        <h3 class="font-bold text-white text-base mb-1">Gasto Esencial vs Discrecional</h3>
+                        <p class="text-xs text-textmuted mb-4">% del gasto de consumo mensual. Excluye FIBRAS, cuentas de alto rendimiento y amortización voluntaria (eso es construcción de patrimonio, no consumo).</p>
+                        <div class="relative h-[300px]">
+                            <canvas id="esencialDiscrecionalChart"></canvas>
                         </div>
                     </div>
                 </div>
@@ -454,6 +523,60 @@
                                     <tr><td colspan="4" class="py-6 text-center text-textmuted animate-pulse">Cargando ingresos...</td></tr>
                                 </tbody>
                             </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB: PATRIMONIO NETO -->
+            <div id="tab-patrimonio" class="hidden space-y-6">
+                <!-- KPI Summary cards -->
+                <div class="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-6 gap-6">
+                    <div class="bg-card rounded-3xl p-6 border border-accent/40 shadow-sm shadow-accent/5 relative overflow-hidden ring-1 ring-accent/10">
+                        <p class="text-textmuted text-sm font-medium tracking-wide">Patrimonio Neto</p>
+                        <h3 class="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-semibold text-accent mt-1" id="kpi-pn-total">S/ 0</h3>
+                        <p class="text-[10px] text-textmuted mt-1">Activos reales menos deuda pendiente</p>
+                        <div class="absolute right-4 bottom-4 text-accent/10"><svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m-9 4h.01M4 7h16a1 1 0 011 1v9a2 2 0 01-2 2H5a2 2 0 01-2-2V8a1 1 0 011-1z"></path></svg></div>
+                    </div>
+                    <div class="bg-card rounded-3xl p-6 border border-slate-800/60 shadow-sm relative overflow-hidden">
+                        <p class="text-textmuted text-sm font-medium tracking-wide">Equity Hipoteca</p>
+                        <h3 class="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-medium text-white mt-1" id="kpi-pn-equity">S/ 0</h3>
+                        <p class="text-[10px] text-textmuted mt-1">Capital amortizado del inmueble</p>
+                        <div class="absolute right-4 bottom-4 text-indigo-400/10"><svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5"></path></svg></div>
+                    </div>
+                    <div class="bg-card rounded-3xl p-6 border border-slate-800/60 shadow-sm relative overflow-hidden">
+                        <p class="text-textmuted text-sm font-medium tracking-wide">FIBRAS</p>
+                        <h3 class="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-medium text-white mt-1" id="kpi-pn-fibras">S/ 0</h3>
+                        <p class="text-[10px] text-textmuted mt-1">Aportes acumulados (sin plusvalía)</p>
+                        <div class="absolute right-4 bottom-4 text-violet-400/10"><svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg></div>
+                    </div>
+                    <div class="bg-card rounded-3xl p-6 border border-slate-800/60 shadow-sm relative overflow-hidden">
+                        <p class="text-textmuted text-sm font-medium tracking-wide">Cuentas Alto Rendimiento</p>
+                        <h3 class="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-medium text-white mt-1" id="kpi-pn-cuentas">S/ 0</h3>
+                        <p class="text-[10px] text-textmuted mt-1">Saldo neto (depósitos - retiros)</p>
+                        <div class="absolute right-4 bottom-4 text-cyan-400/10"><svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg></div>
+                    </div>
+                    <div class="bg-card rounded-3xl p-6 border border-slate-800/60 shadow-sm relative overflow-hidden">
+                        <p class="text-textmuted text-sm font-medium tracking-wide">Efectivo</p>
+                        <h3 class="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-medium text-white mt-1" id="kpi-pn-efectivo">S/ 0</h3>
+                        <p class="text-[10px] text-textmuted mt-1">Caja acumulada en cuentas regulares</p>
+                        <div class="absolute right-4 bottom-4 text-emerald-400/10"><svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h1m4 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2z"></path></svg></div>
+                    </div>
+                    <div class="bg-card rounded-3xl p-6 border border-slate-800/60 shadow-sm relative overflow-hidden">
+                        <p class="text-textmuted text-sm font-medium tracking-wide">Hipoteca Pendiente</p>
+                        <h3 class="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-medium text-expense mt-1" id="kpi-pn-pendiente">S/ 0</h3>
+                        <p class="text-[10px] text-textmuted mt-1">Capital que falta por amortizar</p>
+                        <div class="absolute right-4 bottom-4 text-expense/10"><svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg></div>
+                    </div>
+                </div>
+
+                <!-- Chart evolutivo -->
+                <div class="grid grid-cols-1 gap-6">
+                    <div class="bg-card rounded-2xl p-6 border border-slate-800/60 shadow-sm">
+                        <h3 class="font-bold text-white text-base mb-1">Evolución del Patrimonio Neto</h3>
+                        <p class="text-xs text-textmuted mb-4">Activos apilados (equity, FIBRAS, cuentas de alto rendimiento) vs. deuda pendiente, y la línea de patrimonio neto resultante. Basado en importes reales, sin valorización de activos.</p>
+                        <div class="relative h-[380px]">
+                            <canvas id="patrimonioChart"></canvas>
                         </div>
                     </div>
                 </div>
@@ -871,10 +994,12 @@
         let ingresoNetoChartInstance = null;
         let libertadChartInstance = null;
         let incomePieChartInstance = null;
+        let esencialDiscrecionalChartInstance = null;
         let originalIncomeCategoryData = null;
         let excludedIncomeCategories = new Set();
         let hipotecaChartInstance = null;
         let amortChartInstance = null;
+        let patrimonioChartInstance = null;
 
         let costoVidaChartInstance = null;
         let originalCostoVidaData = null;
@@ -910,6 +1035,7 @@
             const tabBtnOverview = document.getElementById('tab-btn-overview');
             const tabBtnPresupuesto = document.getElementById('tab-btn-presupuesto');
             const tabBtnCrecimiento = document.getElementById('tab-btn-crecimiento');
+            const tabBtnPatrimonio = document.getElementById('tab-btn-patrimonio');
             const tabBtnHipoteca = document.getElementById('tab-btn-hipoteca');
             const tabBtnCostoVida = document.getElementById('tab-btn-costovida');
             const tabBtnEstabilizadores = document.getElementById('tab-btn-estabilizadores');
@@ -918,6 +1044,7 @@
             const tabOverview = document.getElementById('tab-overview');
             const tabPresupuesto = document.getElementById('tab-presupuesto');
             const tabCrecimiento = document.getElementById('tab-crecimiento');
+            const tabPatrimonio = document.getElementById('tab-patrimonio');
             const tabHipoteca = document.getElementById('tab-hipoteca');
             const tabCostoVida = document.getElementById('tab-costovida');
             const tabEstabilizadores = document.getElementById('tab-estabilizadores');
@@ -929,10 +1056,10 @@
             const pageTitle = document.getElementById('page-title');
             const pageSubtitle = document.getElementById('page-subtitle');
 
-            [tabBtnOverview, tabBtnPresupuesto, tabBtnCrecimiento, tabBtnHipoteca, tabBtnCostoVida, tabBtnEstabilizadores, tabBtnSocial].forEach(btn => {
+            [tabBtnOverview, tabBtnPresupuesto, tabBtnCrecimiento, tabBtnPatrimonio, tabBtnHipoteca, tabBtnCostoVida, tabBtnEstabilizadores, tabBtnSocial].forEach(btn => {
                 if (btn) btn.className = "w-full flex items-center gap-3 px-4 py-2.5 text-textmuted hover:bg-slate-800/50 hover:text-textmain rounded-xl text-sm font-medium transition-all text-left";
             });
-            [tabOverview, tabPresupuesto, tabCrecimiento, tabHipoteca, tabCostoVida, tabEstabilizadores, tabSocial].forEach(t => {
+            [tabOverview, tabPresupuesto, tabCrecimiento, tabPatrimonio, tabHipoteca, tabCostoVida, tabEstabilizadores, tabSocial].forEach(t => {
                 if (t) t.classList.add('hidden');
             });
 
@@ -964,6 +1091,15 @@
                 pageTitle.innerText = "Crecimiento e Inversiones";
                 pageSubtitle.innerText = "Análisis de ingresos pasivos, presupuestos de vida y evolución patrimonial.";
                 cargarCrecimiento();
+            } else if (tab === 'patrimonio') {
+                tabPatrimonio.classList.remove('hidden');
+                filterDates.classList.add('hidden');
+                filterBudget.classList.add('hidden');
+                tabBtnPatrimonio.className = "w-full flex items-center gap-3 px-4 py-2.5 bg-accent/15 text-accent rounded-xl text-sm font-medium border border-accent/20 transition-all text-left";
+
+                pageTitle.innerText = "Patrimonio Neto";
+                pageSubtitle.innerText = "Activos reales (equity, FIBRAS, cuentas de alto rendimiento) menos deuda pendiente. No incluye valorización de activos.";
+                cargarPatrimonio();
             } else if (tab === 'hipoteca') {
                 tabHipoteca.classList.remove('hidden');
                 filterDates.classList.add('hidden');
@@ -1073,6 +1209,18 @@
             return new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN', maximumFractionDigits: 0 }).format(valor);
         }
 
+        // Escapar texto antes de insertarlo como HTML (evita romper el layout o inyectar markup
+        // si un concepto/descripción de BigQuery trae caracteres como < > & " ')
+        function escapeHtml(valor) {
+            if (valor === null || valor === undefined) return '';
+            return String(valor)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
         // Cargar todos los datos del Overview (Tab 1)
         async function cargarOverview() {
             const desde = document.getElementById('input-desde').value;
@@ -1083,26 +1231,87 @@
             cargarGastosCategoria(desde, hasta);
             cargarBalanceTrimestre(desde, hasta);
             cargarTopGastos(desde, hasta);
+            cargarCostoVidaOverview(desde, hasta);
+        }
+
+        // Calcula el rango de igual duración inmediatamente anterior a [desde, hasta],
+        // para comparativas de periodo contra periodo (no necesariamente calendario MoM/YoY,
+        // ya que el usuario puede elegir cualquier rango de fechas).
+        function calcularPeriodoAnterior(desdeStr, hastaStr) {
+            const unDiaMs = 24 * 60 * 60 * 1000;
+            const desde = new Date(`${desdeStr}T00:00:00`);
+            const hasta = new Date(`${hastaStr}T00:00:00`);
+            const duracionMs = hasta - desde;
+            const hastaAnterior = new Date(desde.getTime() - unDiaMs);
+            const desdeAnterior = new Date(hastaAnterior.getTime() - duracionMs);
+            const fmt = d => d.toISOString().split('T')[0];
+            return { desde: fmt(desdeAnterior), hasta: fmt(hastaAnterior) };
+        }
+
+        // Delta como % relativo (para montos como ingresos/gastos)
+        function renderDeltaPct(id, actual, anterior, positivoEsBueno = true) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            if (!anterior) {
+                el.textContent = '';
+                return;
+            }
+            const cambio = ((actual - anterior) / Math.abs(anterior)) * 100;
+            const esBueno = positivoEsBueno ? cambio >= 0 : cambio <= 0;
+            const signo = cambio >= 0 ? '▲' : '▼';
+            const clase = esBueno ? 'text-income' : 'text-expense';
+            el.innerHTML = `<span class="${clase} font-semibold">${signo} ${Math.abs(cambio).toFixed(1)}%</span> vs. periodo anterior`;
+        }
+
+        // Delta en soles (para Balance Neto, que puede cruzar cero y no admite % estable)
+        function renderDeltaAbsoluto(id, actual, anterior) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            const delta = actual - anterior;
+            const esBueno = delta >= 0;
+            const signo = delta >= 0 ? '▲' : '▼';
+            const clase = esBueno ? 'text-income' : 'text-expense';
+            el.innerHTML = `<span class="${clase} font-semibold">${signo} ${formatMoneda(Math.abs(delta))}</span> vs. periodo anterior`;
+        }
+
+        // Delta en puntos porcentuales (para tasas/porcentajes, nunca como "% de cambio")
+        function renderDeltaPuntos(id, actualPct, anteriorPct) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            const delta = actualPct - anteriorPct;
+            const esBueno = delta >= 0;
+            const signo = delta >= 0 ? '▲' : '▼';
+            const clase = esBueno ? 'text-income' : 'text-expense';
+            el.innerHTML = `<span class="${clase} font-semibold">${signo} ${Math.abs(delta).toFixed(1)} pp</span> vs. periodo anterior`;
         }
 
         // Obtener KPIs de resumen
         async function cargarKPIs(desde, hasta) {
             try {
-                const res = await fetch(`${API_URL}/flujo-caja?fecha_inicio=${desde}&fecha_fin=${hasta}&granularidad=mensual`);
-                const data = await res.json();
-                
-                let ingresoTotal = 0;
-                let gastoTotal = 0;
-                
-                data.ingresos.forEach(i => ingresoTotal += i);
-                data.gastos.forEach(g => gastoTotal += Math.abs(g));
-                
+                const anterior = calcularPeriodoAnterior(desde, hasta);
+
+                const [resActual, resAnterior] = await Promise.all([
+                    fetch(`${API_URL}/flujo-caja?fecha_inicio=${desde}&fecha_fin=${hasta}&granularidad=mensual`),
+                    fetch(`${API_URL}/flujo-caja?fecha_inicio=${anterior.desde}&fecha_fin=${anterior.hasta}&granularidad=mensual`)
+                ]);
+                const data = await resActual.json();
+                const dataAnterior = await resAnterior.json();
+
+                const sumar = (arr) => (arr || []).reduce((acc, v) => acc + v, 0);
+
+                const ingresoTotal = sumar(data.ingresos);
+                const gastoTotal = sumar(data.gastos.map(g => Math.abs(g)));
                 const balanceNeto = ingresoTotal - gastoTotal;
-                const porcentajeAhorro = ingresoTotal > 0 ? ((balanceNeto / ingresoTotal) * 100).toFixed(1) : 0;
-                
+                const porcentajeAhorro = ingresoTotal > 0 ? ((balanceNeto / ingresoTotal) * 100) : 0;
+
+                const ingresoAnterior = sumar(dataAnterior.ingresos);
+                const gastoAnterior = sumar((dataAnterior.gastos || []).map(g => Math.abs(g)));
+                const balanceAnterior = ingresoAnterior - gastoAnterior;
+                const porcentajeAhorroAnterior = ingresoAnterior > 0 ? ((balanceAnterior / ingresoAnterior) * 100) : 0;
+
                 document.getElementById('kpi-ingresos').innerText = formatMoneda(ingresoTotal);
                 document.getElementById('kpi-gastos').innerText = formatMoneda(gastoTotal);
-                
+
                 const balEl = document.getElementById('kpi-balance');
                 balEl.innerText = formatMoneda(balanceNeto);
                 if (balanceNeto >= 0) {
@@ -1111,10 +1320,27 @@
                     balEl.className = "text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-medium text-white mt-1";
                 }
 
-                document.getElementById('kpi-ahorro').innerText = `${porcentajeAhorro}%`;
-                
+                document.getElementById('kpi-ahorro').innerText = `${porcentajeAhorro.toFixed(1)}%`;
+
+                renderDeltaPct('kpi-ingresos-delta', ingresoTotal, ingresoAnterior, true);
+                renderDeltaPct('kpi-gastos-delta', gastoTotal, gastoAnterior, false);
+                renderDeltaAbsoluto('kpi-balance-delta', balanceNeto, balanceAnterior);
+                renderDeltaPuntos('kpi-ahorro-delta', porcentajeAhorro, porcentajeAhorroAnterior);
+
             } catch (err) {
                 console.error("Error al cargar KPIs:", err);
+            }
+        }
+
+        // Costo en vida total del periodo (suma de todas las categorías), en el Overview
+        async function cargarCostoVidaOverview(desde, hasta) {
+            try {
+                const res = await fetch(`${API_URL}/costo-vida-kpis?fecha_inicio=${desde}&fecha_fin=${hasta}`);
+                const data = await res.json();
+                const total = Object.values(data || {}).reduce((acc, v) => acc + (v || 0), 0);
+                document.getElementById('kpi-costovida-total').textContent = `${total.toFixed(1)} hrs`;
+            } catch (err) {
+                console.error("Error al cargar costo en vida del overview:", err);
             }
         }
 
@@ -1539,6 +1765,75 @@
             cargarTopIngresos(desde, hasta);
             cargarIngresoNetoChart(desde, hasta);
             cargarLibertad();
+            cargarEsencialDiscrecional(desde, hasta);
+        }
+
+        async function cargarEsencialDiscrecional(desde, hasta) {
+            try {
+                const res = await fetch(`${API_URL}/gasto-esencial-discrecional?fecha_inicio=${desde}&fecha_fin=${hasta}`);
+                const data = await res.json();
+
+                if (esencialDiscrecionalChartInstance) {
+                    esencialDiscrecionalChartInstance.destroy();
+                }
+
+                const pctDiscrecional = (data.pct_esencial || []).map(p => Math.round((100 - p) * 10) / 10);
+
+                const ctx = document.getElementById('esencialDiscrecionalChart').getContext('2d');
+                esencialDiscrecionalChartInstance = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: data.meses || [],
+                        datasets: [
+                            {
+                                label: 'Esencial',
+                                data: data.pct_esencial || [],
+                                backgroundColor: 'rgba(74, 222, 128, 0.85)', // Accent green (mismo tono que "dentro de presupuesto" e "Hipoteca > Capital")
+                                stack: 'pct',
+                                borderRadius: 3
+                            },
+                            {
+                                label: 'Discrecional',
+                                data: pctDiscrecional,
+                                backgroundColor: 'rgba(156, 163, 175, 0.85)', // Gris (mismo tono que "sobre presupuesto" en Presupuesto)
+                                stack: 'pct',
+                                borderRadius: 3
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                                labels: { boxWidth: 12, font: { size: 10 } }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: (context) => `${context.dataset.label}: ${context.parsed.y}%`
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                stacked: true,
+                                grid: { display: false },
+                                ticks: { font: { size: 9 } }
+                            },
+                            y: {
+                                stacked: true,
+                                min: 0,
+                                max: 100,
+                                grid: { color: 'rgba(51, 65, 85, 0.1)' },
+                                ticks: { font: { size: 9 }, callback: v => `${v}%` }
+                            }
+                        }
+                    }
+                });
+            } catch (err) {
+                console.error("Error al cargar esencial vs discrecional:", err);
+            }
         }
 
         async function cargarCrecimientoKPIs(desde, hasta) {
@@ -1550,6 +1845,10 @@
                 document.getElementById('kpi-supervivencia-estricta').textContent = formatMoneda(data.supervivencia_estricta);
                 document.getElementById('kpi-gastos-vida').textContent = formatMoneda(data.supervivencia_vida);
                 document.getElementById('kpi-mediana-ingreso').textContent = formatMoneda(data.mediana_ingreso_neto);
+                document.getElementById('kpi-tasa-gasto').textContent = `${data.tasa_gasto_consumo}%`;
+                document.getElementById('kpi-tasa-patrimonio').textContent = `${data.tasa_construccion_patrimonio}%`;
+                document.getElementById('kpi-tasa-ahorro-caja').textContent = `${data.tasa_ahorro_caja}%`;
+                document.getElementById('kpi-dti').textContent = `${data.ratio_deuda_ingreso}%`;
             } catch (err) {
                 console.error("Error al cargar KPIs de crecimiento:", err);
             }
@@ -1894,22 +2193,20 @@
                     return;
                 }
 
-                data.ingresos.forEach(ing => {
-                    tbody.innerHTML += `
+                tbody.innerHTML = data.ingresos.map(ing => `
                         <tr class="hover:bg-slate-800/20 transition-colors">
-                            <td class="py-3 px-2 text-textmuted font-medium">${ing.fecha}</td>
-                            <td class="py-3 px-2 font-medium text-white truncate max-w-[160px]">${ing.descripcion}</td>
+                            <td class="py-3 px-2 text-textmuted font-medium">${escapeHtml(ing.fecha)}</td>
+                            <td class="py-3 px-2 font-medium text-white truncate max-w-[160px]">${escapeHtml(ing.descripcion)}</td>
                             <td class="py-3 px-2">
                                 <span class="px-2 py-0.5 rounded-full bg-slate-900 text-[10px] text-emerald-300 border border-slate-800 font-semibold">
-                                    ${ing.categoria}
+                                    ${escapeHtml(ing.categoria)}
                                 </span>
                             </td>
                             <td class="py-3 px-2 text-right font-bold text-income">
                                 ${formatMoneda(ing.monto)}
                             </td>
                         </tr>
-                    `;
-                });
+                    `).join('');
             } catch (err) {
                 console.error("Error al cargar top ingresos:", err);
             }
@@ -1918,6 +2215,128 @@
         // ==========================================
         // SECCIÓN HIPOTECA DEPA MIRANDA (TAB 4)
         // ==========================================
+
+        // ==========================================
+        // SECCIÓN PATRIMONIO NETO
+        // ==========================================
+
+        async function cargarPatrimonio() {
+            try {
+                const res = await fetch(`${API_URL}/net-worth`);
+                const data = await res.json();
+
+                const snap = data.snapshot || {};
+                document.getElementById('kpi-pn-total').textContent = formatMoneda(snap.patrimonio_neto || 0);
+                document.getElementById('kpi-pn-equity').textContent = formatMoneda(snap.equity_hipoteca || 0);
+                document.getElementById('kpi-pn-fibras').textContent = formatMoneda(snap.fibras || 0);
+                document.getElementById('kpi-pn-cuentas').textContent = formatMoneda(snap.cuentas_alto_rendimiento || 0);
+                document.getElementById('kpi-pn-efectivo').textContent = formatMoneda(snap.efectivo || 0);
+                document.getElementById('kpi-pn-pendiente').textContent = formatMoneda(snap.hipoteca_pendiente || 0);
+
+                if (patrimonioChartInstance) {
+                    patrimonioChartInstance.destroy();
+                }
+
+                const activos = data.activos || {};
+                const pasivos = data.pasivos || {};
+                const pendienteNegativo = (pasivos.hipoteca_pendiente || []).map(v => -v);
+
+                const ctx = document.getElementById('patrimonioChart').getContext('2d');
+                patrimonioChartInstance = new Chart(ctx, {
+                    data: {
+                        labels: data.meses || [],
+                        datasets: [
+                            {
+                                type: 'bar',
+                                label: 'Equity Hipoteca',
+                                data: activos.equity_hipoteca || [],
+                                backgroundColor: 'rgba(99, 102, 241, 0.85)', // Indigo
+                                stack: 'patrimonio',
+                                borderRadius: 3
+                            },
+                            {
+                                type: 'bar',
+                                label: 'FIBRAS',
+                                data: activos.fibras || [],
+                                backgroundColor: 'rgba(139, 92, 246, 0.85)', // Violet
+                                stack: 'patrimonio',
+                                borderRadius: 3
+                            },
+                            {
+                                type: 'bar',
+                                label: 'Cuentas Alto Rendimiento',
+                                data: activos.cuentas_alto_rendimiento || [],
+                                backgroundColor: 'rgba(34, 211, 238, 0.85)', // Cyan
+                                stack: 'patrimonio',
+                                borderRadius: 3
+                            },
+                            {
+                                type: 'bar',
+                                label: 'Efectivo',
+                                data: activos.efectivo || [],
+                                backgroundColor: 'rgba(245, 158, 11, 0.85)', // Amber (ya usado en Hipoteca/Estabilizadores) — evita chocar con el verde de la línea de Patrimonio Neto
+                                stack: 'patrimonio',
+                                borderRadius: 3
+                            },
+                            {
+                                type: 'bar',
+                                label: 'Hipoteca Pendiente',
+                                data: pendienteNegativo,
+                                backgroundColor: 'rgba(244, 63, 94, 0.85)', // Rose
+                                stack: 'patrimonio',
+                                borderRadius: 3
+                            },
+                            {
+                                type: 'line',
+                                label: 'Patrimonio Neto',
+                                data: data.patrimonio_neto || [],
+                                borderColor: '#4ADE80',
+                                backgroundColor: '#4ADE80',
+                                borderWidth: 2,
+                                pointRadius: 2,
+                                pointHoverRadius: 4,
+                                tension: 0.25,
+                                fill: false
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                                labels: { boxWidth: 12, font: { size: 10 } }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const valor = context.dataset.label === 'Hipoteca Pendiente'
+                                            ? Math.abs(context.parsed.y)
+                                            : context.parsed.y;
+                                        return `${context.dataset.label}: ${formatMoneda(valor)}`;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                stacked: true,
+                                grid: { display: false },
+                                ticks: { font: { size: 9 } }
+                            },
+                            y: {
+                                stacked: true,
+                                grid: { color: 'rgba(51, 65, 85, 0.1)' },
+                                ticks: { font: { size: 9 }, callback: v => formatMoneda(v) }
+                            }
+                        }
+                    }
+                });
+            } catch (err) {
+                console.error("Error al cargar patrimonio neto:", err);
+            }
+        }
 
         async function cargarHipoteca() {
             cargarHipotecaKPIs();
@@ -2165,15 +2584,13 @@
                     monto: agrupados[desc]
                 })).sort((a, b) => b.monto - a.monto);
                 
-                ordenados.forEach(item => {
-                    tbody.innerHTML += `
+                tbody.innerHTML = ordenados.map(item => `
                         <tr class="hover:bg-slate-800/10 transition-colors">
-                            <td class="py-3 px-2 font-medium text-white">${item.descripcion}</td>
+                            <td class="py-3 px-2 font-medium text-white">${escapeHtml(item.descripcion)}</td>
                             <td class="py-3 px-2 text-right font-bold text-white">${formatMoneda(item.monto)}</td>
                         </tr>
-                    `;
-                });
-                
+                    `).join('');
+
             } catch (err) {
                 console.error("Error al cargar conceptos:", err);
                 tbody.innerHTML = '<tr><td colspan="2" class="py-6 text-center text-white">Error al cargar la información.</td></tr>';
@@ -2245,22 +2662,20 @@
                     return;
                 }
                 
-                data.gastos.forEach(gasto => {
-                    tbody.innerHTML += `
+                tbody.innerHTML = data.gastos.map(gasto => `
                         <tr class="hover:bg-slate-800/20 transition-colors">
-                            <td class="py-3 px-2 text-textmuted font-medium">${gasto.fecha}</td>
-                            <td class="py-3 px-2 font-medium text-white truncate max-w-[160px]">${gasto.descripcion}</td>
+                            <td class="py-3 px-2 text-textmuted font-medium">${escapeHtml(gasto.fecha)}</td>
+                            <td class="py-3 px-2 font-medium text-white truncate max-w-[160px]">${escapeHtml(gasto.descripcion)}</td>
                             <td class="py-3 px-2">
                                 <span class="px-2 py-0.5 rounded-full bg-slate-900 text-[10px] text-textmuted border border-slate-800 font-semibold">
-                                    ${gasto.categoria}
+                                    ${escapeHtml(gasto.categoria)}
                                 </span>
                             </td>
                             <td class="py-3 px-2 text-right font-bold text-accent">
                                 ${formatMoneda(gasto.monto)}
                             </td>
                         </tr>
-                    `;
-                });
+                    `).join('');
             } catch (err) {
                 console.error("Error al cargar top gastos:", err);
             }
@@ -2294,13 +2709,51 @@
                 const res = await fetch(queryUrl);
                 const data = await res.json();
 
+                renderPresupuestoResumen(data);
                 renderPresupuestoVisualCharts(data);
             } catch (err) {
                 console.error("Error al cargar presupuestos:", err);
             }
         }
 
+        // Resumen agregado: de las categorías con datos en el último mes presente en la
+        // selección, cuántas están sobre presupuesto y cuánto se lleva utilizado en total.
+        function renderPresupuestoResumen(datos) {
+            const card = document.getElementById('budget-summary-card');
+            if (!datos || datos.length === 0) {
+                card.classList.add('hidden');
+                return;
+            }
 
+            const ultimoMes = datos.reduce((max, row) => (row.fecha > max ? row.fecha : max), datos[0].fecha).substring(0, 7);
+            // Solo categorías con presupuesto asignado (presupuesto > 0): las que tienen
+            // presupuesto = 0 no tienen límite definido (cumplimiento = "DESCONOCIDO") y no
+            // deben contarse como "sobre presupuesto" solo por tener gasto_acumulado_mes > 0.
+            const filasUltimoMes = datos.filter(row => row.fecha.substring(0, 7) === ultimoMes && row.presupuesto > 0);
+            if (filasUltimoMes.length === 0) {
+                card.classList.add('hidden');
+                return;
+            }
+
+            const totalCategorias = filasUltimoMes.length;
+            const sobrePresupuesto = filasUltimoMes.filter(row => row.gasto_acumulado_mes > row.presupuesto).length;
+            const totalGastado = filasUltimoMes.reduce((acc, row) => acc + (row.gasto_acumulado_mes || 0), 0);
+            const totalPresupuestado = filasUltimoMes.reduce((acc, row) => acc + (row.presupuesto || 0), 0);
+            const pctUtilizado = totalPresupuestado > 0 ? (totalGastado / totalPresupuestado * 100) : 0;
+
+            const [anio, mes] = ultimoMes.split('-');
+            const nombreMes = new Date(`${ultimoMes}-01T00:00:00`).toLocaleDateString('es-PE', { month: 'long', year: 'numeric' });
+
+            document.getElementById('budget-summary-mes').textContent = `Resumen de ${nombreMes}`;
+            document.getElementById('budget-summary-categorias').textContent = `${sobrePresupuesto} de ${totalCategorias} categorías sobre presupuesto`;
+            document.getElementById('budget-summary-montos').textContent = `${formatMoneda(totalGastado)} / ${formatMoneda(totalPresupuestado)}`;
+
+            const pctEl = document.getElementById('budget-summary-pct');
+            pctEl.textContent = `${pctUtilizado.toFixed(0)}%`;
+            pctEl.className = `text-2xl font-bold ${pctUtilizado > 100 ? 'text-expense' : 'text-accent'}`;
+
+            card.classList.remove('hidden');
+        }
 
         // Renderizar minigráficos dinámicos para cumplimiento de presupuestos
         function renderPresupuestoVisualCharts(datos) {
@@ -2632,22 +3085,22 @@
                     return;
                 }
                 
-                data.forEach(item => {
-                    const subcatText = item.subcategoria ? item.subcategoria : '<span class="text-textmuted/40">-</span>';
-                    tbody.innerHTML += `
+                tbody.innerHTML = data.map(item => {
+                    const subcatText = item.subcategoria ? escapeHtml(item.subcategoria) : '<span class="text-textmuted/40">-</span>';
+                    return `
                         <tr class="hover:bg-slate-800/10 transition-colors border-b border-slate-800/30">
-                            <td class="py-3 px-2">${item.fecha}</td>
-                            <td class="py-3 px-2 font-medium text-white">${item.categoria}</td>
+                            <td class="py-3 px-2">${escapeHtml(item.fecha)}</td>
+                            <td class="py-3 px-2 font-medium text-white">${escapeHtml(item.categoria)}</td>
                             <td class="py-3 px-2">${subcatText}</td>
-                            <td class="py-3 px-2 text-textmuted">${item.concepto}</td>
+                            <td class="py-3 px-2 text-textmuted">${escapeHtml(item.concepto)}</td>
                             <td class="py-3 px-2 text-right font-semibold text-white">${formatMoneda(item.importe_moneda_principal)}</td>
                             <td class="py-3 px-2 text-right font-bold text-white">${item.costo_en_horas.toFixed(1)} hrs</td>
                             <td class="py-3 px-2 text-right text-textmuted">${item.horas_trabajadas_mes.toFixed(0)} hrs</td>
                             <td class="py-3 px-2 text-right text-textmuted">${formatMoneda(item.pago_por_hora_mes)}/hr</td>
                         </tr>
                     `;
-                });
-                
+                }).join('');
+
             } catch (err) {
                 console.error("Error al cargar detalles de costo de vida:", err);
                 tbody.innerHTML = '<tr><td colspan="8" class="py-6 text-center text-white">Error al cargar la información.</td></tr>';
@@ -3040,16 +3493,14 @@
                     return;
                 }
                 
-                data.forEach(item => {
-                    tbody.innerHTML += `
+                tbody.innerHTML = data.map(item => `
                         <tr class="hover:bg-slate-800/10 transition-colors border-b border-slate-800/30">
-                            <td class="py-3 px-2">${item.fecha}</td>
-                            <td class="py-3 px-2 font-medium text-white">${item.concepto}</td>
+                            <td class="py-3 px-2">${escapeHtml(item.fecha)}</td>
+                            <td class="py-3 px-2 font-medium text-white">${escapeHtml(item.concepto)}</td>
                             <td class="py-3 px-2 text-right font-bold text-accent">${formatMoneda(item.importe)}</td>
-                            <td class="py-3 px-2 pl-6 text-textmuted">${item.valor || '<span class="text-textmuted/40">-</span>'}</td>
+                            <td class="py-3 px-2 pl-6 text-textmuted">${item.valor ? escapeHtml(item.valor) : '<span class="text-textmuted/40">-</span>'}</td>
                         </tr>
-                    `;
-                });
+                    `).join('');
             } catch (err) {
                 console.error("Error al cargar top de gastos sociales:", err);
                 const tbody = document.getElementById('social-table-body');

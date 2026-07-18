@@ -1,7 +1,9 @@
 import os
+import time
+from collections import defaultdict, deque
 from typing import List, Optional
-from fastapi import FastAPI, Query
-from fastapi.responses import HTMLResponse
+from fastapi import FastAPI, Query, Request
+from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from google.cloud import bigquery
 
@@ -38,7 +40,46 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Rate limiting básico en memoria: es un fusible de "por si acaso" (bug de frontend en loop,
+# fuerza bruta si en el futuro se expone con dominio público), no un control de tráfico fino.
+# Ventana deslizante por IP; se reinicia si el proceso se reinicia (aceptable para este uso).
+RATE_LIMIT_MAX_REQUESTS = 120
+RATE_LIMIT_WINDOW_SECONDS = 60
+_rate_limit_buckets: dict[str, deque] = defaultdict(deque)
+
+@app.middleware("http")
+async def limitar_tasa(request: Request, call_next):
+    cliente_ip = request.client.host if request.client else "unknown"
+    ahora = time.monotonic()
+    bucket = _rate_limit_buckets[cliente_ip]
+    while bucket and ahora - bucket[0] > RATE_LIMIT_WINDOW_SECONDS:
+        bucket.popleft()
+    if len(bucket) >= RATE_LIMIT_MAX_REQUESTS:
+        return JSONResponse(
+            status_code=429,
+            content={"detail": "Demasiadas solicitudes. Intenta de nuevo en unos segundos."}
+        )
+    bucket.append(ahora)
+    return await call_next(request)
+
 client = bigquery.Client()
+
+def _rango_fechas(fecha_inicio: Optional[str], fecha_fin: Optional[str], campo: str = "txn_time"):
+    """Construye condiciones de rango de fecha parametrizadas de forma segura contra SQL injection."""
+    condiciones = []
+    parametros = []
+    if fecha_inicio:
+        condiciones.append(f"date({campo}) >= @fecha_inicio")
+        parametros.append(bigquery.ScalarQueryParameter("fecha_inicio", "DATE", fecha_inicio))
+    if fecha_fin:
+        condiciones.append(f"date({campo}) <= @fecha_fin")
+        parametros.append(bigquery.ScalarQueryParameter("fecha_fin", "DATE", fecha_fin))
+    return condiciones, parametros
+
+def _query(query: str, parametros: list):
+    """Ejecuta un query parametrizado en BigQuery."""
+    job_config = bigquery.QueryJobConfig(query_parameters=parametros)
+    return client.query(query, job_config=job_config).result()
 
 @app.get("/ultima-actualizacion")
 def obtener_ultima_actualizacion():
@@ -65,15 +106,8 @@ def obtener_flujo_caja(
     fecha_fin: Optional[str] = None,
     granularidad: str = "mensual" # "diario" o "mensual"
 ):
-    filtros = []
-    if fecha_inicio:
-        filtros.append(f"date(txn_time) >= '{fecha_inicio}'")
-    if fecha_fin:
-        filtros.append(f"date(txn_time) <= '{fecha_fin}'")
-    
-    where_clause = " AND ".join(filtros)
-    if where_clause:
-        where_clause = "WHERE " + where_clause
+    filtros, parametros = _rango_fechas(fecha_inicio, fecha_fin)
+    where_clause = ("WHERE " + " AND ".join(filtros)) if filtros else ""
 
     if granularidad == "diario":
         query = f"""
@@ -130,8 +164,8 @@ def obtener_flujo_caja(
             ORDER BY fecha
         """
 
-    resultados = client.query(query).result()
-    
+    resultados = _query(query, parametros)
+
     fechas, ingresos, gastos, balance, acumulado = [], [], [], [], []
     for fila in resultados:
         fechas.append(fila.fecha)
@@ -150,16 +184,16 @@ def obtener_flujo_caja(
 
 @app.get("/gastos-categoria")
 def obtener_categorias(fecha_inicio: str, fecha_fin: str):
-    query = f""" 
-        SELECT 
-            categoria, 
+    query = """
+        SELECT
+            categoria,
             SUM(importe_moneda_principal) as monto
         FROM `big-query-406221.finanzas_personales_mds.fact_transactions`
         WHERE ingreso_gasto = 'Gastos'
-          AND date(txn_time) >= '{fecha_inicio}' 
-          AND date(txn_time) <= '{fecha_fin}'
+          AND date(txn_time) >= @fecha_inicio
+          AND date(txn_time) <= @fecha_fin
           AND concepto NOT IN ('Cambio dólares', 'liquidación', 'Sin concepto')
-          AND categoria IN 
+          AND categoria IN
             ("Entretenimiento",
             "Auto",
             "Comida",
@@ -183,8 +217,12 @@ def obtener_categorias(fecha_inicio: str, fecha_fin: str):
         GROUP BY categoria
         ORDER BY monto DESC
     """
-    resultados = client.query(query).result()
-    
+    parametros = [
+        bigquery.ScalarQueryParameter("fecha_inicio", "DATE", fecha_inicio),
+        bigquery.ScalarQueryParameter("fecha_fin", "DATE", fecha_fin),
+    ]
+    resultados = _query(query, parametros)
+
     categorias, montos = [], []
     for fila in resultados:
         categorias.append(fila.categoria)
@@ -194,17 +232,11 @@ def obtener_categorias(fecha_inicio: str, fecha_fin: str):
 
 @app.get("/balance-trimestre")
 def obtener_trimestre(fecha_inicio: Optional[str] = None, fecha_fin: Optional[str] = None):
-    filtros = []
-    if fecha_inicio:
-        filtros.append(f"date(txn_time) >= '{fecha_inicio}'")
-    if fecha_fin:
-        filtros.append(f"date(txn_time) <= '{fecha_fin}'")
-    where_clause = " AND ".join(filtros)
-    if where_clause:
-        where_clause = "WHERE " + where_clause
+    filtros, parametros = _rango_fechas(fecha_inicio, fecha_fin)
+    where_clause = ("WHERE " + " AND ".join(filtros)) if filtros else ""
 
     query = f"""
-        SELECT 
+        SELECT
             CAST(DATE_TRUNC(date(txn_time), QUARTER) AS STRING) AS trimestre,
             SUM(IF(LOWER(ingreso_gasto) LIKE '%ingr%', importe_moneda_principal, importe_moneda_principal * -1)) AS balance
         FROM `big-query-406221.finanzas_personales_mds.fact_transactions`
@@ -212,8 +244,8 @@ def obtener_trimestre(fecha_inicio: Optional[str] = None, fecha_fin: Optional[st
         GROUP BY 1
         ORDER BY trimestre
     """
-    resultados = client.query(query).result()
-    
+    resultados = _query(query, parametros)
+
     trimestres, balances = [], []
     for fila in resultados:
         trimestres.append(fila.trimestre)
@@ -230,28 +262,34 @@ def obtener_top_gastos(
 ):
     filtros = [
         "ingreso_gasto = 'Gastos'",
-        f"date(txn_time) >= '{fecha_inicio}'",
-        f"date(txn_time) <= '{fecha_fin}'",
+        "date(txn_time) >= @fecha_inicio",
+        "date(txn_time) <= @fecha_fin",
         "LOWER(concepto) NOT IN ('quinta categoría', 'aporte afp')"
     ]
+    parametros = [
+        bigquery.ScalarQueryParameter("fecha_inicio", "DATE", fecha_inicio),
+        bigquery.ScalarQueryParameter("fecha_fin", "DATE", fecha_fin),
+        bigquery.ScalarQueryParameter("limite", "INT64", limite),
+    ]
     if categoria:
-        filtros.append(f"categoria = '{categoria}'")
-        
+        filtros.append("categoria = @categoria")
+        parametros.append(bigquery.ScalarQueryParameter("categoria", "STRING", categoria))
+
     where_clause = " AND ".join(filtros)
-    
-    query = f"""
-        SELECT 
-            CAST(date(txn_time) AS STRING) AS fecha, 
+
+    query = """
+        SELECT
+            CAST(date(txn_time) AS STRING) AS fecha,
             categoria,
             concepto as descripcion,
             importe_moneda_principal as monto
-        FROM `big-query-406221.finanzas_personales_mds.fact_transactions` 
-        WHERE {where_clause}
+        FROM `big-query-406221.finanzas_personales_mds.fact_transactions`
+        WHERE """ + where_clause + """
         ORDER BY importe_moneda_principal DESC
-        LIMIT {limite}
+        LIMIT @limite
     """
-    resultados = client.query(query).result()
-    
+    resultados = _query(query, parametros)
+
     gastos = []
     for fila in resultados:
         gastos.append({
@@ -270,20 +308,21 @@ def obtener_cumplimiento_presupuesto(
     categorias: Optional[List[str]] = Query(None)
 ):
     filtros = []
+    parametros = []
     if anios:
-        anios_formatted = ", ".join([str(y) for y in anios])
-        filtros.append(f"EXTRACT(YEAR FROM date(fecha)) IN ({anios_formatted})")
+        filtros.append("EXTRACT(YEAR FROM date(fecha)) IN UNNEST(@anios)")
+        parametros.append(bigquery.ArrayQueryParameter("anios", "INT64", anios))
     if meses:
-        meses_formatted = ", ".join([str(m) for m in meses])
-        filtros.append(f"EXTRACT(MONTH FROM date(fecha)) IN ({meses_formatted})")
+        filtros.append("EXTRACT(MONTH FROM date(fecha)) IN UNNEST(@meses)")
+        parametros.append(bigquery.ArrayQueryParameter("meses", "INT64", meses))
     if categorias:
-        cats_formatted = ", ".join([f"'{c}'" for c in categorias])
-        filtros.append(f"categoria IN ({cats_formatted})")
-        
+        filtros.append("categoria IN UNNEST(@categorias)")
+        parametros.append(bigquery.ArrayQueryParameter("categorias", "STRING", categorias))
+
     where_clause = " AND ".join(filtros)
     if where_clause:
         where_clause = "WHERE " + where_clause
-        
+
     query = f"""
         SELECT 
             CAST(date(fecha) AS STRING) as fecha,
@@ -297,8 +336,8 @@ def obtener_cumplimiento_presupuesto(
         {where_clause}
         ORDER BY fecha, categoria
     """
-    resultados = client.query(query).result()
-    
+    resultados = _query(query, parametros)
+
     datos = []
     for fila in resultados:
         datos.append({
@@ -321,7 +360,7 @@ def obtener_crecimiento_kpis(fecha_inicio: Optional[str] = None, fecha_fin: Opti
         SELECT SUM(presupuesto) as total
         FROM `big-query-406221.finanzas_personales_mds.presupuesto_materialized`
         WHERE fecha = (SELECT MAX(fecha) FROM `big-query-406221.finanzas_personales_mds.presupuesto_materialized`)
-          AND categoria IN ('Comida', 'Transporte', 'Facturas', 'Deudas indispensables', 'Salud', 'Gastos Variables')
+          AND categoria IN ('Comida', 'Transporte', 'Facturas', 'Deudas indispensables', 'Salud', 'Gastos Variables', 'Seguros')
     """
     
     query_vida = """
@@ -344,7 +383,7 @@ def obtener_crecimiento_kpis(fecha_inicio: Optional[str] = None, fecha_fin: Opti
                 SELECT SUM(CAST(presupuesto AS FLOAT64)) as total
                 FROM `big-query-406221.finanzas_personales_mds.agg_cumplimiento_presupuesto`
                 WHERE date(fecha) = (SELECT MAX(date(fecha)) FROM `big-query-406221.finanzas_personales_mds.agg_cumplimiento_presupuesto`)
-                  AND categoria IN ('Comida', 'Transporte', 'Facturas', 'Deudas indispensables', 'Salud', 'Gastos Variables')
+                  AND categoria IN ('Comida', 'Transporte', 'Facturas', 'Deudas indispensables', 'Salud', 'Gastos Variables', 'Seguros')
             """
             res_fb = list(client.query(fallback_query).result())
             if res_fb and res_fb[0].total is not None:
@@ -371,17 +410,9 @@ def obtener_crecimiento_kpis(fecha_inicio: Optional[str] = None, fecha_fin: Opti
             print("Error en fallback_query_vida:", fb_err)
 
     # Mediana de ingreso_neto
-    filtros = []
-    if fecha_inicio:
-        filtros.append(f"date(fecha) >= '{fecha_inicio}'")
-    if fecha_fin:
-        filtros.append(f"date(fecha) <= '{fecha_fin}'")
-    where_clause = " AND ".join(filtros)
-    if where_clause:
-        where_clause = "WHERE " + where_clause
-    else:
-        where_clause = ""
-        
+    filtros, parametros = _rango_fechas(fecha_inicio, fecha_fin, campo="fecha")
+    where_clause = ("WHERE " + " AND ".join(filtros)) if filtros else ""
+
     query_mediana = f"""
         SELECT DISTINCT PERCENTILE_CONT(ingreso_neto, 0.5) OVER() as mediana
         FROM `big-query-406221.finanzas_personales_mds.agg_ingresos`
@@ -389,33 +420,360 @@ def obtener_crecimiento_kpis(fecha_inicio: Optional[str] = None, fecha_fin: Opti
     """
     mediana_ingreso_neto = 0.0
     try:
-        res_mediana = list(client.query(query_mediana).result())
+        res_mediana = list(_query(query_mediana, parametros))
         if res_mediana and res_mediana[0].mediana is not None:
             mediana_ingreso_neto = float(res_mediana[0].mediana)
     except Exception as e:
         print("Error en query_mediana:", e)
-        
+
+    # Tasa de ahorro de caja vs tasa de construcción de patrimonio.
+    # Construcción de patrimonio = aportes a FIBRAS + transferencias netas a cuentas de alto
+    # rendimiento + amortización voluntaria de capital (categoria 'Deudas' o
+    # Inversiones/Inmuebles/Amortización, según cómo se haya registrado la transacción)
+    # + el capital (no el interés ni seguros) de la cuota hipotecaria obligatoria del periodo.
+    filtros_periodo, parametros_periodo = _rango_fechas(fecha_inicio, fecha_fin)
+    where_periodo = ("WHERE " + " AND ".join(filtros_periodo)) if filtros_periodo else ""
+
+    query_flujo_periodo = f"""
+        SELECT
+            SUM(IF(ingreso_gasto = 'Ingreso', importe_moneda_principal, 0)) AS ingresos,
+            SUM(IF(ingreso_gasto = 'Gastos', importe_moneda_principal, 0)) AS gastos
+        FROM `big-query-406221.finanzas_personales_mds.fact_transactions`
+        {where_periodo}
+    """
+    query_construccion_patrimonio = f"""
+        SELECT
+            SUM(IF(categoria = 'Inversiones' AND subcategoria = 'FIBRAS', importe_moneda_principal, 0)) AS fibras,
+            SUM(
+                IF(categoria = 'Deudas'
+                   OR (categoria = 'Inversiones' AND subcategoria = 'Inmuebles' AND concepto = 'Amortización'),
+                   importe_moneda_principal, 0)
+            ) AS amortizacion_voluntaria,
+            SUM(
+                CASE
+                    WHEN cuenta IN ('Wow Compartamos', 'Pichincha', 'GNB') AND ingreso_gasto = 'Dinero ingresado' THEN importe_moneda_principal
+                    WHEN cuenta IN ('Wow Compartamos', 'Pichincha', 'GNB') AND ingreso_gasto = 'Dinero gastado' THEN -importe_moneda_principal
+                    ELSE 0
+                END
+            ) AS cuentas_alto_rendimiento
+        FROM `big-query-406221.finanzas_personales_mds.fact_transactions`
+        {where_periodo}
+    """
+
+    # Capital de la cuota hipotecaria OBLIGATORIA (no solo la amortización voluntaria):
+    # pagar el capital de la cuota mensual también construye equity, sea la cuota obligatoria
+    # o un abono extra voluntario — la diferencia real es capital (patrimonio) vs interés y
+    # seguros (consumo real, el costo de haber pedido el préstamo).
+    filtros_hip, parametros_hip = _rango_fechas(fecha_inicio, fecha_fin, campo="fecha_vencimiento")
+    where_hip = "WHERE pagado" + ("".join(f" AND {f}" for f in filtros_hip))
+    query_capital_hipoteca_periodo = f"""
+        SELECT SUM(capital_cuota) AS capital
+        FROM `big-query-406221.finanzas_personales_mds.hipotecas_materialized`
+        {where_hip}
+    """
+
+    ingresos_periodo = 0.0
+    gastos_totales_periodo = 0.0
+    fibras_periodo = 0.0
+    amortizacion_periodo = 0.0
+    cuentas_alto_rendimiento_periodo = 0.0
+    capital_hipoteca_periodo = 0.0
+    try:
+        res_flujo = list(_query(query_flujo_periodo, parametros_periodo))
+        if res_flujo:
+            ingresos_periodo = float(res_flujo[0].ingresos or 0.0)
+            gastos_totales_periodo = float(res_flujo[0].gastos or 0.0)
+    except Exception as e:
+        print("Error en query_flujo_periodo:", e)
+
+    try:
+        res_cp = list(_query(query_construccion_patrimonio, parametros_periodo))
+        if res_cp:
+            fibras_periodo = float(res_cp[0].fibras or 0.0)
+            amortizacion_periodo = float(res_cp[0].amortizacion_voluntaria or 0.0)
+            cuentas_alto_rendimiento_periodo = float(res_cp[0].cuentas_alto_rendimiento or 0.0)
+    except Exception as e:
+        print("Error en query_construccion_patrimonio:", e)
+
+    try:
+        res_cap_hip = list(_query(query_capital_hipoteca_periodo, parametros_hip))
+        if res_cap_hip and res_cap_hip[0].capital is not None:
+            capital_hipoteca_periodo = float(res_cap_hip[0].capital)
+    except Exception as e:
+        print("Error en query_capital_hipoteca_periodo:", e)
+
+    construccion_patrimonio_periodo = (
+        fibras_periodo + amortizacion_periodo + cuentas_alto_rendimiento_periodo + capital_hipoteca_periodo
+    )
+
+    # Gasto de consumo real: 'gastos_totales_periodo' incluye FIBRAS, amortización voluntaria
+    # y la cuota hipotecaria completa (capital + interés + seguros), porque en el ledger se
+    # registran con ingreso_gasto = 'Gastos'. Se resta el capital (de ambas fuentes) para que
+    # no quede contado dos veces — como "gasto" y como "construcción de patrimonio" — dejando
+    # dentro del gasto de consumo solo interés y seguros de la hipoteca, que sí son costo real.
+    # Las cuentas de alto rendimiento no se restan porque nunca estuvieron en el bucket
+    # 'Gastos' (se registran como 'Dinero ingresado'/'Dinero gastado', transferencia interna).
+    gasto_consumo_periodo = gastos_totales_periodo - fibras_periodo - amortizacion_periodo - capital_hipoteca_periodo
+
+    tasa_gasto_consumo = (gasto_consumo_periodo / ingresos_periodo * 100.0) if ingresos_periodo > 0 else 0.0
+    tasa_construccion_patrimonio = (construccion_patrimonio_periodo / ingresos_periodo * 100.0) if ingresos_periodo > 0 else 0.0
+    # Ahorro de caja: residual — lo que no fue ni a gasto de consumo ni a construcción de
+    # patrimonio. Por construcción, tasa_gasto_consumo + tasa_construccion_patrimonio +
+    # tasa_ahorro_caja = 100% (puede dar negativo si se retiró más de lo que entró).
+    tasa_ahorro_caja = (100.0 - tasa_gasto_consumo - tasa_construccion_patrimonio) if ingresos_periodo > 0 else 0.0
+
+    # Ratio Deuda/Ingreso (DTI): solo la cuota indispensable (obligatoria), sin las
+    # amortizaciones voluntarias (esas ya están en tasa_construccion_patrimonio).
+    query_deuda_indispensable = """
+        SELECT SUM(presupuesto) as total
+        FROM `big-query-406221.finanzas_personales_mds.presupuesto_materialized`
+        WHERE fecha = (SELECT MAX(fecha) FROM `big-query-406221.finanzas_personales_mds.presupuesto_materialized`)
+          AND categoria = 'Deudas indispensables'
+    """
+    deuda_indispensable_mensual = 0.0
+    try:
+        res_deuda = list(client.query(query_deuda_indispensable).result())
+        if res_deuda and res_deuda[0].total is not None:
+            deuda_indispensable_mensual = float(res_deuda[0].total)
+    except Exception as e:
+        print("Error en query_deuda_indispensable (intentando fallback):", e)
+        try:
+            fallback_query = """
+                SELECT SUM(CAST(presupuesto AS FLOAT64)) as total
+                FROM `big-query-406221.finanzas_personales_mds.agg_cumplimiento_presupuesto`
+                WHERE date(fecha) = (SELECT MAX(date(fecha)) FROM `big-query-406221.finanzas_personales_mds.agg_cumplimiento_presupuesto`)
+                  AND categoria = 'Deudas indispensables'
+            """
+            res_fb = list(client.query(fallback_query).result())
+            if res_fb and res_fb[0].total is not None:
+                deuda_indispensable_mensual = float(res_fb[0].total)
+        except Exception as fb_err:
+            print("Error en fallback_query_deuda_indispensable:", fb_err)
+
+    ratio_deuda_ingreso = (deuda_indispensable_mensual / mediana_ingreso_neto * 100.0) if mediana_ingreso_neto > 0 else 0.0
+
     return {
         "fondo_emergencia": fondo_emergencia,
         "supervivencia_estricta": total_estricta,
         "supervivencia_vida": total_vida,
-        "mediana_ingreso_neto": mediana_ingreso_neto
+        "mediana_ingreso_neto": mediana_ingreso_neto,
+        "tasa_gasto_consumo": round(tasa_gasto_consumo, 1),
+        "tasa_construccion_patrimonio": round(tasa_construccion_patrimonio, 1),
+        "tasa_ahorro_caja": round(tasa_ahorro_caja, 1),
+        "deuda_indispensable_mensual": deuda_indispensable_mensual,
+        "ratio_deuda_ingreso": round(ratio_deuda_ingreso, 1)
     }
+
+@app.get("/net-worth")
+def obtener_net_worth():
+    """
+    Patrimonio neto = equity de hipoteca (capital amortizado) + aportes acumulados a FIBRAS +
+    saldo neto en cuentas de alto rendimiento - capital pendiente de la hipoteca.
+    No incluye valorización de activos (ni plusvalía de FIBRAS ni del inmueble): solo importes
+    reales verificables (aportes/saldos), tal como se decidió con el usuario.
+    """
+    # Capital total del préstamo: TODA la tabla (cuotas pasadas y futuras), sin filtrar por
+    # fecha. Si se filtrara por fecha_vencimiento <= hoy, se estaría ignorando el capital de
+    # las cuotas futuras aún no vencidas, subestimando gravemente la deuda pendiente real.
+    q_hipoteca_total = """
+        SELECT SUM(capital_total) AS total
+        FROM `big-query-406221.finanzas_personales_mds.hipotecas_materialized`
+    """
+    # Serie mensual de equity (solo para graficar la evolución histórica hasta hoy)
+    q_hipoteca_mensual = """
+        SELECT
+            CAST(DATE_TRUNC(fecha_vencimiento, MONTH) AS STRING) AS mes,
+            SUM(IF(pagado, capital_total, 0)) AS capital_pagado_mes
+        FROM `big-query-406221.finanzas_personales_mds.hipotecas_materialized`
+        WHERE fecha_vencimiento <= CURRENT_DATE()
+        GROUP BY 1
+        ORDER BY mes
+    """
+    q_fibras_mensual = """
+        SELECT
+            CAST(DATE_TRUNC(txn_time, MONTH) AS STRING) AS mes,
+            SUM(importe_moneda_principal) AS monto
+        FROM `big-query-406221.finanzas_personales_mds.fact_transactions`
+        WHERE categoria = 'Inversiones' AND subcategoria = 'FIBRAS'
+        GROUP BY 1
+        ORDER BY mes
+    """
+    q_cuentas_mensual = """
+        SELECT
+            CAST(DATE_TRUNC(txn_time, MONTH) AS STRING) AS mes,
+            SUM(
+                CASE
+                    WHEN ingreso_gasto = 'Dinero ingresado' THEN importe_moneda_principal
+                    WHEN ingreso_gasto = 'Dinero gastado' THEN -importe_moneda_principal
+                    ELSE 0
+                END
+            ) AS monto_neto
+        FROM `big-query-406221.finanzas_personales_mds.fact_transactions`
+        WHERE cuenta IN ('Wow Compartamos', 'Pichincha', 'GNB')
+        GROUP BY 1
+        ORDER BY mes
+    """
+    # Efectivo en cuentas regulares: balance de caja acumulado de todo el historial (Ingreso -
+    # Gastos, igual que el "acumulado" de /flujo-caja pero sin filtro de fecha) menos lo que ya
+    # se movió a cuentas de alto rendimiento. Ese movimiento se registra como 'Dinero
+    # ingresado'/'Dinero gastado' (no como 'Ingreso'/'Gastos'), así que no reduce el balance de
+    # caja por sí solo — hay que restarlo explícitamente para no contar ese efectivo dos veces
+    # (una como "cuenta regular" y otra como "cuenta de alto rendimiento").
+    q_balance_mensual = """
+        SELECT
+            CAST(DATE_TRUNC(txn_time, MONTH) AS STRING) AS mes,
+            SUM(IF(ingreso_gasto = 'Ingreso', importe_moneda_principal, 0))
+                - SUM(IF(ingreso_gasto = 'Gastos', importe_moneda_principal, 0)) AS balance
+        FROM `big-query-406221.finanzas_personales_mds.fact_transactions`
+        GROUP BY 1
+        ORDER BY mes
+    """
+
+    vacio = {"meses": [], "activos": {}, "pasivos": {}, "patrimonio_neto": [], "snapshot": {}}
+    try:
+        res_total = list(client.query(q_hipoteca_total).result())
+        capital_total_hipoteca = float(res_total[0].total or 0.0) if res_total else 0.0
+        hip_rows = list(client.query(q_hipoteca_mensual).result())
+        fibras_rows = list(client.query(q_fibras_mensual).result())
+        cuentas_rows = list(client.query(q_cuentas_mensual).result())
+        balance_rows = list(client.query(q_balance_mensual).result())
+    except Exception as e:
+        print("Error en net-worth:", e)
+        return vacio
+
+    def _acumulado_por_mes(filas, campo_monto):
+        acumulado = {}
+        total = 0.0
+        for fila in sorted(filas, key=lambda f: f.mes or ""):
+            mes = (fila.mes or "")[:7]
+            total += float(getattr(fila, campo_monto) or 0.0)
+            acumulado[mes] = total
+        return acumulado
+
+    equity_cum = _acumulado_por_mes(hip_rows, "capital_pagado_mes")
+    fibras_cum = _acumulado_por_mes(fibras_rows, "monto")
+    cuentas_cum = _acumulado_por_mes(cuentas_rows, "monto_neto")
+    balance_cum = _acumulado_por_mes(balance_rows, "balance")
+
+    # La hipoteca no existía antes de su primera cuota — antes de ese mes, equity y deuda
+    # pendiente deben ser 0, no la deuda total completa (que es lo que saldría si simplemente
+    # no hubiera valor todavía en equity_cum para esos meses).
+    mes_inicio_hipoteca = min(equity_cum) if equity_cum else None
+
+    # Antes de mayo 2024 las transacciones no se registraban de forma consistente, así que
+    # esos meses no se muestran — pero sí se siguen acumulando (no se descartan del cálculo),
+    # para que el arranque de la serie visible ya traiga el acumulado correcto.
+    MES_INICIO_SERIE = "2024-05"
+
+    todos_los_meses = sorted(set(equity_cum) | set(fibras_cum) | set(cuentas_cum) | set(balance_cum))
+    if not todos_los_meses:
+        return vacio
+
+    meses, equity_serie, fibras_serie, cuentas_serie, efectivo_serie = [], [], [], [], []
+    pendiente_serie, patrimonio_serie = [], []
+    ultimo_equity = ultimo_fibras = ultimo_cuentas = ultimo_balance = 0.0
+
+    for mes in todos_los_meses:
+        ultimo_fibras = fibras_cum.get(mes, ultimo_fibras)
+        ultimo_cuentas = cuentas_cum.get(mes, ultimo_cuentas)
+        ultimo_balance = balance_cum.get(mes, ultimo_balance)
+
+        if mes_inicio_hipoteca and mes >= mes_inicio_hipoteca:
+            ultimo_equity = equity_cum.get(mes, ultimo_equity)
+            pendiente = capital_total_hipoteca - ultimo_equity
+        else:
+            ultimo_equity = 0.0
+            pendiente = 0.0
+
+        efectivo = ultimo_balance - ultimo_cuentas
+        patrimonio = ultimo_equity + ultimo_fibras + ultimo_cuentas + efectivo - pendiente
+
+        if mes < MES_INICIO_SERIE:
+            continue
+
+        meses.append(mes)
+        equity_serie.append(round(ultimo_equity, 2))
+        fibras_serie.append(round(ultimo_fibras, 2))
+        cuentas_serie.append(round(ultimo_cuentas, 2))
+        efectivo_serie.append(round(efectivo, 2))
+        pendiente_serie.append(round(pendiente, 2))
+        patrimonio_serie.append(round(patrimonio, 2))
+
+    if not meses:
+        return vacio
+
+    return {
+        "meses": meses,
+        "activos": {
+            "equity_hipoteca": equity_serie,
+            "fibras": fibras_serie,
+            "cuentas_alto_rendimiento": cuentas_serie,
+            "efectivo": efectivo_serie
+        },
+        "pasivos": {
+            "hipoteca_pendiente": pendiente_serie
+        },
+        "patrimonio_neto": patrimonio_serie,
+        "snapshot": {
+            "equity_hipoteca": equity_serie[-1],
+            "fibras": fibras_serie[-1],
+            "cuentas_alto_rendimiento": cuentas_serie[-1],
+            "efectivo": efectivo_serie[-1],
+            "hipoteca_pendiente": pendiente_serie[-1],
+            "patrimonio_neto": patrimonio_serie[-1]
+        }
+    }
+
+@app.get("/gasto-esencial-discrecional")
+def obtener_gasto_esencial_discrecional(fecha_inicio: Optional[str] = None, fecha_fin: Optional[str] = None):
+    """
+    Tendencia mensual de gasto esencial vs discrecional. Excluye 'Inversiones' (FIBRAS,
+    amortización de inmuebles) y 'Deudas' (amortización voluntaria) porque son construcción
+    de patrimonio, no consumo — ver tasa_construccion_patrimonio en /crecimiento-kpis.
+    """
+    filtros, parametros = _rango_fechas(fecha_inicio, fecha_fin)
+    filtros = ["ingreso_gasto = 'Gastos'", "categoria NOT IN ('Inversiones', 'Deudas')"] + filtros
+    where_clause = "WHERE " + " AND ".join(filtros)
+
+    categorias_esenciales_sql = "'Comida', 'Transporte', 'Facturas', 'Deudas indispensables', 'Salud', 'Gastos Variables', 'Seguros'"
+
+    query = f"""
+        SELECT
+            CAST(DATE_TRUNC(date(txn_time), MONTH) AS STRING) AS mes,
+            SUM(IF(categoria IN ({categorias_esenciales_sql}), importe_moneda_principal, 0)) AS esencial,
+            SUM(IF(categoria NOT IN ({categorias_esenciales_sql}), importe_moneda_principal, 0)) AS discrecional
+        FROM `big-query-406221.finanzas_personales_mds.fact_transactions`
+        {where_clause}
+        GROUP BY 1
+        ORDER BY mes
+    """
+    try:
+        resultados = _query(query, parametros)
+        meses, esencial, discrecional, pct_esencial = [], [], [], []
+        for fila in resultados:
+            mes = fila.mes[:7] if fila.mes else ""
+            e = float(fila.esencial or 0.0)
+            d = float(fila.discrecional or 0.0)
+            total = e + d
+            meses.append(mes)
+            esencial.append(round(e, 2))
+            discrecional.append(round(d, 2))
+            pct_esencial.append(round((e / total * 100), 1) if total > 0 else 0.0)
+        return {
+            "meses": meses,
+            "esencial": esencial,
+            "discrecional": discrecional,
+            "pct_esencial": pct_esencial
+        }
+    except Exception as e:
+        print("Error en gasto-esencial-discrecional:", e)
+        return {"meses": [], "esencial": [], "discrecional": [], "pct_esencial": []}
 
 @app.get("/ingreso-neto-mensual")
 def obtener_ingreso_neto_mensual(fecha_inicio: Optional[str] = None, fecha_fin: Optional[str] = None):
-    filtros = []
-    if fecha_inicio:
-        filtros.append(f"date(fecha) >= '{fecha_inicio}'")
-    if fecha_fin:
-        filtros.append(f"date(fecha) <= '{fecha_fin}'")
-    
-    where_clause = " AND ".join(filtros)
-    if where_clause:
-        where_clause = "WHERE " + where_clause
-    else:
-        where_clause = ""
-        
+    filtros, parametros = _rango_fechas(fecha_inicio, fecha_fin, campo="fecha")
+    where_clause = ("WHERE " + " AND ".join(filtros)) if filtros else ""
+
     query = f"""
         SELECT CAST(DATE(fecha) AS STRING) AS fecha, ingreso_neto
         FROM `big-query-406221.finanzas_personales_mds.agg_ingresos`
@@ -423,7 +781,7 @@ def obtener_ingreso_neto_mensual(fecha_inicio: Optional[str] = None, fecha_fin: 
         ORDER BY fecha
     """
     try:
-        resultados = client.query(query).result()
+        resultados = _query(query, parametros)
         fechas = []
         neto = []
         for fila in resultados:
@@ -545,28 +903,34 @@ def obtener_top_ingresos(
 ):
     filtros = [
         "ingreso_gasto = 'Ingreso'",
-        f"date(txn_time) >= '{fecha_inicio}'",
-        f"date(txn_time) <= '{fecha_fin}'",
+        "date(txn_time) >= @fecha_inicio",
+        "date(txn_time) <= @fecha_fin",
         "LOWER(categoria) NOT IN ('reembolsos', 'descuentos', 'dinero extra')"
     ]
+    parametros = [
+        bigquery.ScalarQueryParameter("fecha_inicio", "DATE", fecha_inicio),
+        bigquery.ScalarQueryParameter("fecha_fin", "DATE", fecha_fin),
+        bigquery.ScalarQueryParameter("limite", "INT64", limite),
+    ]
     if categoria:
-        filtros.append(f"categoria = '{categoria}'")
-        
+        filtros.append("categoria = @categoria")
+        parametros.append(bigquery.ScalarQueryParameter("categoria", "STRING", categoria))
+
     where_clause = " AND ".join(filtros)
-    
-    query = f"""
-        SELECT 
-            CAST(date(txn_time) AS STRING) AS fecha, 
+
+    query = """
+        SELECT
+            CAST(date(txn_time) AS STRING) AS fecha,
             categoria,
             concepto as descripcion,
             importe_moneda_principal as monto
-        FROM `big-query-406221.finanzas_personales_mds.fact_transactions` 
-        WHERE {where_clause}
+        FROM `big-query-406221.finanzas_personales_mds.fact_transactions`
+        WHERE """ + where_clause + """
         ORDER BY importe_moneda_principal DESC
-        LIMIT {limite}
+        LIMIT @limite
     """
     try:
-        resultados = client.query(query).result()
+        resultados = _query(query, parametros)
         ingresos = []
         for fila in resultados:
             ingresos.append({
@@ -582,20 +946,24 @@ def obtener_top_ingresos(
 
 @app.get("/ingresos-categoria")
 def obtener_ingresos_categoria(fecha_inicio: str, fecha_fin: str):
-    query = f"""
-        SELECT 
-            categoria, 
+    query = """
+        SELECT
+            categoria,
             SUM(importe_moneda_principal) as monto
         FROM `big-query-406221.finanzas_personales_mds.fact_transactions`
         WHERE ingreso_gasto = 'Ingreso'
-          AND date(txn_time) >= '{fecha_inicio}' 
-          AND date(txn_time) <= '{fecha_fin}'
+          AND date(txn_time) >= @fecha_inicio
+          AND date(txn_time) <= @fecha_fin
           AND categoria NOT IN ('Reembolsos')
         GROUP BY categoria
         ORDER BY monto DESC
     """
+    parametros = [
+        bigquery.ScalarQueryParameter("fecha_inicio", "DATE", fecha_inicio),
+        bigquery.ScalarQueryParameter("fecha_fin", "DATE", fecha_fin),
+    ]
     try:
-        resultados = client.query(query).result()
+        resultados = _query(query, parametros)
         categorias = []
         montos = []
         for fila in resultados:
@@ -755,20 +1123,11 @@ def obtener_hipoteca_amortizaciones():
 
 @app.get("/costo-vida-kpis")
 def obtener_costo_vida_kpis(fecha_inicio: Optional[str] = None, fecha_fin: Optional[str] = None):
-    filtros = []
-    if fecha_inicio:
-        filtros.append(f"date(txn_time) >= '{fecha_inicio}'")
-    if fecha_fin:
-        filtros.append(f"date(txn_time) <= '{fecha_fin}'")
-    
-    where_clause = " AND ".join(filtros)
-    if where_clause:
-        where_clause = "WHERE " + where_clause
-    else:
-        where_clause = ""
-        
+    filtros, parametros = _rango_fechas(fecha_inicio, fecha_fin)
+    where_clause = ("WHERE " + " AND ".join(filtros)) if filtros else ""
+
     query = f"""
-        SELECT 
+        SELECT
             categoria,
             COALESCE(subcategoria, 'no_subcat') AS subcategoria,
             SUM(costo_en_horas) AS total_horas
@@ -777,7 +1136,7 @@ def obtener_costo_vida_kpis(fecha_inicio: Optional[str] = None, fecha_fin: Optio
         GROUP BY 1, 2
     """
     try:
-        resultados = client.query(query).result()
+        resultados = _query(query, parametros)
         kpis = {
             "comida": 0.0,
             "facturas": 0.0,
@@ -840,22 +1199,23 @@ def obtener_costo_vida_detalles(
     fecha_fin: Optional[str] = None
 ):
     filtros = []
+    parametros = []
     # Se gestiona el filtro de categoria o subcategoria Mujeres
     if categoria == "Mujeres":
         filtros.append("subcategoria = 'Mujeres'")
     else:
-        filtros.append(f"categoria = '{categoria}'")
+        filtros.append("categoria = @categoria")
+        parametros.append(bigquery.ScalarQueryParameter("categoria", "STRING", categoria))
         filtros.append("COALESCE(subcategoria, 'no_subcat') NOT IN ('Mujeres')")
-        
-    if fecha_inicio:
-        filtros.append(f"date(txn_time) >= '{fecha_inicio}'")
-    if fecha_fin:
-        filtros.append(f"date(txn_time) <= '{fecha_fin}'")
-        
+
+    fecha_filtros, fecha_parametros = _rango_fechas(fecha_inicio, fecha_fin)
+    filtros.extend(fecha_filtros)
+    parametros.extend(fecha_parametros)
+
     where_clause = " AND ".join(filtros)
     if where_clause:
         where_clause = "WHERE " + where_clause
-        
+
     query = f"""
         SELECT 
             CAST(DATE(txn_time) AS STRING) AS fecha,
@@ -871,7 +1231,7 @@ def obtener_costo_vida_detalles(
         ORDER BY costo_en_horas DESC
     """
     try:
-        resultados = client.query(query).result()
+        resultados = _query(query, parametros)
         detalles = []
         for fila in resultados:
             detalles.append({
@@ -891,18 +1251,9 @@ def obtener_costo_vida_detalles(
 
 @app.get("/costo-vida-grafico")
 def obtener_costo_vida_grafico(fecha_inicio: Optional[str] = None, fecha_fin: Optional[str] = None):
-    filtros = []
-    if fecha_inicio:
-        filtros.append(f"date(txn_time) >= '{fecha_inicio}'")
-    if fecha_fin:
-        filtros.append(f"date(txn_time) <= '{fecha_fin}'")
-    
-    where_clause = " AND ".join(filtros)
-    if where_clause:
-        where_clause = "AND " + where_clause
-    else:
-        where_clause = ""
-        
+    filtros, parametros = _rango_fechas(fecha_inicio, fecha_fin)
+    where_clause = ("AND " + " AND ".join(filtros)) if filtros else ""
+
     query = f"""
         SELECT 
             CAST(DATE_TRUNC(date(txn_time), MONTH) AS STRING) AS mes,
@@ -916,7 +1267,7 @@ def obtener_costo_vida_grafico(fecha_inicio: Optional[str] = None, fecha_fin: Op
         ORDER BY mes
     """
     try:
-        resultados = client.query(query).result()
+        resultados = _query(query, parametros)
         datos_map = {}
         meses_set = set()
         categorias_set = {'Comida', 'Viajes', 'Regalos', 'Entretenimiento', 'Facturas', 'Salud', 'Transporte', 'Autocuidado', 'Inversiones', 'Equipo de trabajo'}
@@ -948,13 +1299,11 @@ def obtener_estabilizadores(fecha_inicio: Optional[str] = None, fecha_fin: Optio
         "concepto IN ('Pan', 'Pancito', 'Cerveza', 'Whisky', 'Café', 'Café Instantáneo', 'Popcorn')",
         "categoria IN ('Comida', 'Entretenimiento', 'Regalos')"
     ]
-    if fecha_inicio:
-        filtros.append(f"date(txn_time) >= '{fecha_inicio}'")
-    if fecha_fin:
-        filtros.append(f"date(txn_time) <= '{fecha_fin}'")
-        
+    fecha_filtros, parametros = _rango_fechas(fecha_inicio, fecha_fin)
+    filtros.extend(fecha_filtros)
+
     where_clause = "WHERE " + " AND ".join(filtros)
-    
+
     query = f"""
         SELECT
           CAST(DATE_TRUNC(date(txn_time), MONTH) AS STRING) AS mes,
@@ -971,7 +1320,7 @@ def obtener_estabilizadores(fecha_inicio: Optional[str] = None, fecha_fin: Optio
         ORDER BY mes
     """
     try:
-        resultados = client.query(query).result()
+        resultados = _query(query, parametros)
         datos_map = {}
         meses_set = set()
         conceptos_set = {'Pan', 'Pancito', 'Cerveza', 'Whisky', 'Café (Comida)', 'Café (Entretenimiento)', 'Popcorn'}
@@ -999,18 +1348,13 @@ def obtener_estabilizadores(fecha_inicio: Optional[str] = None, fecha_fin: Optio
 
 @app.get("/social-kpis")
 def obtener_social_kpis(fecha_inicio: Optional[str] = None, fecha_fin: Optional[str] = None):
-    filtros_tx = ["subcategoria = 'Mujeres'"]
-    filtros_soc = []
-    if fecha_inicio:
-        filtros_tx.append(f"date(txn_time) >= '{fecha_inicio}'")
-        filtros_soc.append(f"date(fecha_trunc) >= '{fecha_inicio}'")
-    if fecha_fin:
-        filtros_tx.append(f"date(txn_time) <= '{fecha_fin}'")
-        filtros_soc.append(f"date(fecha_trunc) <= '{fecha_fin}'")
-        
+    filtros_tx, parametros_tx = _rango_fechas(fecha_inicio, fecha_fin, campo="txn_time")
+    filtros_tx = ["subcategoria = 'Mujeres'"] + filtros_tx
+    filtros_soc, parametros_soc = _rango_fechas(fecha_inicio, fecha_fin, campo="fecha_trunc")
+
     where_tx = "WHERE " + " AND ".join(filtros_tx)
     where_soc = ("WHERE " + " AND ".join(filtros_soc)) if filtros_soc else ""
-    
+
     q_gastos = f"""
         SELECT
             SUM(IF(ingreso_gasto = 'Gastos', importe_moneda_principal, 0)) AS bruto,
@@ -1019,28 +1363,28 @@ def obtener_social_kpis(fecha_inicio: Optional[str] = None, fecha_fin: Optional[
         {where_tx}
     """
     q_social = f"""
-        SELECT 
-            SUM(gasto_mujeres) AS gm, 
+        SELECT
+            SUM(gasto_mujeres) AS gm,
             SUM(ingreso_total) AS it
         FROM `big-query-406221.finanzas_personales_mds.agg_social`
         {where_soc}
     """
-    
+
     gasto_bruto = 0.0
     reembolsos = 0.0
     pct_social = 0.0
-    
+
     try:
-        res_g = list(client.query(q_gastos).result())
+        res_g = list(_query(q_gastos, parametros_tx))
         if res_g and res_g[0].bruto is not None:
             gasto_bruto = float(res_g[0].bruto)
         if res_g and res_g[0].reembolsos is not None:
             reembolsos = float(res_g[0].reembolsos)
     except Exception as e:
         print("Error en social-kpis gastos:", e)
-        
+
     try:
-        res_s = list(client.query(q_social).result())
+        res_s = list(_query(q_social, parametros_soc))
         if res_s and res_s[0].gm is not None and res_s[0].it is not None and res_s[0].it > 0:
             pct_social = (float(res_s[0].gm) / float(res_s[0].it)) * 100.0
     except Exception as e:
@@ -1055,13 +1399,8 @@ def obtener_social_kpis(fecha_inicio: Optional[str] = None, fecha_fin: Optional[
 
 @app.get("/social-tendencia")
 def obtener_social_tendencia(fecha_inicio: Optional[str] = None, fecha_fin: Optional[str] = None):
-    filtros = []
-    if fecha_inicio:
-        filtros.append(f"date(fecha_trunc) >= '{fecha_inicio}'")
-    if fecha_fin:
-        filtros.append(f"date(fecha_trunc) <= '{fecha_fin}'")
-        
-    where_clause = "WHERE " + " AND ".join(filtros) if filtros else ""
+    filtros, parametros = _rango_fechas(fecha_inicio, fecha_fin, campo="fecha_trunc")
+    where_clause = ("WHERE " + " AND ".join(filtros)) if filtros else ""
     query = f"""
         SELECT
           CAST(DATE(fecha_trunc) AS STRING) AS mes,
@@ -1071,7 +1410,7 @@ def obtener_social_tendencia(fecha_inicio: Optional[str] = None, fecha_fin: Opti
         ORDER BY fecha_trunc
     """
     try:
-        resultados = client.query(query).result()
+        resultados = _query(query, parametros)
         meses = []
         gastos = []
         for fila in resultados:
@@ -1089,11 +1428,9 @@ def obtener_social_top_gastos(fecha_inicio: Optional[str] = None, fecha_fin: Opt
         "ingreso_gasto = 'Gastos'",
         "subcategoria = 'Mujeres'"
     ]
-    if fecha_inicio:
-        filtros.append(f"date(txn_time) >= '{fecha_inicio}'")
-    if fecha_fin:
-        filtros.append(f"date(txn_time) <= '{fecha_fin}'")
-        
+    fecha_filtros, parametros = _rango_fechas(fecha_inicio, fecha_fin)
+    filtros.extend(fecha_filtros)
+
     where_clause = "WHERE " + " AND ".join(filtros)
     query = f"""
         SELECT
@@ -1107,7 +1444,7 @@ def obtener_social_top_gastos(fecha_inicio: Optional[str] = None, fecha_fin: Opt
         LIMIT 100
     """
     try:
-        resultados = client.query(query).result()
+        resultados = _query(query, parametros)
         gastos = []
         for fila in resultados:
             gastos.append({
@@ -1127,11 +1464,9 @@ def obtener_social_categoria(fecha_inicio: Optional[str] = None, fecha_fin: Opti
         "subcategoria = 'Mujeres'",
         "categoria != 'Reembolsos'"
     ]
-    if fecha_inicio:
-        filtros.append(f"date(txn_time) >= '{fecha_inicio}'")
-    if fecha_fin:
-        filtros.append(f"date(txn_time) <= '{fecha_fin}'")
-        
+    fecha_filtros, parametros = _rango_fechas(fecha_inicio, fecha_fin)
+    filtros.extend(fecha_filtros)
+
     where_clause = "WHERE " + " AND ".join(filtros)
     query = f"""
         SELECT
@@ -1143,7 +1478,7 @@ def obtener_social_categoria(fecha_inicio: Optional[str] = None, fecha_fin: Opti
         ORDER BY gasto_por_categoria DESC
     """
     try:
-        resultados = client.query(query).result()
+        resultados = _query(query, parametros)
         categorias = []
         montos = []
         for fila in resultados:
@@ -1157,13 +1492,11 @@ def obtener_social_categoria(fecha_inicio: Optional[str] = None, fecha_fin: Opti
 @app.get("/social-compartido")
 def obtener_social_compartido(fecha_inicio: Optional[str] = None, fecha_fin: Optional[str] = None):
     filtros = ["clave = 'C/'"]
-    if fecha_inicio:
-        filtros.append(f"date(txn_time) >= '{fecha_inicio}'")
-    if fecha_fin:
-        filtros.append(f"date(txn_time) <= '{fecha_fin}'")
-        
-    where_clause = " AND " + " AND ".join(filtros) if filtros else ""
-    
+    fecha_filtros, parametros = _rango_fechas(fecha_inicio, fecha_fin)
+    filtros.extend(fecha_filtros)
+
+    where_clause = " AND " + " AND ".join(filtros)
+
     query = f"""
         WITH precalculo AS (
             SELECT
@@ -1185,8 +1518,8 @@ def obtener_social_compartido(fecha_inicio: Optional[str] = None, fecha_fin: Opt
         ORDER BY mes
     """
     try:
-        resultados = client.query(query).result()
-        
+        resultados = _query(query, parametros)
+
         datos_map = {}
         meses_set = set()
         valores_set = set()
