@@ -5,6 +5,7 @@ from typing import List, Optional
 from fastapi import FastAPI, Query, Request
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from google.cloud import bigquery
 
 def find_credentials():
@@ -38,6 +39,12 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+)
+
+app.mount(
+    "/static",
+    StaticFiles(directory=os.path.join(os.path.dirname(os.path.abspath(__file__)), "static")),
+    name="static",
 )
 
 # Rate limiting básico en memoria: es un fusible de "por si acaso" (bug de frontend en loop,
