@@ -449,15 +449,9 @@ def obtener_crecimiento_kpis(fecha_inicio: Optional[str] = None, fecha_fin: Opti
                    OR (categoria = 'Inversiones' AND subcategoria = 'Inmuebles' AND concepto = 'Amortización'),
                    importe_moneda_principal, 0)
             ) AS amortizacion_voluntaria,
-            -- OJO: a diferencia de /net-worth, aquí NO se suma 'Gastos' al lado negativo.
-            -- Un 'Gastos' real cargado a una de estas cuentas (ej. una comisión bancaria) ya
-            -- queda contado en gastos_totales_periodo / tasa_gasto_consumo; si también restara
-            -- aquí, se cancelaría a sí mismo en la fórmula residual de tasa_ahorro_caja
-            -- (100 - gasto - patrimonio), haciendo que un gasto real no mueva el ahorro de caja.
-            -- 'Dinero gastado' sí resta porque es una transferencia interna (no está en 'Gastos').
             SUM(
                 CASE
-                    WHEN cuenta IN ('Wow Compartamos', 'Pichincha', 'GNB') AND ingreso_gasto IN ('Ingreso', 'Dinero ingresado') THEN importe_moneda_principal
+                    WHEN cuenta IN ('Wow Compartamos', 'Pichincha', 'GNB') AND ingreso_gasto = 'Dinero ingresado' THEN importe_moneda_principal
                     WHEN cuenta IN ('Wow Compartamos', 'Pichincha', 'GNB') AND ingreso_gasto = 'Dinero gastado' THEN -importe_moneda_principal
                     ELSE 0
                 END
@@ -517,10 +511,8 @@ def obtener_crecimiento_kpis(fecha_inicio: Optional[str] = None, fecha_fin: Opti
     # registran con ingreso_gasto = 'Gastos'. Se resta el capital (de ambas fuentes) para que
     # no quede contado dos veces — como "gasto" y como "construcción de patrimonio" — dejando
     # dentro del gasto de consumo solo interés y seguros de la hipoteca, que sí son costo real.
-    # Las cuentas de alto rendimiento no se restan aquí: sus transferencias de entrada/salida
-    # nunca estuvieron en el bucket 'Gastos', y un 'Gastos' real cargado directamente a una de
-    # esas cuentas (ej. una comisión) ya es consumo real y debe quedarse contado como tal (ver
-    # nota en query_construccion_patrimonio sobre por qué esa cuenta no resta 'Gastos').
+    # Las cuentas de alto rendimiento no se restan porque nunca estuvieron en el bucket
+    # 'Gastos' (se registran como 'Dinero ingresado'/'Dinero gastado', transferencia interna).
     gasto_consumo_periodo = gastos_totales_periodo - fibras_periodo - amortizacion_periodo - capital_hipoteca_periodo
 
     tasa_gasto_consumo = (gasto_consumo_periodo / ingresos_periodo * 100.0) if ingresos_periodo > 0 else 0.0
