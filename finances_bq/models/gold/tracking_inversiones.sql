@@ -46,6 +46,10 @@ acumulados AS(
     -- Rolling SUM de ingreso bruto en el mes
     SUM(IF(flg_ingreso, importe_moneda_principal, 0)) OVER(
       PARTITION BY  r.month_id ORDER BY txn_time ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW)  AS bruto_mensual_acumulado,
+    
+    pi.neto_despues_de_vida,
+    pi.disponible_ahorro_inversion,
+    
     -- Join con asignación mensual a CAR
     pi.cuenta_alto_rendimiento AS cuentas_alto_rendimiento_asignado,  
     -- ROlling SUM de inversiones mensuales en CAR
@@ -72,8 +76,10 @@ SELECT
   month_id,
   --categoria,
   --concepto,
-  importe_moneda_principal,
+  --importe_moneda_principal,
   bruto_mensual_acumulado,
+  neto_despues_de_vida,
+  disponible_ahorro_inversion,
   cuentas_alto_rendimiento_asignado,
   cuentas_alto_rendimiento_inversion_acumulada,
   
