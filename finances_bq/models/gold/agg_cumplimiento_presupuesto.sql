@@ -24,13 +24,13 @@ WITH base_fact AS(
         fecha_carga
     FROM {{ref('fact_transactions')}}
     WHERE ingreso_gasto = "Gastos"
-    {% if is_incremental() %}
-        AND fecha_carga > (SELECT MAX(fecha_carga) FROM {{ this }})
-    {% endif %}
 ),
 first_layer AS(
     SELECT
-        TO_HEX(MD5(CONCAT(DATE_TRUNC(h.txn_time, MONTH), h.categoria))) AS month_cat_id,
+        TO_HEX(MD5(CONCAT(
+            CAST(COALESCE(DATE_TRUNC(h.txn_time, MONTH), DATE_TRUNC(p.fecha, MONTH)) AS STRING),
+            COALESCE(h.categoria, p.categoria)
+        ))) AS month_cat_id,
         COALESCE(
             DATE_TRUNC(h.txn_time, MONTH),
             DATE_TRUNC(p.fecha, MONTH)
@@ -61,7 +61,7 @@ SELECT
     gasto_acumulado_mes,
     presupuesto,
     CONCAT(
-        ROUND((gasto_acumulado_mes / presupuesto)*100, 3),
+        ROUND(SAFE_DIVIDE(gasto_acumulado_mes, presupuesto)*100, 3),
         '%')
          AS utilizado,
     ROUND(presupuesto - gasto_acumulado_mes, 2) AS presupuesto_disponible,
