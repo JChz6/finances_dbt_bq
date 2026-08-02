@@ -112,8 +112,9 @@ models:
 
         tests:
           - relationships:
-              to: ref('claves')
-              field: clave
+              arguments:
+                to: ref('claves')
+                field: clave
 
       - name: valor
         description: >

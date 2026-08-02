@@ -23,8 +23,9 @@ WITH base_fact AS(
         ingreso_gasto,
         fecha_carga
     FROM {{ref('fact_transactions')}}
+    WHERE ingreso_gasto = "Gastos"
     {% if is_incremental() %}
-        WHERE fecha_carga > (SELECT MAX(fecha_carga) FROM {{ this }}) 
+        AND fecha_carga > (SELECT MAX(fecha_carga) FROM {{ this }})
     {% endif %}
 ),
 first_layer AS(
@@ -35,20 +36,22 @@ first_layer AS(
             DATE_TRUNC(p.fecha, MONTH)
         ) AS fecha,
         COALESCE(h.categoria, p.categoria) as categoria,
-        SUM(h.importe_moneda_principal)
-            OVER(PARTITION BY
-                COALESCE(DATE_TRUNC(h.txn_time, MONTH),
-                DATE_TRUNC(p.fecha, MONTH)),
-                COALESCE(h.categoria, p.categoria)
-            ) AS gasto_acumulado_mes,
+        COALESCE(
+            SUM(h.importe_moneda_principal)
+                OVER(PARTITION BY
+                    COALESCE(DATE_TRUNC(h.txn_time, MONTH),
+                    DATE_TRUNC(p.fecha, MONTH)),
+                    COALESCE(h.categoria, p.categoria)
+                ),
+            0
+        ) AS gasto_acumulado_mes,
         p.presupuesto,
         MAX(h.fecha_carga) OVER(PARTITION BY DATE_TRUNC(h.txn_time, MONTH)) AS fecha_carga
     FROM base_fact h
     FULL OUTER JOIN {{source('finances_raw', 'presupuesto')}} p
     ON UPPER(h.categoria) = UPPER(p.categoria)
     AND
-    DATE_TRUNC(p.fecha, MONTH) = DATE_TRUNC(h.txn_time, MONTH) 
-    WHERE h.ingreso_gasto =  "Gastos"
+    DATE_TRUNC(p.fecha, MONTH) = DATE_TRUNC(h.txn_time, MONTH)
     QUALIFY ROW_NUMBER() OVER(PARTITION BY COALESCE(DATE_TRUNC(h.txn_time, MONTH), DATE_TRUNC(p.fecha, MONTH)), categoria) = 1
 )
 SELECT
