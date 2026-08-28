@@ -92,6 +92,46 @@ models:
       - name: fecha_carga
         description: "Timestamp de la carga incremental para trazabilidad de datos."
 
+  - name: agg_netos_prestamos_anuncios
+    description: >
+      Neteo mensual de dos categorías que en fact_transactions viven mezcladas con su
+      contraparte de 'Reembolsos': Préstamos (micro-adelantos a conocidos, identificados por
+      comentario 'C/<Nombre>') y Anuncios (publicidad reembolsada, concepto 'Ads%'). Lo no
+      neteado (sin contraparte en el mismo mes) cuenta como gasto/pérdida real.
+    columns:
+      - name: mes
+        description: "Mes (primer día) del neteo."
+      - name: neto_prestamos_terceros
+        description: "SUM(Préstamos) - SUM(Reembolsos) agrupado por persona/mes; sin contraparte queda como gasto completo."
+      - name: neto_anuncios
+        description: "SUM(Anuncios) - SUM(Reembolsos con concepto LIKE 'Ads%') del mes."
+      - name: neto_prestamos_terceros_horas
+        description: "neto_prestamos_terceros convertido a horas de trabajo equivalentes (mismo criterio que agg_costo_en_vida)."
+      - name: neto_anuncios_horas
+        description: "neto_anuncios convertido a horas de trabajo equivalentes."
+
+  - name: agg_gasto_esencial
+    description: >
+      Fuente única de la lista canónica de categorías "esenciales de supervivencia"
+      (macro categorias_esenciales_supervivencia), para que /crecimiento-kpis,
+      /gasto-esencial-discrecional y /libertad-financiera dejen de divergir. Suma el
+      componente real de interés+seguros de hipoteca (vivienda propia) desde
+      hipotecas_materialized, y usa los netos de agg_netos_prestamos_anuncios en vez de los
+      brutos de Préstamos/Anuncios.
+    columns:
+      - name: mes
+        description: "Mes (primer día)."
+      - name: gasto_esencial_real
+        description: "Gasto real (fact_transactions) en categorías esenciales + interés/seguros de hipoteca (vivienda propia) del mes."
+      - name: gasto_discrecional_real
+        description: "Gasto real discrecional (excluye esencial, Inversiones, Deudas) + netos de Préstamos/Anuncios del mes."
+      - name: presupuesto_esencial
+        description: "Presupuesto planeado (presupuesto_materialized) en categorías esenciales + interés/seguros de hipoteca (vivienda propia) del mes."
+      - name: neto_prestamos_terceros
+        description: "Ver agg_netos_prestamos_anuncios."
+      - name: neto_anuncios
+        description: "Ver agg_netos_prestamos_anuncios."
+
   - name: plan_inversion
     description: >
       Modelo Gold que calcula la distribución mensual del dinero disponible para ahorro e inversión

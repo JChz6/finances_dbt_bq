@@ -26,3 +26,7 @@ references/
 # OS metadata
 .DS_Store
 Thumbs.db
+
+# Claude Code config and context (local only, not shared via repo)
+.claude/
+CLAUDE.md

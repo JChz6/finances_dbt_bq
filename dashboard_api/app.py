@@ -119,9 +119,9 @@ def obtener_flujo_caja(
     if granularidad == "diario":
         query = f"""
             WITH diario AS (
-                SELECT 
-                  CAST(date(txn_time) AS STRING) AS fecha, 
-                  SUM(IF(ingreso_gasto = 'Ingreso', importe_moneda_principal, 0)) AS ingresos,
+                SELECT
+                  CAST(date(txn_time) AS STRING) AS fecha,
+                  SUM(IF(ingreso_gasto = 'Ingreso' AND categoria != 'Reembolsos', importe_moneda_principal, 0)) AS ingresos,
                   SUM(IF(ingreso_gasto = 'Gastos', importe_moneda_principal * -1, 0)) AS gastos,
                   SUM(
                     CASE
@@ -146,9 +146,9 @@ def obtener_flujo_caja(
     else: # mensual
         query = f"""
             WITH mensual AS (
-                SELECT 
-                  CAST(DATE_TRUNC(date(txn_time), MONTH) AS STRING) AS fecha, 
-                  SUM(IF(ingreso_gasto = 'Ingreso', importe_moneda_principal, 0)) AS ingresos,
+                SELECT
+                  CAST(DATE_TRUNC(date(txn_time), MONTH) AS STRING) AS fecha,
+                  SUM(IF(ingreso_gasto = 'Ingreso' AND categoria != 'Reembolsos', importe_moneda_principal, 0)) AS ingresos,
                   SUM(IF(ingreso_gasto = 'Gastos', importe_moneda_principal * -1, 0)) AS gastos,
                   SUM(
                     CASE
@@ -245,7 +245,13 @@ def obtener_trimestre(fecha_inicio: Optional[str] = None, fecha_fin: Optional[st
     query = f"""
         SELECT
             CAST(DATE_TRUNC(date(txn_time), QUARTER) AS STRING) AS trimestre,
-            SUM(IF(LOWER(ingreso_gasto) LIKE '%ingr%', importe_moneda_principal, importe_moneda_principal * -1)) AS balance
+            SUM(
+                CASE
+                    WHEN categoria = 'Reembolsos' THEN 0
+                    WHEN LOWER(ingreso_gasto) LIKE '%ingr%' THEN importe_moneda_principal
+                    ELSE importe_moneda_principal * -1
+                END
+            ) AS balance
         FROM `big-query-406221.finanzas_personales_mds.fact_transactions`
         {where_clause}
         GROUP BY 1
@@ -363,11 +369,17 @@ def obtener_cumplimiento_presupuesto(
 def obtener_crecimiento_kpis(fecha_inicio: Optional[str] = None, fecha_fin: Optional[str] = None):
     fondo_emergencia = 30000.0
     
+    # Lee de agg_gasto_esencial.presupuesto_esencial: fuente única de la lista canónica de
+    # categorías esenciales (macro categorias_esenciales_supervivencia) + el componente real
+    # de interés/seguros de la hipoteca de vivienda propia — reemplaza el hardcode de
+    # 'Deudas indispensables'/'Seguros' que nunca matcheaba con presupuesto_materialized.
     query_estricta = """
-        SELECT SUM(presupuesto) as total
-        FROM `big-query-406221.finanzas_personales_mds.presupuesto_materialized`
-        WHERE fecha = (SELECT MAX(fecha) FROM `big-query-406221.finanzas_personales_mds.presupuesto_materialized`)
-          AND categoria IN ('Comida', 'Transporte', 'Facturas', 'Deudas indispensables', 'Salud', 'Gastos Variables', 'Seguros')
+        SELECT ge.presupuesto_esencial AS total
+        FROM `big-query-406221.finanzas_personales_mds.agg_gasto_esencial` ge
+        WHERE ge.mes = (
+            SELECT DATE_TRUNC(MAX(fecha), MONTH)
+            FROM `big-query-406221.finanzas_personales_mds.presupuesto_materialized`
+        )
     """
     
     query_vida = """
@@ -390,7 +402,7 @@ def obtener_crecimiento_kpis(fecha_inicio: Optional[str] = None, fecha_fin: Opti
                 SELECT SUM(CAST(presupuesto AS FLOAT64)) as total
                 FROM `big-query-406221.finanzas_personales_mds.agg_cumplimiento_presupuesto`
                 WHERE date(fecha) = (SELECT MAX(date(fecha)) FROM `big-query-406221.finanzas_personales_mds.agg_cumplimiento_presupuesto`)
-                  AND categoria IN ('Comida', 'Transporte', 'Facturas', 'Deudas indispensables', 'Salud', 'Gastos Variables', 'Seguros')
+                  AND categoria IN ('Comida', 'Transporte', 'Facturas', 'Salud', 'Gastos Variables', 'Seguros')
             """
             res_fb = list(client.query(fallback_query).result())
             if res_fb and res_fb[0].total is not None:
@@ -443,11 +455,14 @@ def obtener_crecimiento_kpis(fecha_inicio: Optional[str] = None, fecha_fin: Opti
 
     query_flujo_periodo = f"""
         SELECT
-            SUM(IF(ingreso_gasto = 'Ingreso', importe_moneda_principal, 0)) AS ingresos,
+            SUM(IF(ingreso_gasto = 'Ingreso' AND categoria != 'Reembolsos', importe_moneda_principal, 0)) AS ingresos,
             SUM(IF(ingreso_gasto = 'Gastos', importe_moneda_principal, 0)) AS gastos
         FROM `big-query-406221.finanzas_personales_mds.fact_transactions`
         {where_periodo}
     """
+    # cuentas_alto_rendimiento: mismas cuentas y misma lógica que /net-worth (q_cuentas_mensual)
+    # — 'Ingreso'/'Gastos' además de 'Dinero ingresado'/'Dinero gastado', antes solo se
+    # contaban estas últimas acá y el interés/rendimiento acreditado como 'Ingreso' se perdía.
     query_construccion_patrimonio = f"""
         SELECT
             SUM(IF(categoria = 'Inversiones' AND subcategoria = 'FIBRAS', importe_moneda_principal, 0)) AS fibras,
@@ -458,8 +473,8 @@ def obtener_crecimiento_kpis(fecha_inicio: Optional[str] = None, fecha_fin: Opti
             ) AS amortizacion_voluntaria,
             SUM(
                 CASE
-                    WHEN cuenta IN ('Wow Compartamos', 'Pichincha', 'GNB') AND ingreso_gasto = 'Dinero ingresado' THEN importe_moneda_principal
-                    WHEN cuenta IN ('Wow Compartamos', 'Pichincha', 'GNB') AND ingreso_gasto = 'Dinero gastado' THEN -importe_moneda_principal
+                    WHEN cuenta IN ('Wow Compartamos', 'Pichincha', 'GNB', 'Global66 - USD') AND ingreso_gasto IN ('Ingreso', 'Dinero ingresado') THEN importe_moneda_principal
+                    WHEN cuenta IN ('Wow Compartamos', 'Pichincha', 'GNB', 'Global66 - USD') AND ingreso_gasto IN ('Gastos', 'Dinero gastado') THEN -importe_moneda_principal
                     ELSE 0
                 END
             ) AS cuentas_alto_rendimiento
@@ -616,7 +631,7 @@ def obtener_net_worth():
                 END
             ) AS monto_neto
         FROM `big-query-406221.finanzas_personales_mds.fact_transactions`
-        WHERE cuenta IN ('Wow Compartamos', 'Pichincha', 'GNB')
+        WHERE cuenta IN ('Wow Compartamos', 'Pichincha', 'GNB', 'Global66 - USD')
         GROUP BY 1
         ORDER BY mes
     """
@@ -626,6 +641,13 @@ def obtener_net_worth():
     # ingresado'/'Dinero gastado' (no como 'Ingreso'/'Gastos'), así que no reduce el balance de
     # caja por sí solo — hay que restarlo explícitamente para no contar ese efectivo dos veces
     # (una como "cuenta regular" y otra como "cuenta de alto rendimiento").
+    # 'Reembolsos' SÍ se incluye acá (a diferencia de /flujo-caja, /balance-trimestre y
+    # /crecimiento-kpis, que lo excluyen a propósito): esas otras métricas miden ingreso/flujo
+    # económico neto, donde un reembolso no es ganancia real. Esta query mide saldo de caja
+    # real — un reembolso es dinero que efectivamente vuelve a la cuenta. El gasto original que
+    # generó el reembolso ya restó del lado 'Gastos'; si también se excluye del lado 'Ingreso'
+    # cuando vuelve, queda una pérdida de caja fantasma que nunca se revierte y se acumula mes
+    # a mes indefinidamente, aunque el dinero sí esté de vuelta en la cuenta.
     q_balance_mensual = """
         SELECT
             CAST(DATE_TRUNC(txn_time, MONTH) AS STRING) AS mes,
@@ -734,24 +756,22 @@ def obtener_net_worth():
 @app.get("/gasto-esencial-discrecional")
 def obtener_gasto_esencial_discrecional(fecha_inicio: Optional[str] = None, fecha_fin: Optional[str] = None):
     """
-    Tendencia mensual de gasto esencial vs discrecional. Excluye 'Inversiones' (FIBRAS,
-    amortización de inmuebles) y 'Deudas' (amortización voluntaria) porque son construcción
-    de patrimonio, no consumo — ver tasa_construccion_patrimonio en /crecimiento-kpis.
+    Tendencia mensual de gasto esencial vs discrecional. Lee de agg_gasto_esencial: fuente
+    única de la lista canónica de categorías esenciales (compartida con /crecimiento-kpis y
+    /libertad-financiera), que ya excluye 'Inversiones'/'Deudas' (construcción de patrimonio),
+    ya suma el interés/seguros real de la hipoteca de vivienda propia, y ya usa los netos de
+    Préstamos/Anuncios (agg_netos_prestamos_anuncios) en vez de sus brutos.
     """
-    filtros, parametros = _rango_fechas(fecha_inicio, fecha_fin)
-    filtros = ["ingreso_gasto = 'Gastos'", "categoria NOT IN ('Inversiones', 'Deudas')"] + filtros
-    where_clause = "WHERE " + " AND ".join(filtros)
-
-    categorias_esenciales_sql = "'Comida', 'Transporte', 'Facturas', 'Deudas indispensables', 'Salud', 'Gastos Variables', 'Seguros'"
+    filtros, parametros = _rango_fechas(fecha_inicio, fecha_fin, campo="mes")
+    where_clause = ("WHERE " + " AND ".join(filtros)) if filtros else ""
 
     query = f"""
         SELECT
-            CAST(DATE_TRUNC(date(txn_time), MONTH) AS STRING) AS mes,
-            SUM(IF(categoria IN ({categorias_esenciales_sql}), importe_moneda_principal, 0)) AS esencial,
-            SUM(IF(categoria NOT IN ({categorias_esenciales_sql}), importe_moneda_principal, 0)) AS discrecional
-        FROM `big-query-406221.finanzas_personales_mds.fact_transactions`
+            CAST(mes AS STRING) AS mes,
+            gasto_esencial_real AS esencial,
+            gasto_discrecional_real AS discrecional
+        FROM `big-query-406221.finanzas_personales_mds.agg_gasto_esencial`
         {where_clause}
-        GROUP BY 1
         ORDER BY mes
     """
     try:
@@ -848,13 +868,13 @@ def obtener_libertad_financiera():
             GROUP BY 1
         ),
         indispensable AS (
+            -- Misma fuente única de "esencial" que /crecimiento-kpis y
+            -- /gasto-esencial-discrecional (agg_gasto_esencial) — antes esta lista tenía
+            -- 6 categorías distintas a las otras dos (sin 'Seguros', con 'Deudas' genérico).
             SELECT
-                CAST(DATE_TRUNC(date(txn_time), MONTH) AS STRING) AS fecha,
-                SUM(importe_moneda_principal) AS indispensable
-            FROM `big-query-406221.finanzas_personales_mds.fact_transactions`
-            WHERE categoria IN ('Comida', 'Transporte', 'Facturas', 'Deudas', 'Salud', 'Gastos Variables')
-              AND ingreso_gasto = 'Gastos'
-            GROUP BY 1
+                CAST(mes AS STRING) AS fecha,
+                gasto_esencial_real AS indispensable
+            FROM `big-query-406221.finanzas_personales_mds.agg_gasto_esencial`
         )
         SELECT 
             COALESCE(p.fecha, i.fecha) AS fecha,
@@ -1142,6 +1162,18 @@ def obtener_costo_vida_kpis(fecha_inicio: Optional[str] = None, fecha_fin: Optio
         {where_clause}
         GROUP BY 1, 2
     """
+    # Préstamos y Anuncios se calculan aparte (netos, no brutos) porque agg_costo_en_vida
+    # solo tiene transacciones 'Gastos' — no puede netear contra su contraparte de
+    # 'Reembolsos', que es 'Ingreso'. Ver agg_netos_prestamos_anuncios.
+    filtros_netos, parametros_netos = _rango_fechas(fecha_inicio, fecha_fin, campo="mes")
+    where_netos = ("WHERE " + " AND ".join(filtros_netos)) if filtros_netos else ""
+    query_netos = f"""
+        SELECT
+            SUM(neto_prestamos_terceros_horas) AS prestamos_horas,
+            SUM(neto_anuncios_horas) AS anuncios_horas
+        FROM `big-query-406221.finanzas_personales_mds.agg_netos_prestamos_anuncios`
+        {where_netos}
+    """
     try:
         resultados = _query(query, parametros)
         kpis = {
@@ -1153,9 +1185,19 @@ def obtener_costo_vida_kpis(fecha_inicio: Optional[str] = None, fecha_fin: Optio
             "salud": 0.0,
             "inversiones": 0.0,
             "mujeres": 0.0,
-            "equipo_trabajo": 0.0
+            "equipo_trabajo": 0.0,
+            "prestamos": 0.0,
+            "anuncios": 0.0
         }
-        
+
+        try:
+            res_netos = list(_query(query_netos, parametros_netos))
+            if res_netos:
+                kpis["prestamos"] = float(res_netos[0].prestamos_horas or 0.0)
+                kpis["anuncios"] = float(res_netos[0].anuncios_horas or 0.0)
+        except Exception as e:
+            print("Error en costo-vida-kpis (netos prestamos/anuncios):", e)
+
         for fila in resultados:
             cat = fila.categoria or ""
             subcat = fila.subcategoria or "no_subcat"
@@ -1196,7 +1238,9 @@ def obtener_costo_vida_kpis(fecha_inicio: Optional[str] = None, fecha_fin: Optio
             "salud": 0.0,
             "inversiones": 0.0,
             "mujeres": 0.0,
-            "equipo_trabajo": 0.0
+            "equipo_trabajo": 0.0,
+            "prestamos": 0.0,
+            "anuncios": 0.0
         }
 
 @app.get("/costo-vida-detalles")

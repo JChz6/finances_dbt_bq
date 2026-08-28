@@ -70,6 +70,41 @@
         ::-webkit-scrollbar-thumb:hover {
             background: #404040;
         }
+
+        /* Info tooltip icon + popover (ver componente JS al final del body) */
+        .info-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 15px;
+            height: 15px;
+            border-radius: 9999px;
+            border: 1px solid currentColor;
+            opacity: 0.4;
+            font-size: 9px;
+            font-weight: 700;
+            font-style: italic;
+            font-family: Georgia, 'Times New Roman', serif;
+            line-height: 1;
+            cursor: pointer;
+            background: transparent;
+            color: inherit;
+            flex-shrink: 0;
+            transition: opacity 0.15s ease, background-color 0.15s ease;
+        }
+        .info-btn:hover,
+        .info-btn:focus-visible,
+        .info-btn.active {
+            opacity: 1;
+            background: rgba(255, 255, 255, 0.08);
+        }
+        .info-btn:focus-visible {
+            outline: 1px solid #4ADE80;
+            outline-offset: 1px;
+        }
+        #info-popover {
+            font-family: 'Outfit', sans-serif;
+        }
     </style>
 </head>
 <body class="bg-darkbg text-textmain font-sans antialiased selection:bg-accent selection:text-white">
@@ -211,35 +246,35 @@
                 <!-- KPI Summary cards -->
                 <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
                     <div class="col-span-2 lg:col-span-1 bg-card rounded-3xl p-6 border border-slate-800/60 shadow-sm relative overflow-hidden">
-                        <p class="text-textmuted text-sm font-medium tracking-wide">Ingresos Totales</p>
+                        <p class="text-textmuted text-sm font-medium tracking-wide inline-flex items-center gap-1.5">Ingresos Totales<button type="button" class="info-btn" data-tip="Suma de todos los ingresos reales registrados en el periodo seleccionado.">i</button></p>
                         <h3 class="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-medium text-income mt-1" id="kpi-ingresos">$0</h3>
                         <p class="text-[10px] text-textmuted mt-1" id="kpi-ingresos-desc">En el periodo seleccionado</p>
                         <p class="text-[10px] mt-1" id="kpi-ingresos-delta"></p>
                         <div class="absolute right-4 bottom-4 text-income/10"><svg class="w-12 h-12" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path></svg></div>
                     </div>
                     <div class="bg-card rounded-3xl p-6 border border-slate-800/60 shadow-sm relative overflow-hidden">
-                        <p class="text-textmuted text-sm font-medium tracking-wide">Gastos Totales</p>
+                        <p class="text-textmuted text-sm font-medium tracking-wide inline-flex items-center gap-1.5">Gastos Totales<button type="button" class="info-btn" data-tip="Suma de todos los gastos reales registrados en el periodo seleccionado, incluida la hipoteca completa (capital, interés y seguros).">i</button></p>
                         <h3 class="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-medium text-white mt-1" id="kpi-gastos">$0</h3>
                         <p class="text-[10px] text-textmuted mt-1" id="kpi-gastos-desc">En el periodo seleccionado</p>
                         <p class="text-[10px] mt-1" id="kpi-gastos-delta"></p>
                         <div class="absolute right-4 bottom-4 text-white/5"><svg class="w-12 h-12" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path></svg></div>
                     </div>
                     <div class="bg-card rounded-3xl p-6 border border-slate-800/60 shadow-sm relative overflow-hidden">
-                        <p class="text-textmuted text-sm font-medium tracking-wide">Balance Neto</p>
+                        <p class="text-textmuted text-sm font-medium tracking-wide inline-flex items-center gap-1.5">Balance Neto<button type="button" class="info-btn" data-tip="Ingresos menos gastos del periodo. Es la vista cruda de caja: no excluye nada, así que la hipoteca completa y cualquier movimiento a cuentas de alto rendimiento marcado como ingreso/gasto entran en el cálculo.">i</button></p>
                         <h3 class="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-medium text-white mt-1" id="kpi-balance">$0</h3>
                         <p class="text-[10px] text-textmuted mt-1" id="kpi-balance-desc">Ingresos - Gastos</p>
                         <p class="text-[10px] mt-1" id="kpi-balance-delta"></p>
                         <div class="absolute right-4 bottom-4 text-white/5"><svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg></div>
                     </div>
                     <div class="bg-card rounded-3xl p-6 border border-slate-800/60 shadow-sm relative overflow-hidden">
-                        <p class="text-textmuted text-sm font-medium tracking-wide">Tasa de Ahorro</p>
+                        <p class="text-textmuted text-sm font-medium tracking-wide inline-flex items-center gap-1.5">Tasa de Ahorro<button type="button" class="info-btn" data-tip="(Ingresos − Gastos) / Ingresos del periodo, en porcentaje. Basada en el balance de caja crudo, sin distinguir consumo de construcción de patrimonio.">i</button></p>
                         <h3 class="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-medium text-white mt-1" id="kpi-ahorro">0%</h3>
                         <p class="text-[10px] text-textmuted mt-1" id="kpi-ahorro-desc">(Ingresos - Gastos) / Ingresos</p>
                         <p class="text-[10px] mt-1" id="kpi-ahorro-delta"></p>
                         <div class="absolute right-4 bottom-4 text-white/5"><svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg></div>
                     </div>
                     <div class="bg-card rounded-3xl p-6 border border-slate-800/60 shadow-sm relative overflow-hidden">
-                        <p class="text-textmuted text-sm font-medium tracking-wide">Costo en Vida</p>
+                        <p class="text-textmuted text-sm font-medium tracking-wide inline-flex items-center gap-1.5">Costo en Vida<button type="button" class="info-btn" data-tip="Horas de trabajo equivalentes al gasto del periodo, sumando solo 9 categorías fijas (comida, facturas, transporte, salud, entretenimiento, etc.). Categorías fuera de esa lista (Casa, Viajes, Auto, Seguros, etc.) no se cuentan, así que este total subestima el costo real en horas.">i</button></p>
                         <h3 class="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-medium text-white mt-1" id="kpi-costovida-total">0.0 hrs</h3>
                         <p class="text-[10px] text-textmuted mt-1">Horas de trabajo del gasto del periodo</p>
                         <div class="absolute right-4 bottom-4 text-white/5"><svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg></div>
@@ -250,7 +285,7 @@
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <div class="bg-card rounded-2xl p-6 border border-slate-800/60 shadow-sm lg:col-span-2">
                         <div class="flex items-center justify-between mb-4">
-                            <h3 class="font-bold text-white text-base">Flujo de Caja vs Balance Acumulado</h3>
+                            <h3 class="font-bold text-white text-base inline-flex items-center gap-1.5">Flujo de Caja vs Balance Acumulado<button type="button" class="info-btn" data-tip="Serie de ingresos, gastos y balance de caja por día o mes, con el acumulado corriente del balance. Vista cruda: incluye toda la hipoteca (capital+interés+seguros) y cualquier movimiento a cuentas de alto rendimiento marcado como ingreso/gasto.">i</button></h3>
                             <!-- Granularity switches -->
                             <div class="flex bg-slate-900 border border-slate-800 p-0.5 rounded-lg text-xs">
                                 <button onclick="setGranularidad('mensual')" id="btn-gran-mensual" class="px-2.5 py-1 bg-accent text-white rounded-md transition-colors font-medium">Mensual</button>
@@ -264,7 +299,7 @@
 
                     <div class="bg-card rounded-2xl p-6 border border-slate-800/60 shadow-sm flex flex-col relative">
                         <div class="flex items-center justify-between mb-4">
-                            <h3 class="font-bold text-white text-base">Distribución por Categorías</h3>
+                            <h3 class="font-bold text-white text-base inline-flex items-center gap-1.5">Distribución por Categorías<button type="button" class="info-btn" data-tip="Gasto real del periodo agrupado por categoría. La hipoteca aparece bajo 'Inversiones', no bajo 'Deudas' — así se categoriza hoy en las transacciones.">i</button></h3>
                             <!-- Dropdown for category select -->
                             <div class="relative">
                                 <button onclick="toggleCategoryDropdown(event)" class="px-2.5 py-1.5 bg-slate-900 border border-slate-800 hover:border-slate-700 hover:bg-slate-800 text-[11px] text-textmain rounded-lg flex items-center gap-1.5 transition-all">
@@ -290,14 +325,14 @@
 
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <div class="bg-card rounded-2xl p-6 border border-slate-800/60 shadow-sm">
-                        <h3 class="font-bold text-white text-base mb-4">Balance por Trimestre</h3>
+                        <h3 class="font-bold text-white text-base mb-4 inline-flex items-center gap-1.5">Balance por Trimestre<button type="button" class="info-btn" data-tip="Ingresos, gastos y balance del flujo de caja real, agregados por trimestre.">i</button></h3>
                         <div class="relative h-[280px]">
                             <canvas id="trimestreChart"></canvas>
                         </div>
                     </div>
 
                     <div class="bg-card rounded-2xl p-6 border border-slate-800/60 shadow-sm lg:col-span-2 overflow-hidden flex flex-col h-[360px]">
-                        <h3 class="font-bold text-white text-base mb-4">Top Gastos del Periodo</h3>
+                        <h3 class="font-bold text-white text-base mb-4 inline-flex items-center gap-1.5">Top Gastos del Periodo<button type="button" class="info-btn" data-tip="Las transacciones de mayor monto del periodo, excluyendo retenciones (quinta categoría, aporte AFP). Filtrable por categoría exacta.">i</button></h3>
                         <div class="overflow-y-auto overflow-x-auto flex-1 pr-1">
                             <table class="w-full text-left text-xs table-auto">
                                 <thead>
@@ -331,7 +366,10 @@
                 <div id="budget-summary-card" class="hidden bg-card rounded-2xl p-5 border border-slate-800/60 shadow-sm">
                     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
                         <div>
-                            <span class="text-xs text-textmuted uppercase tracking-wider font-semibold block mb-1" id="budget-summary-mes">Resumen del mes</span>
+                            <span class="text-xs text-textmuted uppercase tracking-wider font-semibold inline-flex items-center gap-1.5 mb-1">
+                                <span id="budget-summary-mes">Resumen del mes</span>
+                                <button type="button" class="info-btn" data-tip="Del mes más reciente con datos: cuántas categorías con presupuesto asignado (presupuesto > 0) superaron su límite de gasto real, y qué % del total presupuestado ya se gastó. Categorías sin presupuesto cargado no se cuentan.">i</button>
+                            </span>
                             <h3 class="text-xl sm:text-2xl font-semibold text-white" id="budget-summary-categorias">0 de 0 categorías sobre presupuesto</h3>
                         </div>
                         <div class="flex items-center gap-6">
@@ -396,31 +434,31 @@
                 <!-- KPI Summary cards -->
                 <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-6">
                     <div class="col-span-2 md:col-span-1 bg-card rounded-3xl p-6 border border-accent/40 shadow-sm shadow-accent/5 relative overflow-hidden ring-1 ring-accent/10">
-                        <p class="text-textmuted text-sm font-medium tracking-wide">Índice de Libertad</p>
+                        <p class="text-textmuted text-sm font-medium tracking-wide inline-flex items-center gap-1.5">Índice de Libertad<button type="button" class="info-btn" data-tip="Ingreso pasivo real / gasto indispensable del mes, en %. Usa su propia definición de 'indispensable' (sin Seguros, con 'Deudas' genérico en vez de 'Deudas indispensables'). Si el mes actual está incompleto, muestra el mes anterior.">i</button></p>
                         <h3 class="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-semibold text-accent mt-1" id="kpi-libertad">0%</h3>
                         <p class="text-[10px] text-textmuted mt-1">Supervivencia cubierta por pasivos</p>
                         <div class="absolute right-4 bottom-4 text-accent/10"><svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg></div>
                     </div>
                     <div class="bg-card rounded-3xl p-6 border border-slate-800/60 shadow-sm relative overflow-hidden">
-                        <p class="text-textmuted text-sm font-medium tracking-wide">Fondo de Emergencia</p>
+                        <p class="text-textmuted text-sm font-medium tracking-wide inline-flex items-center gap-1.5">Fondo de Emergencia<button type="button" class="info-btn" data-tip="Meta fija de referencia: S/ 30,000. No es un valor calculado desde tus datos, es una constante de la app.">i</button></p>
                         <h3 class="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-medium text-accent mt-1" id="kpi-fondo-emergencia">S/ 0</h3>
                         <p class="text-[10px] text-textmuted mt-1">Valor objetivo constante (S/ 30,000)</p>
                         <div class="absolute right-4 bottom-4 text-emerald-400/10"><svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg></div>
                     </div>
                     <div class="bg-card rounded-3xl p-6 border border-slate-800/60 shadow-sm relative overflow-hidden">
-                        <p class="text-textmuted text-sm font-medium tracking-wide">Supervivencia Estricta</p>
+                        <p class="text-textmuted text-sm font-medium tracking-wide inline-flex items-center gap-1.5">Supervivencia Estricta<button type="button" class="info-btn" data-tip="Presupuesto planeado (no gasto real) del mes más reciente cargado, sumando solo las categorías de supervivencia mínima: Comida, Transporte, Facturas, Deudas indispensables, Salud, Gastos Variables y Seguros.">i</button></p>
                         <h3 class="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-medium text-white mt-1" id="kpi-supervivencia-estricta">S/ 0</h3>
                         <p class="text-[10px] text-textmuted mt-1">Categorías indispensables seleccionadas</p>
                         <div class="absolute right-4 bottom-4 text-white/5"><svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg></div>
                     </div>
                     <div class="bg-card rounded-3xl p-6 border border-slate-800/60 shadow-sm relative overflow-hidden">
-                        <p class="text-textmuted text-sm font-medium tracking-wide">Gastos de Vida</p>
+                        <p class="text-textmuted text-sm font-medium tracking-wide inline-flex items-center gap-1.5">Gastos de Vida<button type="button" class="info-btn" data-tip="Presupuesto planeado (no gasto real) total del mes más reciente cargado, sumando todas las categorías presupuestadas, no solo las indispensables.">i</button></p>
                         <h3 class="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-medium text-white mt-1" id="kpi-gastos-vida">S/ 0</h3>
                         <p class="text-[10px] text-textmuted mt-1">Presupuesto total de vida mensual</p>
                         <div class="absolute right-4 bottom-4 text-white/5"><svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg></div>
                     </div>
                     <div class="bg-card rounded-3xl p-6 border border-slate-800/60 shadow-sm relative overflow-hidden">
-                        <p class="text-textmuted text-sm font-medium tracking-wide">Mediana Ingreso Neto</p>
+                        <p class="text-textmuted text-sm font-medium tracking-wide inline-flex items-center gap-1.5">Mediana Ingreso Neto<button type="button" class="info-btn" data-tip="Mediana (no promedio) del ingreso neto mensual real en el rango seleccionado — ingreso bruto menos descuentos tipo planilla. Se usa mediana para no dejarse arrastrar por meses con bonos o ingresos extraordinarios.">i</button></p>
                         <h3 class="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-medium text-accent mt-1" id="kpi-mediana-ingreso">S/ 0</h3>
                         <p class="text-[10px] text-textmuted mt-1">Mediana de ingreso neto mensual</p>
                         <div class="absolute right-4 bottom-4 text-white/5"><svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg></div>
@@ -430,22 +468,22 @@
                 <!-- Gasto de consumo vs construcción de patrimonio vs ahorro de caja (suman 100% del ingreso), y apalancamiento -->
                 <div class="grid grid-cols-2 md:grid-cols-2 xl:grid-cols-4 gap-6">
                     <div class="bg-card rounded-2xl p-6 border border-slate-800/60 shadow-sm relative overflow-hidden">
-                        <p class="text-textmuted text-sm font-medium tracking-wide">% Gasto de Consumo</p>
+                        <p class="text-textmuted text-sm font-medium tracking-wide inline-flex items-center gap-1.5">% Gasto de Consumo<button type="button" class="info-btn" data-tip="Gasto real del periodo, sin FIBRAS, cuentas de alto rendimiento, amortización voluntaria ni el capital de la cuota hipotecaria (eso construye patrimonio). Sí incluye el interés y los seguros de la hipoteca, como consumo real.">i</button></p>
                         <h3 class="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-medium text-white mt-1" id="kpi-tasa-gasto">0%</h3>
                         <p class="text-[10px] text-textmuted mt-1">Gastos reales, sin FIBRAS ni amortización voluntaria</p>
                     </div>
                     <div class="bg-card rounded-2xl p-6 border border-accent/40 shadow-sm relative overflow-hidden">
-                        <p class="text-textmuted text-sm font-medium tracking-wide">% Construcción de Patrimonio</p>
+                        <p class="text-textmuted text-sm font-medium tracking-wide inline-flex items-center gap-1.5">% Construcción de Patrimonio<button type="button" class="info-btn" data-tip="FIBRAS + cuentas de alto rendimiento + amortización voluntaria + capital (no interés/seguros) de la cuota hipotecaria obligatoria, sobre el ingreso del periodo. Pagar capital de la cuota cuenta igual que un abono voluntario.">i</button></p>
                         <h3 class="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-medium text-accent mt-1" id="kpi-tasa-patrimonio">0%</h3>
                         <p class="text-[10px] text-textmuted mt-1">FIBRAS + cuentas alto rendimiento + amortización voluntaria, sobre ingresos</p>
                     </div>
                     <div class="bg-card rounded-2xl p-6 border border-slate-800/60 shadow-sm relative overflow-hidden">
-                        <p class="text-textmuted text-sm font-medium tracking-wide">% Ahorro de Caja</p>
+                        <p class="text-textmuted text-sm font-medium tracking-wide inline-flex items-center gap-1.5">% Ahorro de Caja<button type="button" class="info-btn" data-tip="Residual: 100% menos % Gasto de Consumo menos % Construcción de Patrimonio. Puede dar negativo si se retiró más efectivo del que entró en el periodo.">i</button></p>
                         <h3 class="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-medium text-white mt-1" id="kpi-tasa-ahorro-caja">0%</h3>
                         <p class="text-[10px] text-textmuted mt-1">Residual: 100% - gasto - patrimonio (cash ocioso)</p>
                     </div>
                     <div class="bg-card rounded-2xl p-6 border border-slate-800/60 shadow-sm relative overflow-hidden">
-                        <p class="text-textmuted text-sm font-medium tracking-wide">Ratio Deuda / Ingreso (DTI)</p>
+                        <p class="text-textmuted text-sm font-medium tracking-wide inline-flex items-center gap-1.5">Ratio Deuda / Ingreso (DTI)<button type="button" class="info-btn" data-tip="Cuota indispensable presupuestada (planeada, no la pagada realmente) entre la mediana de ingreso neto. Si el presupuesto de esa categoría está desactualizado frente a la cuota real de la hipoteca, este ratio no lo reflejará.">i</button></p>
                         <h3 class="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-medium text-white mt-1" id="kpi-dti">0%</h3>
                         <p class="text-[10px] text-textmuted mt-1">Cuota indispensable / mediana de ingreso neto</p>
                     </div>
@@ -454,7 +492,7 @@
                 <!-- Charts layout -->
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <div class="bg-card rounded-2xl p-6 border border-slate-800/60 shadow-sm">
-                        <h3 class="font-bold text-white text-base mb-4">Ingreso Pasivo Mensual vs Acumulado</h3>
+                        <h3 class="font-bold text-white text-base mb-4 inline-flex items-center gap-1.5">Ingreso Pasivo Mensual vs Acumulado<button type="button" class="info-btn" data-tip="Serie mensual y acumulada del ingreso real registrado con categoría 'Pasivo'.">i</button></h3>
                         <div class="relative h-[320px]">
                             <canvas id="pasivoChart"></canvas>
                         </div>
@@ -463,7 +501,7 @@
                     <div class="bg-card rounded-2xl p-6 border border-slate-800/60 shadow-sm relative overflow-hidden flex flex-col justify-between">
                         <div>
                             <div class="flex items-center justify-between mb-4">
-                                <h3 class="font-bold text-white text-base">Ingreso Neto Mensual</h3>
+                                <h3 class="font-bold text-white text-base inline-flex items-center gap-1.5">Ingreso Neto Mensual<button type="button" class="info-btn" data-tip="Ingreso bruto (Salario, Freelance, Pasivo) menos descuentos tipo planilla (Jubilación, Comisiones, Quinta categoría, ITF), por mes.">i</button></h3>
                             </div>
                             <div class="relative h-[320px]">
                                 <canvas id="ingresoNetoChart"></canvas>
@@ -475,7 +513,7 @@
                 <!-- Evolutivo Libertad layout -->
                 <div class="grid grid-cols-1 mt-6 gap-6">
                     <div class="bg-card rounded-2xl p-6 border border-slate-800/60 shadow-sm">
-                        <h3 class="font-bold text-white text-base mb-4">Evolutivo: Brecha de Libertad</h3>
+                        <h3 class="font-bold text-white text-base mb-4 inline-flex items-center gap-1.5">Evolutivo: Brecha de Libertad<button type="button" class="info-btn" data-tip="% del gasto indispensable mensual que ya cubre el ingreso pasivo real, mes a mes. Usa su propia definición de 'indispensable' (sin Seguros, con 'Deudas' genérico), distinta de la de Supervivencia Estricta.">i</button></h3>
                         <div class="relative h-[320px]">
                             <canvas id="libertadChart"></canvas>
                         </div>
@@ -485,7 +523,7 @@
                 <!-- Esencial vs Discrecional -->
                 <div class="grid grid-cols-1 gap-6">
                     <div class="bg-card rounded-2xl p-6 border border-slate-800/60 shadow-sm">
-                        <h3 class="font-bold text-white text-base mb-1">Gasto Esencial vs Discrecional</h3>
+                        <h3 class="font-bold text-white text-base mb-1 inline-flex items-center gap-1.5">Gasto Esencial vs Discrecional<button type="button" class="info-btn" data-tip="Gasto real (no presupuesto) del periodo. 'Esencial' usa una lista fija de categorías que no incluye la hipoteca — cae bajo 'Inversiones', que este cálculo excluye por completo (capital, interés y seguros quedan fuera).">i</button></h3>
                         <p class="text-xs text-textmuted mb-4">% del gasto de consumo mensual. Excluye FIBRAS, cuentas de alto rendimiento y amortización voluntaria (eso es construcción de patrimonio, no consumo).</p>
                         <div class="relative h-[300px]">
                             <canvas id="esencialDiscrecionalChart"></canvas>
@@ -497,7 +535,7 @@
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <div class="bg-card rounded-2xl p-6 border border-slate-800/60 shadow-sm flex flex-col relative">
                         <div class="flex items-center justify-between mb-4">
-                            <h3 class="font-bold text-white text-base">Porcentaje de Ingreso por Categoría</h3>
+                            <h3 class="font-bold text-white text-base inline-flex items-center gap-1.5">Porcentaje de Ingreso por Categoría<button type="button" class="info-btn" data-tip="Ingreso real del periodo, agrupado por categoría.">i</button></h3>
                             <!-- Dropdown for category select -->
                             <div class="relative">
                                 <button onclick="toggleIncomeCategoryDropdown(event)" class="px-2.5 py-1.5 bg-slate-900 border border-slate-800 hover:border-slate-700 hover:bg-slate-800 text-[11px] text-textmain rounded-lg flex items-center gap-1.5 transition-all">
@@ -521,7 +559,7 @@
                     </div>
 
                     <div class="bg-card rounded-2xl p-6 border border-slate-800/60 shadow-sm lg:col-span-2 overflow-hidden flex flex-col h-[360px]">
-                        <h3 class="font-bold text-white text-base mb-4">Top Ingresos del Periodo</h3>
+                        <h3 class="font-bold text-white text-base mb-4 inline-flex items-center gap-1.5">Top Ingresos del Periodo<button type="button" class="info-btn" data-tip="Las transacciones de mayor ingreso del periodo, excluyendo reembolsos, descuentos y dinero extra. Filtrable por categoría exacta.">i</button></h3>
                         <div class="overflow-y-auto overflow-x-auto flex-1 pr-1">
                             <table class="w-full text-left text-xs table-auto">
                                 <thead>
@@ -546,37 +584,37 @@
                 <!-- KPI Summary cards -->
                 <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-6">
                     <div class="col-span-2 md:col-span-1 bg-card rounded-3xl p-6 border border-accent/40 shadow-sm shadow-accent/5 relative overflow-hidden ring-1 ring-accent/10">
-                        <p class="text-textmuted text-sm font-medium tracking-wide">Patrimonio Neto</p>
+                        <p class="text-textmuted text-sm font-medium tracking-wide inline-flex items-center gap-1.5">Patrimonio Neto<button type="button" class="info-btn" data-tip="Equity de hipoteca + FIBRAS + cuentas de alto rendimiento + efectivo, menos la hipoteca pendiente. No incluye valorización de activos (ni plusvalía de FIBRAS ni del inmueble) — solo importes reales verificables, decisión deliberada.">i</button></p>
                         <h3 class="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-semibold text-accent mt-1" id="kpi-pn-total">S/ 0</h3>
                         <p class="text-[10px] text-textmuted mt-1">Activos reales menos deuda pendiente</p>
                         <div class="absolute right-4 bottom-4 text-accent/10"><svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m-9 4h.01M4 7h16a1 1 0 011 1v9a2 2 0 01-2 2H5a2 2 0 01-2-2V8a1 1 0 011-1z"></path></svg></div>
                     </div>
                     <div class="bg-card rounded-3xl p-6 border border-slate-800/60 shadow-sm relative overflow-hidden">
-                        <p class="text-textmuted text-sm font-medium tracking-wide">Equity Hipoteca</p>
+                        <p class="text-textmuted text-sm font-medium tracking-wide inline-flex items-center gap-1.5">Equity Hipoteca<button type="button" class="info-btn" data-tip="Capital acumulado ya pagado del cronograma de la hipoteca. Es 0 antes del mes de la primera cuota, para no mostrar deuda pendiente completa por falta de dato.">i</button></p>
                         <h3 class="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-medium text-white mt-1" id="kpi-pn-equity">S/ 0</h3>
                         <p class="text-[10px] text-textmuted mt-1">Capital amortizado del inmueble</p>
                         <div class="absolute right-4 bottom-4 text-indigo-400/10"><svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5"></path></svg></div>
                     </div>
                     <div class="bg-card rounded-3xl p-6 border border-slate-800/60 shadow-sm relative overflow-hidden">
-                        <p class="text-textmuted text-sm font-medium tracking-wide">FIBRAS</p>
+                        <p class="text-textmuted text-sm font-medium tracking-wide inline-flex items-center gap-1.5">FIBRAS<button type="button" class="info-btn" data-tip="Acumulado real de aportes a FIBRAS (categoría 'Inversiones', subcategoría 'FIBRAS'), sin plusvalía.">i</button></p>
                         <h3 class="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-medium text-white mt-1" id="kpi-pn-fibras">S/ 0</h3>
                         <p class="text-[10px] text-textmuted mt-1">Aportes acumulados (sin plusvalía)</p>
                         <div class="absolute right-4 bottom-4 text-violet-400/10"><svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg></div>
                     </div>
                     <div class="bg-card rounded-3xl p-6 border border-slate-800/60 shadow-sm relative overflow-hidden">
-                        <p class="text-textmuted text-sm font-medium tracking-wide">Cuentas Alto Rendimiento</p>
+                        <p class="text-textmuted text-sm font-medium tracking-wide inline-flex items-center gap-1.5">Cuentas Alto Rendimiento<button type="button" class="info-btn" data-tip="Saldo neto (depósitos menos retiros) en Wow Compartamos, Pichincha y GNB, sumando ingresos y restando gastos en esas cuentas.">i</button></p>
                         <h3 class="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-medium text-white mt-1" id="kpi-pn-cuentas">S/ 0</h3>
                         <p class="text-[10px] text-textmuted mt-1">Saldo neto (depósitos - retiros)</p>
                         <div class="absolute right-4 bottom-4 text-cyan-400/10"><svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg></div>
                     </div>
                     <div class="bg-card rounded-3xl p-6 border border-slate-800/60 shadow-sm relative overflow-hidden">
-                        <p class="text-textmuted text-sm font-medium tracking-wide">Efectivo</p>
+                        <p class="text-textmuted text-sm font-medium tracking-wide inline-flex items-center gap-1.5">Efectivo<button type="button" class="info-btn" data-tip="Balance de caja acumulado de todo el historial, menos lo ya movido a cuentas de alto rendimiento — para no contar ese dinero dos veces.">i</button></p>
                         <h3 class="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-medium text-white mt-1" id="kpi-pn-efectivo">S/ 0</h3>
                         <p class="text-[10px] text-textmuted mt-1">Caja acumulada en cuentas regulares</p>
                         <div class="absolute right-4 bottom-4 text-emerald-400/10"><svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h1m4 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2z"></path></svg></div>
                     </div>
                     <div class="col-span-2 md:col-span-1 bg-card rounded-3xl p-6 border border-slate-800/60 shadow-sm relative overflow-hidden">
-                        <p class="text-textmuted text-sm font-medium tracking-wide">Hipoteca Pendiente</p>
+                        <p class="text-textmuted text-sm font-medium tracking-wide inline-flex items-center gap-1.5">Hipoteca Pendiente<button type="button" class="info-btn" data-tip="Capital total del cronograma completo (incluye cuotas futuras aún no vencidas) menos el equity ya pagado. No se filtra por fecha, para no ignorar capital futuro.">i</button></p>
                         <h3 class="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-medium text-expense mt-1" id="kpi-pn-pendiente">S/ 0</h3>
                         <p class="text-[10px] text-textmuted mt-1">Capital que falta por amortizar</p>
                         <div class="absolute right-4 bottom-4 text-expense/10"><svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg></div>
@@ -586,7 +624,7 @@
                 <!-- Chart evolutivo -->
                 <div class="grid grid-cols-1 gap-6">
                     <div class="bg-card rounded-2xl p-6 border border-slate-800/60 shadow-sm">
-                        <h3 class="font-bold text-white text-base mb-1">Evolución del Patrimonio Neto</h3>
+                        <h3 class="font-bold text-white text-base mb-1 inline-flex items-center gap-1.5">Evolución del Patrimonio Neto<button type="button" class="info-btn" data-tip="Basado solo en importes reales verificables (aportes, saldos, capital amortizado) — no incluye plusvalía de FIBRAS ni del inmueble. La serie visible arranca en mayo 2024, pero los acumulados sí incluyen meses previos.">i</button></h3>
                         <p class="text-xs text-textmuted mb-4">Activos apilados (equity, FIBRAS, cuentas de alto rendimiento) vs. deuda pendiente, y la línea de patrimonio neto resultante. Basado en importes reales, sin valorización de activos.</p>
                         <div class="relative h-[380px]">
                             <canvas id="patrimonioChart"></canvas>
@@ -600,26 +638,26 @@
                 <!-- KPI Summary cards -->
                 <div class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     <div class="bg-card rounded-3xl p-6 border border-slate-800/60 shadow-sm relative overflow-hidden">
-                        <p class="text-textmuted text-sm font-medium tracking-wide">Pagado en Cuotas</p>
+                        <p class="text-textmuted text-sm font-medium tracking-wide inline-flex items-center gap-1.5">Pagado en Cuotas<button type="button" class="info-btn" data-tip="Suma de las cuotas mensuales ya pagadas (capital + interés + seguros), según el cronograma normal de la hipoteca. No depende de cómo se categoricen las transacciones.">i</button></p>
                         <h3 class="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-medium text-white mt-1" id="kpi-hipoteca-pagado">S/ 0</h3>
                         <p class="text-[10px] text-textmuted mt-1">Suma acumulada de cuotas mensuales pagadas</p>
                         <div class="absolute right-4 bottom-4 text-emerald-400/10"><svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg></div>
                     </div>
                     <div class="bg-card rounded-3xl p-6 border border-slate-800/60 shadow-sm relative overflow-hidden">
-                        <p class="text-textmuted text-sm font-medium tracking-wide">Amortizaciones a Capital</p>
+                        <p class="text-textmuted text-sm font-medium tracking-wide inline-flex items-center gap-1.5">Amortizaciones a Capital<button type="button" class="info-btn" data-tip="Abonos extraordinarios directos a capital ya pagados, aparte de la cuota regular — reducen el cronograma restante.">i</button></p>
                         <h3 class="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-medium text-white mt-1" id="kpi-hipoteca-amortizaciones">S/ 0</h3>
                         <p class="text-[10px] text-textmuted mt-1">Pagos extraordinarios directo al saldo de capital</p>
                         <div class="absolute right-4 bottom-4 text-white/5"><svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6M17 14v6m-3-3h6"></path></svg></div>
                     </div>
                     <div class="bg-card rounded-3xl p-6 border border-slate-800/60 shadow-sm relative overflow-hidden">
-                        <p class="text-textmuted text-sm font-medium tracking-wide">Gastos Colaterales</p>
+                        <p class="text-textmuted text-sm font-medium tracking-wide inline-flex items-center gap-1.5">Gastos Colaterales<button type="button" class="info-btn" data-tip="Gasto real asociado al departamento que no es cuota ni amortización: mudanza, muebles, mantenimiento, notaría, tasación, etc. Se excluye para no duplicar contra las otras dos tarjetas.">i</button></p>
                         <h3 class="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-medium text-white mt-1" id="kpi-hipoteca-colaterales">S/ 0</h3>
                         <p class="text-[10px] text-textmuted mt-1">Acondicionamiento y extras</p>
                         <div class="absolute right-4 bottom-4 text-white/5"><svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg></div>
                     </div>
                     <div class="bg-card rounded-2xl p-6 border border-slate-800/60 shadow-sm relative overflow-hidden flex flex-col justify-between">
                         <div>
-                            <p class="text-textmuted text-sm font-medium tracking-wide">Costo Total Acumulado</p>
+                            <p class="text-textmuted text-sm font-medium tracking-wide inline-flex items-center gap-1.5">Costo Total Acumulado<button type="button" class="info-btn" data-tip="Suma de cuotas pagadas + amortizaciones a capital + gastos colaterales: costo total de vida del inmueble hasta hoy.">i</button></p>
                             <h3 class="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-medium text-accent mt-1" id="kpi-hipoteca-costototal">S/ 0</h3>
                             <p class="text-[10px] text-textmuted mt-1">Suma total invertida en el inmueble a la fecha</p>
                         </div>
@@ -631,7 +669,7 @@
                 <div class="space-y-6">
                     <!-- stacked bar chart for distribution: Full Width -->
                     <div class="bg-card rounded-2xl p-6 border border-slate-800/60 shadow-sm w-full">
-                        <h3 class="font-bold text-white text-base mb-4">Distribución de Cuota Mensual</h3>
+                        <h3 class="font-bold text-white text-base mb-4 inline-flex items-center gap-1.5">Distribución de Cuota Mensual<button type="button" class="info-btn" data-tip="Capital, interés, seguros e ingreso por alquiler de cada cuota del cronograma completo (pasadas y futuras).">i</button></h3>
                         <div class="relative h-[360px]">
                             <canvas id="hipotecaChart"></canvas>
                         </div>
@@ -642,7 +680,7 @@
                         <!-- Progress bar for Equity -->
                         <div class="bg-card rounded-2xl p-6 border border-slate-800/60 shadow-sm flex flex-col justify-between">
                             <div>
-                                <h3 class="font-bold text-white text-base mb-2">Progreso del Equity</h3>
+                                <h3 class="font-bold text-white text-base mb-2 inline-flex items-center gap-1.5">Progreso del Equity<button type="button" class="info-btn" data-tip="Capital ya amortizado vs. capital pendiente, sobre el cronograma completo de la hipoteca (incluye cuotas futuras aún no vencidas dentro de 'pendiente').">i</button></h3>
                                 <p class="text-xs text-textmuted mb-6">Porcentaje de amortización y participación real sobre el inmueble.</p>
                                 
                                 <!-- Equity visual indicator -->
@@ -696,7 +734,7 @@
                         <!-- Amortizaciones Chart -->
                         <div class="bg-card rounded-2xl p-6 border border-slate-800/60 shadow-sm flex flex-col justify-between">
                             <div>
-                                <h3 class="font-bold text-white text-base mb-2">Amortizaciones Realizadas</h3>
+                                <h3 class="font-bold text-white text-base mb-2 inline-flex items-center gap-1.5">Amortizaciones Realizadas<button type="button" class="info-btn" data-tip="Serie mensual de abonos extraordinarios a capital, solo de cuotas ya pagadas con amortización mayor a 0.">i</button></h3>
                                 <p class="text-xs text-textmuted mb-6">Detalle de abonos extraordinarios a capital realizados hasta la fecha.</p>
                                 <div class="relative h-[240px] mb-4">
                                     <canvas id="amortChart"></canvas>
@@ -710,6 +748,10 @@
             <!-- TAB 5: COSTO EN VIDA -->
             <div id="tab-costovida" class="hidden space-y-6">
                 <!-- Grid de Tarjetas KPI -->
+                <div class="flex items-center gap-1.5 -mb-2">
+                    <span class="text-xs text-textmuted uppercase tracking-wider font-semibold">Costo en Vida por Categoría</span>
+                    <button type="button" class="info-btn" data-tip="Horas de trabajo equivalentes al gasto real de cada categoría (importe ÷ pago por hora del mes correspondiente). Mapeo cerrado a estas 9 categorías: otras categorías reales (Casa, Viajes, Auto, Seguros, etc.) no aparecen aquí aunque sí generan costo en horas.">i</button>
+                </div>
                 <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-9 gap-4">
                     <!-- Comida -->
                     <div class="bg-card rounded-2xl p-4 border border-slate-800/60 shadow-sm">
@@ -791,7 +833,7 @@
                         <div>
                             <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
                                 <div>
-                                    <h3 class="font-bold text-white text-base mb-1">Distribución Mensual de Costo en Vida</h3>
+                                    <h3 class="font-bold text-white text-base mb-1 inline-flex items-center gap-1.5">Distribución Mensual de Costo en Vida<button type="button" class="info-btn" data-tip="Costo en horas de trabajo por mes y categoría. Usa una whitelist de 10 categorías (agrega Viajes y Autocuidado a las 9 de arriba) y excluye subcategoría 'Mujeres' (se reporta aparte en Finanzas Sociales).">i</button></h3>
                                     <p class="text-xs text-textmuted">Costo en horas de trabajo efectivo por mes. Usa el selector inferior para des-seleccionar categorías del gráfico.</p>
                                 </div>
                             </div>
@@ -864,7 +906,7 @@
                         <div>
                             <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
                                 <div>
-                                    <h3 class="font-bold text-white text-base mb-1">Consumo Mensual de Artículos Estabilizadores</h3>
+                                    <h3 class="font-bold text-white text-base mb-1 inline-flex items-center gap-1.5">Consumo Mensual de Artículos Estabilizadores<button type="button" class="info-btn" data-tip="Gasto real en soles (no horas) de una lista fija de artículos de hábito: Pan, Pancito, Cerveza, Whisky, Café, Café Instantáneo, Popcorn. Es un indicador de consumo, no un KPI de costo de vida en horas.">i</button></h3>
                                     <p class="text-xs text-textmuted">Tracking de consumo y disciplina financiera. Selecciona/des-selecciona artículos utilizando el control inferior.</p>
                                 </div>
                             </div>
@@ -897,25 +939,25 @@
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
                     <!-- Gasto Bruto -->
                     <div class="bg-card rounded-2xl p-6 border border-slate-800/60 shadow-sm">
-                        <p class="text-textmuted text-xs uppercase font-semibold tracking-wider mb-2">Gasto Bruto</p>
+                        <p class="text-textmuted text-xs uppercase font-semibold tracking-wider mb-2 inline-flex items-center gap-1.5">Gasto Bruto<button type="button" class="info-btn" data-tip="Gasto real con subcategoría 'Mujeres', sin excluir la categoría 'Préstamos'.">i</button></p>
                         <h3 class="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-medium text-white" id="kpi-social-bruto">S/ 0</h3>
                         <span class="text-[10px] text-textmuted">Gastos de subcategoría Mujeres</span>
                     </div>
                     <!-- Reembolsos -->
                     <div class="bg-card rounded-2xl p-6 border border-slate-800/60 shadow-sm">
-                        <p class="text-textmuted text-xs uppercase font-semibold tracking-wider mb-2">Reembolsos</p>
+                        <p class="text-textmuted text-xs uppercase font-semibold tracking-wider mb-2 inline-flex items-center gap-1.5">Reembolsos<button type="button" class="info-btn" data-tip="Gasto con categoría 'Reembolsos' y subcategoría 'Mujeres'.">i</button></p>
                         <h3 class="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-medium text-accent" id="kpi-social-reembolsos">S/ 0</h3>
                         <span class="text-[10px] text-textmuted">Reembolsos subcategoría Mujeres</span>
                     </div>
                     <!-- Gasto Neto -->
                     <div class="bg-card rounded-2xl p-6 border border-slate-800/60 shadow-sm">
-                        <p class="text-textmuted text-xs uppercase font-semibold tracking-wider mb-2">Gasto Neto</p>
+                        <p class="text-textmuted text-xs uppercase font-semibold tracking-wider mb-2 inline-flex items-center gap-1.5">Gasto Neto<button type="button" class="info-btn" data-tip="Gasto Bruto menos Reembolsos. Usa una definición de 'gasto en Mujeres' distinta a la de % Ingreso (que sí excluye 'Préstamos') — no son comparables entre sí ni deberían sumarse.">i</button></p>
                         <h3 class="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-medium text-white" id="kpi-social-neto">S/ 0</h3>
                         <span class="text-[10px] text-textmuted">Gasto Bruto menos Reembolsos</span>
                     </div>
                     <!-- Porcentaje Gasto Social -->
                     <div class="bg-card rounded-2xl p-6 border border-slate-800/60 shadow-sm">
-                        <p class="text-textmuted text-xs uppercase font-semibold tracking-wider mb-2">Gasto Social / Ingreso</p>
+                        <p class="text-textmuted text-xs uppercase font-semibold tracking-wider mb-2 inline-flex items-center gap-1.5">Gasto Social / Ingreso<button type="button" class="info-btn" data-tip="Gasto en subcategoría 'Mujeres' (esta versión sí excluye 'Préstamos') sobre el ingreso total del periodo.">i</button></p>
                         <h3 class="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-medium text-white" id="kpi-social-pct">0.00%</h3>
                         <span class="text-[10px] text-textmuted">% de ingresos bruto mensuales</span>
                     </div>
@@ -926,7 +968,7 @@
                     <!-- Tendencia de Gasto Social -->
                     <div class="bg-card rounded-2xl p-6 border border-slate-800/60 shadow-sm lg:col-span-2 flex flex-col justify-between">
                         <div>
-                            <h3 class="font-bold text-white text-base mb-2">Tendencia Mensual de Gasto</h3>
+                            <h3 class="font-bold text-white text-base mb-2 inline-flex items-center gap-1.5">Tendencia Mensual de Gasto<button type="button" class="info-btn" data-tip="Serie mensual del gasto real en subcategoría 'Mujeres', excluyendo 'Préstamos' — misma definición que Gasto Social/Ingreso, distinta de Gasto Bruto/Neto de arriba.">i</button></h3>
                             <p class="text-xs text-textmuted mb-6">Evolución del gasto mensual en subcategoría Mujeres.</p>
                             <div class="relative h-[300px] mb-4">
                                 <canvas id="socialTendenciaChart"></canvas>
@@ -937,7 +979,7 @@
                     <!-- Proporción por Categoría -->
                     <div class="bg-card rounded-2xl p-6 border border-slate-800/60 shadow-sm lg:col-span-1 flex flex-col justify-between">
                         <div>
-                            <h3 class="font-bold text-white text-base mb-2">Gasto por Categoría</h3>
+                            <h3 class="font-bold text-white text-base mb-2 inline-flex items-center gap-1.5">Gasto por Categoría<button type="button" class="info-btn" data-tip="Desglose del gasto real en subcategoría 'Mujeres' por categoría, en el periodo.">i</button></h3>
                             <p class="text-xs text-textmuted mb-6">Proporción del gasto social por categoría en el periodo.</p>
                             <div class="relative h-[250px] mb-4">
                                 <canvas id="socialPieChart"></canvas>
@@ -950,7 +992,7 @@
                 <div class="grid grid-cols-1 gap-6">
                     <div class="bg-card rounded-2xl p-6 border border-slate-800/60 shadow-sm flex flex-col justify-between">
                         <div>
-                            <h3 class="font-bold text-white text-base mb-2">Gasto Compartido por Persona</h3>
+                            <h3 class="font-bold text-white text-base mb-2 inline-flex items-center gap-1.5">Gasto Compartido por Persona<button type="button" class="info-btn" data-tip="Gasto neto mensual por persona para transacciones marcadas como compartidas (clave 'C/'), excluyendo reembolsos. No se limita a subcategoría 'Mujeres': es gasto compartido con cualquier persona.">i</button></h3>
                             <p class="text-xs text-textmuted mb-6">Agrupación mensual de gastos compartidos (clave 'C/') apilados por persona (campo 'valor').</p>
                             <div class="relative h-[350px] mb-4">
                                 <canvas id="socialCompartidoChart"></canvas>
@@ -961,7 +1003,7 @@
 
                 <!-- Tabla de Top 100 Gastos -->
                 <div class="bg-card rounded-2xl p-6 border border-slate-800/60 shadow-sm">
-                    <h3 class="font-bold text-white text-base mb-2">Top 100 Gastos del Periodo</h3>
+                    <h3 class="font-bold text-white text-base mb-2 inline-flex items-center gap-1.5">Top 100 Gastos del Periodo<button type="button" class="info-btn" data-tip="Transacciones individuales de subcategoría 'Mujeres' del periodo, ordenadas de mayor a menor monto.">i</button></h3>
                     <p class="text-xs text-textmuted mb-6">Desglose de transacciones individuales correspondientes a la subcategoría Mujeres.</p>
                     
                     <div class="overflow-y-auto max-h-[350px] pr-2 scrollbar-thin scrollbar-thumb-slate-800">
@@ -986,8 +1028,75 @@
     </div>
 
     <script>
-        const API_URL = window.location.origin; 
-        
+        const API_URL = window.location.origin;
+
+        // Componente reutilizable: ícono "i" + popover con la descripción de cómo se
+        // calcula cada métrica. El texto vive en el atributo data-tip de cada botón
+        // (fuente: dashboard_api/docs/metricas.md). Un solo popover compartido en el DOM,
+        // se abre/cierra por delegación de eventos así que también funciona con tarjetas
+        // generadas dinámicamente (ej. cumplimiento de presupuesto por categoría).
+        (function initInfoTooltips() {
+            const popover = document.createElement('div');
+            popover.id = 'info-popover';
+            popover.className = 'hidden fixed z-[100] max-w-[280px] bg-slate-950 border border-slate-800 rounded-xl shadow-2xl p-3 text-xs text-textmain leading-relaxed';
+            document.body.appendChild(popover);
+
+            let activeBtn = null;
+
+            function closeInfoPopover() {
+                popover.classList.add('hidden');
+                if (activeBtn) activeBtn.classList.remove('active');
+                activeBtn = null;
+            }
+
+            function openInfoPopover(btn) {
+                if (activeBtn === btn) {
+                    closeInfoPopover();
+                    return;
+                }
+                if (activeBtn) activeBtn.classList.remove('active');
+
+                popover.textContent = btn.getAttribute('data-tip') || '';
+                popover.classList.remove('hidden');
+                btn.classList.add('active');
+                activeBtn = btn;
+
+                const margin = 8;
+                const rect = btn.getBoundingClientRect();
+                popover.style.left = `${margin}px`;
+                popover.style.top = `${margin}px`;
+
+                const pw = popover.offsetWidth;
+                const ph = popover.offsetHeight;
+                let left = rect.left;
+                let top = rect.bottom + margin;
+                if (left + pw > window.innerWidth - margin) left = window.innerWidth - pw - margin;
+                if (left < margin) left = margin;
+                if (top + ph > window.innerHeight - margin) top = rect.top - ph - margin;
+                if (top < margin) top = margin;
+
+                popover.style.left = `${left}px`;
+                popover.style.top = `${top}px`;
+            }
+
+            document.addEventListener('click', (e) => {
+                const btn = e.target.closest('.info-btn');
+                if (btn) {
+                    e.stopPropagation();
+                    openInfoPopover(btn);
+                    return;
+                }
+                if (!e.target.closest('#info-popover')) closeInfoPopover();
+            });
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') closeInfoPopover();
+            });
+
+            window.addEventListener('scroll', closeInfoPopover, true);
+            window.addEventListener('resize', closeInfoPopover);
+        })();
+
         // Colores y tipografía globales de Chart.js
         Chart.defaults.color = '#64748b';
         Chart.defaults.font.family = "Outfit, ui-sans-serif, system-ui, sans-serif";
@@ -2806,7 +2915,7 @@
                 header.className = "flex justify-between items-start mb-3";
                 header.innerHTML = `
                     <div>
-                        <h4 class="font-bold text-white text-sm">${cat}</h4>
+                        <h4 class="font-bold text-white text-sm inline-flex items-center gap-1.5">${cat}<button type="button" class="info-btn" data-tip="Gasto real acumulado del mes vs. presupuesto planeado para ${cat}. Caveat conocido: para 'Deudas indispensables' el gasto real casi siempre muestra 0 y 'cumple', aunque la cuota de la hipoteca sí se pague — ninguna transacción real usa ese nombre de categoría.">i</button></h4>
                         <span class="text-[10px] text-textmuted">Frecuencia Mensual</span>
                     </div>
                     <span class="px-2 py-0.5 text-[9px] bg-slate-900 border border-slate-800 text-accent font-bold rounded-lg uppercase tracking-wider">
