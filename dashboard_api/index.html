@@ -110,8 +110,10 @@
 <body class="bg-darkbg text-textmain font-sans antialiased selection:bg-accent selection:text-white">
 
     <div class="flex flex-col md:flex-row min-h-screen">
-        <!-- Sidebar -->
-        <aside id="sidebar" class="w-full md:w-64 bg-card border-r border-slate-800/80 p-6 flex flex-col justify-between transition-all duration-300">
+        <!-- Overlay móvil: cierra el drawer al tocar fuera. Oculto siempre en desktop. -->
+        <div id="sidebar-backdrop" onclick="toggleSidebar()" class="hidden md:hidden fixed inset-0 bg-black/60 z-40 transition-opacity duration-300"></div>
+        <!-- Sidebar: drawer fijo desde la izquierda en móvil (transform), en flujo normal desde md hacia arriba -->
+        <aside id="sidebar" class="fixed md:static inset-y-0 left-0 z-50 md:z-auto w-72 max-w-[85%] md:w-64 md:max-w-none h-screen md:h-auto overflow-y-auto bg-card border-r border-slate-800/80 p-6 flex flex-col justify-between transition-transform duration-300 -translate-x-full md:translate-x-0">
             <div>
                 <div class="flex items-center justify-between mb-8">
                     <div class="flex items-center gap-3">
@@ -135,6 +137,10 @@
                     <button onclick="switchTab('presupuesto')" id="tab-btn-presupuesto" class="w-full flex items-center gap-3 px-4 py-2.5 text-textmuted hover:bg-slate-800/50 hover:text-textmain rounded-xl text-sm font-medium transition-all text-left">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
                         Presupuesto
+                    </button>
+                    <button onclick="switchTab('yoy')" id="tab-btn-yoy" class="w-full flex items-center gap-3 px-4 py-2.5 text-textmuted hover:bg-slate-800/50 hover:text-textmain rounded-xl text-sm font-medium transition-all text-left">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+                        Crecimiento YoY
                     </button>
                     <button onclick="switchTab('crecimiento')" id="tab-btn-crecimiento" class="w-full flex items-center gap-3 px-4 py-2.5 text-textmuted hover:bg-slate-800/50 hover:text-textmain rounded-xl text-sm font-medium transition-all text-left">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6M17 14v6m-3-3h6"/></svg>
@@ -175,6 +181,9 @@
             <!-- Global filters -->
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 pb-6 border-b border-slate-800/60">
                 <div class="flex items-center gap-3">
+                    <button id="btn-mobile-menu" onclick="toggleSidebar()" class="md:hidden p-2 bg-card border border-slate-800 hover:border-slate-700 hover:bg-slate-800 rounded-xl text-textmuted hover:text-textmain transition-all" title="Abrir menú">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+                    </button>
                     <button id="btn-show-sidebar" onclick="toggleSidebar()" class="hidden p-2 bg-card border border-slate-800 hover:border-slate-700 hover:bg-slate-800 rounded-xl text-textmuted hover:text-textmain transition-all animate-fade-in" title="Mostrar menú">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
                     </button>
@@ -602,7 +611,7 @@
                         <div class="absolute right-4 bottom-4 text-violet-400/10"><svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg></div>
                     </div>
                     <div class="bg-card rounded-3xl p-6 border border-slate-800/60 shadow-sm relative overflow-hidden">
-                        <p class="text-textmuted text-sm font-medium tracking-wide inline-flex items-center gap-1.5">Cuentas Alto Rendimiento<button type="button" class="info-btn" data-tip="Saldo neto (depósitos menos retiros) en Wow Compartamos, Pichincha y GNB, sumando ingresos y restando gastos en esas cuentas.">i</button></p>
+                        <p class="text-textmuted text-sm font-medium tracking-wide inline-flex items-center gap-1.5">Cuentas Alto Rendimiento<button type="button" class="info-btn" data-tip="Saldo neto (depósitos menos retiros) en las cuentas de alto rendimiento (Wow Compartamos, Pichincha, GNB, Global66 - USD), sumando ingresos y restando gastos en esas cuentas. La lista de cuentas vive en una sola tabla en BigQuery, no hardcodeada aquí.">i</button></p>
                         <h3 class="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-medium text-white mt-1" id="kpi-pn-cuentas">S/ 0</h3>
                         <p class="text-[10px] text-textmuted mt-1">Saldo neto (depósitos - retiros)</p>
                         <div class="absolute right-4 bottom-4 text-cyan-400/10"><svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg></div>
@@ -1024,6 +1033,77 @@
                 </div>
             </div>
 
+            <!-- TAB: CRECIMIENTO YOY -->
+            <div id="tab-yoy" class="hidden space-y-6">
+                <!-- KPI Summary cards -->
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-6">
+                    <div class="bg-card rounded-3xl p-6 border border-accent/40 shadow-sm shadow-accent/5 relative overflow-hidden ring-1 ring-accent/10">
+                        <p class="text-textmuted text-sm font-medium tracking-wide inline-flex items-center gap-1.5">Ingreso Neto (último mes)<button type="button" class="info-btn" data-tip="Ingreso neto real del mes más reciente disponible: ingreso bruto (Salario, Freelance, Pasivo) menos descuentos tipo planilla.">i</button></p>
+                        <h3 class="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-semibold text-accent mt-1" id="kpi-yoy-ingreso-actual">S/ 0</h3>
+                        <p class="text-[10px] text-textmuted mt-1" id="kpi-yoy-ingreso-mes">-</p>
+                    </div>
+                    <div class="bg-card rounded-3xl p-6 border border-slate-800/60 shadow-sm relative overflow-hidden">
+                        <p class="text-textmuted text-sm font-medium tracking-wide inline-flex items-center gap-1.5">Crecimiento YoY<button type="button" class="info-btn" data-tip="Variación % del ingreso neto del mes más reciente contra el mismo mes del año anterior (comparación por fecha exacta, no por historial mensual desplazado). Vacío si no hay dato de hace 12 meses.">i</button></p>
+                        <h3 class="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-medium mt-1" id="kpi-yoy-ingreso-pct">-</h3>
+                        <p class="text-[10px] text-textmuted mt-1">Vs. mismo mes, año anterior</p>
+                    </div>
+                    <div class="bg-card rounded-3xl p-6 border border-slate-800/60 shadow-sm relative overflow-hidden">
+                        <p class="text-textmuted text-sm font-medium tracking-wide inline-flex items-center gap-1.5">Media Móvil 12M<button type="button" class="info-btn" data-tip="Promedio del ingreso neto de los últimos 12 meses (incluido el actual) — suaviza tanto la volatilidad mensual como la estacionalidad anual para ver la tendencia de fondo.">i</button></p>
+                        <h3 class="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-medium text-white mt-1" id="kpi-yoy-media-movil">S/ 0</h3>
+                        <p class="text-[10px] text-textmuted mt-1">Promedio de los últimos 3 meses</p>
+                    </div>
+                </div>
+
+                <!-- Ingreso neto: tendencia -->
+                <div class="grid grid-cols-1 gap-6">
+                    <div class="bg-card rounded-2xl p-6 border border-slate-800/60 shadow-sm">
+                        <h3 class="font-bold text-white text-base mb-4 inline-flex items-center gap-1.5">Ingreso Neto Mensual + Medias Móviles<button type="button" class="info-btn" data-tip="Ingreso neto real por mes (todo el historial disponible) con sus medias móviles de 3, 6 y 12 meses superpuestas, para aplanar la volatilidad mensual y estacional.">i</button></h3>
+                        <div class="relative h-[300px]">
+                            <canvas id="yoyIngresoChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Inflación de estilo de vida por categoría -->
+                <div class="bg-card rounded-2xl p-6 border border-slate-800/60 shadow-sm">
+                    <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+                        <h3 class="font-bold text-white text-base inline-flex items-center gap-1.5">Inflación de Estilo de Vida por Categoría<button type="button" class="info-btn" data-tip="Gasto real de cada categoría en el mes seleccionado, comparado entre los últimos 5 años disponibles. 'Anuncios' y 'Préstamos' se muestran netos contra Reembolsos, igual que en el resto del dashboard.">i</button></h3>
+                        <div class="flex items-center gap-2">
+                            <label for="yoy-mes-select" class="text-[11px] text-textmuted">Mes:</label>
+                            <select id="yoy-mes-select" onchange="cambiarMesYoy()" class="px-2.5 py-1.5 bg-slate-900 border border-slate-800 text-[11px] text-textmain rounded-lg"></select>
+                        </div>
+                    </div>
+                    <p class="text-xs text-textmuted mb-4">Ordenado de mayor a menor variación interanual (último año disponible vs. el anterior) para el mes seleccionado.</p>
+                    <div class="overflow-y-auto max-h-[360px] pr-1">
+                        <table class="w-full text-left text-xs table-auto">
+                            <thead id="yoy-resumen-head">
+                                <tr class="text-textmuted border-b border-slate-800 bg-card sticky top-0 z-10">
+                                    <th class="pb-2 font-semibold px-2 bg-card">Categoría</th>
+                                    <th class="pb-2 font-semibold px-2 text-right bg-card">YoY (último vs. anterior)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="yoy-resumen-body" class="divide-y divide-slate-800/40">
+                                <tr><td colspan="2" class="py-6 text-center text-textmuted animate-pulse">Cargando...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Detalle de una categoría: agosto vs. agosto, mismo mes entre años -->
+                <div class="bg-card rounded-2xl p-6 border border-slate-800/60 shadow-sm">
+                    <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+                        <h3 class="font-bold text-white text-base inline-flex items-center gap-1.5">Detalle Mensual por Categoría<button type="button" class="info-btn" data-tip="Gasto real mensual de la categoría seleccionada, agrupado por mes del año (Ene-Dic) con una barra por cada uno de los últimos 5 años — permite comparar directamente, por ejemplo, agosto de este año contra agosto de los 4 años anteriores.">i</button></h3>
+                        <div class="flex items-center gap-2">
+                            <label for="yoy-categoria-select" class="text-[11px] text-textmuted">Categoría:</label>
+                            <select id="yoy-categoria-select" onchange="cargarYoyCategoriaDetalle()" class="px-2.5 py-1.5 bg-slate-900 border border-slate-800 text-[11px] text-textmain rounded-lg"></select>
+                        </div>
+                    </div>
+                    <div class="relative h-[340px]">
+                        <canvas id="yoyCategoriaChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
         </main>
     </div>
 
@@ -1135,6 +1215,13 @@
         let socialPieChartInstance = null;
         let socialCompartidoChartInstance = null;
 
+        let yoyIngresoChartInstance = null;
+        let yoyCategoriaChartInstance = null;
+        let yoyResumenCategorias = [];
+        let yoyResumenAnios = [];
+        // Paleta consistente con el resto del dashboard (pieChart / patrimonioChart), sin azul/amarillo.
+        const YOY_PALETTE = ['#4ade80', '#ffffff', '#9ca3af', '#4b5563', '#22c55e'];
+
         // Categorías a mostrar
         const categoriasPresupuestoDefault = [
             "Comida", "Casa", "Entretenimiento", "Facturas", 
@@ -1146,8 +1233,19 @@
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
             const showBtn = document.getElementById('btn-show-sidebar');
-            sidebar.classList.toggle('hidden');
-            showBtn.classList.toggle('hidden');
+            const backdrop = document.getElementById('sidebar-backdrop');
+            const esMobile = window.innerWidth < 768; // breakpoint 'md' de Tailwind
+
+            if (esMobile) {
+                // Drawer: se desliza desde la izquierda con transform, no empuja el contenido.
+                const abriendo = sidebar.classList.contains('-translate-x-full');
+                sidebar.classList.toggle('-translate-x-full');
+                if (backdrop) backdrop.classList.toggle('hidden', !abriendo);
+            } else {
+                // Desktop: colapsar/expandir en flujo, como antes.
+                sidebar.classList.toggle('hidden');
+                showBtn.classList.toggle('hidden');
+            }
         }
 
         // Cambiar entre pestañas
@@ -1171,17 +1269,19 @@
             const tabCostoVida = document.getElementById('tab-costovida');
             const tabEstabilizadores = document.getElementById('tab-estabilizadores');
             const tabSocial = document.getElementById('tab-social');
-            
+            const tabBtnYoy = document.getElementById('tab-btn-yoy');
+            const tabYoy = document.getElementById('tab-yoy');
+
             const filterDates = document.getElementById('filter-dates');
             const filterBudget = document.getElementById('filter-budget');
-            
+
             const pageTitle = document.getElementById('page-title');
             const pageSubtitle = document.getElementById('page-subtitle');
 
-            [tabBtnOverview, tabBtnPresupuesto, tabBtnCrecimiento, tabBtnPatrimonio, tabBtnHipoteca, tabBtnCostoVida, tabBtnEstabilizadores, tabBtnSocial].forEach(btn => {
+            [tabBtnOverview, tabBtnPresupuesto, tabBtnCrecimiento, tabBtnPatrimonio, tabBtnHipoteca, tabBtnCostoVida, tabBtnEstabilizadores, tabBtnSocial, tabBtnYoy].forEach(btn => {
                 if (btn) btn.className = "w-full flex items-center gap-3 px-4 py-2.5 text-textmuted hover:bg-slate-800/50 hover:text-textmain rounded-xl text-sm font-medium transition-all text-left";
             });
-            [tabOverview, tabPresupuesto, tabCrecimiento, tabPatrimonio, tabHipoteca, tabCostoVida, tabEstabilizadores, tabSocial].forEach(t => {
+            [tabOverview, tabPresupuesto, tabCrecimiento, tabPatrimonio, tabHipoteca, tabCostoVida, tabEstabilizadores, tabSocial, tabYoy].forEach(t => {
                 if (t) t.classList.add('hidden');
             });
 
@@ -1258,6 +1358,26 @@
                 pageTitle.innerText = "Finanzas Sociales";
                 pageSubtitle.innerText = "Estadísticas del gasto asociado a la subcategoría Mujeres y aportes compartidos.";
                 cargarSocial();
+            } else if (tab === 'yoy') {
+                tabYoy.classList.remove('hidden');
+                filterDates.classList.add('hidden');
+                filterBudget.classList.add('hidden');
+                tabBtnYoy.className = "w-full flex items-center gap-3 px-4 py-2.5 bg-accent/15 text-accent rounded-xl text-sm font-medium border border-accent/20 transition-all text-left";
+
+                pageTitle.innerText = "Crecimiento YoY";
+                pageSubtitle.innerText = "Comparativas año contra año de ingreso neto y gasto por categoría, con todo el historial disponible.";
+                cargarCrecimientoYoY();
+            }
+
+            // En móvil, el menú es un drawer superpuesto: al elegir una pestaña, se cierra
+            // solo para no tapar el contenido recién cargado.
+            if (window.innerWidth < 768) {
+                const sidebarEl = document.getElementById('sidebar');
+                const backdropEl = document.getElementById('sidebar-backdrop');
+                if (sidebarEl && !sidebarEl.classList.contains('-translate-x-full')) {
+                    sidebarEl.classList.add('-translate-x-full');
+                    if (backdropEl) backdropEl.classList.add('hidden');
+                }
             }
         }
 
@@ -3627,6 +3747,226 @@
                 console.error("Error al cargar top de gastos sociales:", err);
                 const tbody = document.getElementById('social-table-body');
                 tbody.innerHTML = '<tr><td colspan="4" class="py-6 text-center text-white">Error al cargar la información.</td></tr>';
+            }
+        }
+
+        // ===== Crecimiento YoY =====
+
+        async function cargarCrecimientoYoY() {
+            await Promise.all([
+                cargarYoyIngreso(),
+                cargarYoyResumenCategorias()
+            ]);
+        }
+
+        async function cargarYoyIngreso() {
+            try {
+                const res = await fetch(`${API_URL}/crecimiento-yoy-ingreso`);
+                const data = await res.json();
+
+                const n = data.ingreso_neto.length;
+                if (n > 0) {
+                    document.getElementById('kpi-yoy-ingreso-actual').textContent = formatMoneda(data.ingreso_neto[n - 1]);
+                    document.getElementById('kpi-yoy-ingreso-mes').textContent = data.meses[n - 1];
+                    document.getElementById('kpi-yoy-media-movil').textContent = formatMoneda(data.promedio_movil_12m[n - 1]);
+
+                    const pct = data.yoy_pct[n - 1];
+                    const kpiPct = document.getElementById('kpi-yoy-ingreso-pct');
+                    if (pct === null || pct === undefined) {
+                        kpiPct.textContent = '—';
+                        kpiPct.className = "text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-medium mt-1 text-textmuted";
+                    } else {
+                        kpiPct.textContent = `${pct >= 0 ? '+' : ''}${pct}%`;
+                        kpiPct.className = `text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-medium mt-1 ${pct >= 0 ? 'text-emerald-400' : 'text-rose-400'}`;
+                    }
+                }
+
+                if (yoyIngresoChartInstance) yoyIngresoChartInstance.destroy();
+                const ctx = document.getElementById('yoyIngresoChart').getContext('2d');
+                yoyIngresoChartInstance = new Chart(ctx, {
+                    data: {
+                        labels: data.meses,
+                        datasets: [
+                            {
+                                type: 'bar',
+                                label: 'Ingreso Neto',
+                                data: data.ingreso_neto,
+                                backgroundColor: 'rgba(74, 222, 128, 0.85)',
+                                borderRadius: 4,
+                                order: 2
+                            },
+                            {
+                                type: 'line',
+                                label: 'Media Móvil 3M',
+                                data: data.promedio_movil_3m,
+                                borderColor: 'rgba(255, 255, 255, 1)',
+                                borderWidth: 2,
+                                fill: false,
+                                tension: 0.4,
+                                pointRadius: 1.5,
+                                order: 1
+                            },
+                            {
+                                type: 'line',
+                                label: 'Media Móvil 6M',
+                                data: data.promedio_movil_6m,
+                                borderColor: 'rgba(139, 92, 246, 1)', // Violet, igual que FIBRAS en Patrimonio Neto
+                                borderWidth: 2,
+                                fill: false,
+                                tension: 0.4,
+                                pointRadius: 1.5,
+                                order: 1
+                            },
+                            {
+                                type: 'line',
+                                label: 'Media Móvil 12M',
+                                data: data.promedio_movil_12m,
+                                borderColor: 'rgba(34, 211, 238, 1)', // Cyan, igual que Cuentas Alto Rendimiento en Patrimonio Neto
+                                borderWidth: 2,
+                                fill: false,
+                                tension: 0.4,
+                                pointRadius: 1.5,
+                                order: 1
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'top', labels: { boxWidth: 12, font: { size: 10 } } }
+                        },
+                        scales: {
+                            x: { grid: { display: false }, ticks: { font: { size: 9 } } },
+                            y: {
+                                grid: { color: 'rgba(51, 65, 85, 0.1)' },
+                                ticks: { font: { size: 9 }, callback: v => formatMoneda(v) }
+                            }
+                        }
+                    }
+                });
+            } catch (err) {
+                console.error("Error al cargar crecimiento YoY de ingreso:", err);
+            }
+        }
+
+        async function cargarYoyResumenCategorias(mes) {
+            try {
+                const url = mes ? `${API_URL}/crecimiento-yoy-resumen-categorias?mes=${mes}` : `${API_URL}/crecimiento-yoy-resumen-categorias`;
+                const res = await fetch(url);
+                const data = await res.json();
+                yoyResumenCategorias = data.categorias || [];
+                yoyResumenAnios = data.anios || [];
+
+                const mesSelect = document.getElementById('yoy-mes-select');
+                if (mesSelect.options.length === 0) {
+                    const nombresMeses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+                    nombresMeses.forEach((nombre, idx) => {
+                        const opt = document.createElement('option');
+                        opt.value = idx + 1;
+                        opt.textContent = nombre;
+                        mesSelect.appendChild(opt);
+                    });
+                }
+                if (data.mes) mesSelect.value = data.mes;
+
+                // Cabecera dinámica: Categoría + una columna por cada año de la ventana (hasta 5) + YoY.
+                const thead = document.getElementById('yoy-resumen-head');
+                thead.innerHTML = `
+                    <tr class="text-textmuted border-b border-slate-800 bg-card sticky top-0 z-10">
+                        <th class="pb-2 font-semibold px-2 bg-card">Categoría</th>
+                        ${yoyResumenAnios.map(a => `<th class="pb-2 font-semibold px-2 text-right bg-card">${a}</th>`).join('')}
+                        <th class="pb-2 font-semibold px-2 text-right bg-card">YoY (último vs. anterior)</th>
+                    </tr>
+                `;
+
+                const colspan = yoyResumenAnios.length + 2;
+                const tbody = document.getElementById('yoy-resumen-body');
+                if (yoyResumenCategorias.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="${colspan}" class="py-6 text-center text-textmuted">Sin datos para este mes.</td></tr>`;
+                } else {
+                    tbody.innerHTML = yoyResumenCategorias.map(cat => {
+                        const celdasAnios = cat.montos.map(m =>
+                            `<td class="py-2.5 px-2 text-right text-textmuted">${m === null || m === undefined ? '—' : formatMoneda(m)}</td>`
+                        ).join('');
+                        const pct = cat.yoy_pct_ultimo;
+                        const pctHtml = (pct === null || pct === undefined)
+                            ? '<span class="text-textmuted">—</span>'
+                            : `<span class="${pct >= 0 ? 'text-rose-400' : 'text-emerald-400'} font-semibold">${pct >= 0 ? '+' : ''}${pct}%</span>`;
+                        return `
+                            <tr class="hover:bg-slate-800/10 transition-colors">
+                                <td class="py-2.5 px-2 font-medium text-white">${escapeHtml(cat.categoria)}</td>
+                                ${celdasAnios}
+                                <td class="py-2.5 px-2 text-right">${pctHtml}</td>
+                            </tr>
+                        `;
+                    }).join('');
+                }
+
+                const catSelect = document.getElementById('yoy-categoria-select');
+                const seleccionPrevia = catSelect.value;
+                catSelect.innerHTML = '';
+                yoyResumenCategorias.forEach(cat => {
+                    const opt = document.createElement('option');
+                    opt.value = cat.categoria;
+                    opt.textContent = cat.categoria;
+                    catSelect.appendChild(opt);
+                });
+                if (yoyResumenCategorias.some(c => c.categoria === seleccionPrevia)) {
+                    catSelect.value = seleccionPrevia;
+                }
+                if (catSelect.value) {
+                    cargarYoyCategoriaDetalle();
+                }
+            } catch (err) {
+                console.error("Error al cargar resumen YoY de categorías:", err);
+            }
+        }
+
+        function cambiarMesYoy() {
+            const mes = document.getElementById('yoy-mes-select').value;
+            cargarYoyResumenCategorias(mes);
+        }
+
+        async function cargarYoyCategoriaDetalle() {
+            const categoria = document.getElementById('yoy-categoria-select').value;
+            if (!categoria) return;
+            try {
+                const res = await fetch(`${API_URL}/crecimiento-yoy-categoria?categoria=${encodeURIComponent(categoria)}`);
+                const data = await res.json();
+
+                if (yoyCategoriaChartInstance) yoyCategoriaChartInstance.destroy();
+                const ctx = document.getElementById('yoyCategoriaChart').getContext('2d');
+                // Eje X = mes del año (Ene-Dic), sin año; un dataset por año para formar clusters
+                // de barras por mes (ej. Ago-2023, Ago-2024... una al lado de la otra).
+                yoyCategoriaChartInstance = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: data.meses_nombres,
+                        datasets: (data.series || []).map((serie, i) => ({
+                            label: String(serie.anio),
+                            data: serie.montos,
+                            backgroundColor: YOY_PALETTE[i % YOY_PALETTE.length],
+                            borderRadius: 3
+                        }))
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'top', labels: { boxWidth: 12, font: { size: 10 } } }
+                        },
+                        scales: {
+                            x: { grid: { display: false }, ticks: { font: { size: 9 } } },
+                            y: {
+                                grid: { color: 'rgba(51, 65, 85, 0.1)' },
+                                ticks: { font: { size: 9 }, callback: v => formatMoneda(v) }
+                            }
+                        }
+                    }
+                });
+            } catch (err) {
+                console.error("Error al cargar detalle YoY de categoría:", err);
             }
         }
 

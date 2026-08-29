@@ -16,100 +16,114 @@ de solo lectura contra `big-query-406221.finanzas_personales_mds` el **2026-08-2
 service account `finances-dbt-bq@...` (no la que usa `dashboard_api` en producción, pero con
 acceso de lectura a las mismas tablas gold/silver).
 
+**Actualizado 2026-08-29**: se revisó el estado real de cada bug de la sección 0 contra el
+código actual (no solo se asumió corregido) — casi todos se arreglaron en una ronda de fixes
+(commit `17b3ad4`, 2026-08-28) posterior a la verificación original del 2026-08-22, más un fix
+adicional a `agg_cumplimiento_presupuesto` (commit `c1d8ba8`) y un ajuste de neteo en
+`/gastos-categoria` (2026-08-29, ver 1.1). El detalle de qué quedó corregido y qué no está en
+cada subsección de abajo — en particular, 0.1 quedó **solo parcialmente corregido**.
+
 ---
 
 ## 0. Problemas transversales (afectan a varios endpoints — leer antes que las secciones)
 
-### 0.1 Bug confirmado: la cuota de hipoteca no se categoriza como "Deudas"
+### 0.1 La cuota de hipoteca no se categoriza como "Deudas" — **corregido a nivel de KPI, NO a nivel de dato crudo**
 
 En `fact_transactions`, todas las transacciones de la cuota de "Depa Alameda Dolores"
-(`valor = 'Depa Alameda Dolores'`) están bajo `categoria = 'Inversiones'`, con o sin
+(`valor = 'Depa Alameda Dolores'`) siguen bajo `categoria = 'Inversiones'`, con o sin
 `subcategoria = 'Inmuebles'` (concepto `Cuota hipoteca`, `Amortización`, `Cuota inicial`,
-`Intereses y seguros amortización`, etc.). **Nunca** aparecen con `categoria = 'Deudas'`.
+`Intereses y seguros amortización`, etc.). **Nunca** aparecen con `categoria = 'Deudas'`, y
+`categoria = 'Deudas indispensables'` **sigue sin existir como valor real en
+`fact_transactions`** (solo vive en `presupuesto_materialized`). Esto no cambió — no fue (ni se
+intentó) un fix de recategorización de la transacción cruda.
 
-Confirmado en BigQuery (2026-08-22): `categoria = 'Deudas'` en `fact_transactions` solo tiene
-23 transacciones históricas correspondientes a préstamos personales ("Floresta", "Henry"),
-cero relación con la hipoteca. Y `categoria = 'Deudas indispensables'` **no existe como valor
-real en `fact_transactions`** — es un nombre que solo vive en `presupuesto_materialized`
-(10 filas, desde 2025-11-01).
+Lo que sí se corrigió (commit `17b3ad4`, 2026-08-28): `finances_bq/models/silver/
+hipotecas_materialized.sql` ahora separa cada cuota en `costo_vida_interes_seguros` (interés +
+seguro_propiedad + seguro_desgravamen) cuando el inmueble tiene `proposito = 'Vivienda propia'`
+vigente en la fecha de vencimiento (vía el Sheet `tracking_inmuebles`, rango `[fecha_inicio,
+fecha_fin]`) — y `costo_operativo_inversion_interes_seguros` cuando el propósito es otro
+(inversión de renta). El modelo gold `agg_gasto_esencial` (nuevo, mismo commit) suma
+`costo_vida_interes_seguros` directamente al gasto esencial mensual, sin pasar por el nombre de
+categoría roto. **Capital** de la cuota nunca se toca por este split — sigue siendo patrimonio
+siempre, sin importar el propósito.
 
-**Efecto concreto**: cualquier métrica que calcule "gasto real en Deudas/Deudas indispensables"
-filtrando `fact_transactions` por esas categorías va a devolver 0 o subestimar, aunque la
-hipoteca sea el pasivo más grande del usuario. En particular:
+**Efecto concreto, endpoint por endpoint:**
 
-- `/cumplimiento-presupuesto` para `categoria = 'Deudas indispensables'` siempre muestra
-  `gasto_acumulado_mes = 0` y `cumplimiento = 'CUMPLE'` — no porque no se pague la cuota, sino
-  porque ningún registro real usa ese nombre de categoría. **El "cumplimiento" de esa fila del
-  presupuesto está roto por diseño de datos, no informa nada real.**
-- `/crecimiento-kpis` → `deuda_indispensable_mensual` y `ratio_deuda_ingreso` **no están
-  afectados por este bug específico** porque leen el presupuesto (lo planeado), no el gasto
-  real — pero eso significa que ese ratio DTI es "cuota planeada / ingreso", no "cuota
-  efectivamente pagada / ingreso". Ver caveat propio en la sección de hipoteca/crecimiento.
-- `/gasto-esencial-discrecional` y `/libertad-financiera` incluyen `'Deudas'` o
-  `'Deudas indispensables'` en sus listas de categorías "esenciales" (ver 0.3) — como esos
-  nombres no capturan la hipoteca, el gasto hipotecario que sí es real consumo (interés +
-  seguros) queda fuera de "esencial" en esos dos endpoints porque además excluyen
-  `'Inversiones'` por completo (ver 0.3).
-- La hipoteca sí se mide correctamente en los endpoints dedicados `/hipoteca-*` y en
-  `/net-worth`, que leen `hipotecas_materialized` (tabla separada, con capital/interés/seguros
-  desglosados por cuota) en vez de depender de la categorización en `fact_transactions`.
+- **`/cumplimiento-presupuesto` sigue roto para `categoria = 'Deudas indispensables'`** —
+  confirmado contra `agg_cumplimiento_presupuesto.sql` actual: sigue siendo un join directo por
+  nombre de categoría entre `fact_transactions` y `presupuesto_materialized`, sin ningún aporte
+  de `hipotecas_materialized`. Esa fila sigue mostrando `gasto_acumulado_mes = 0` y
+  `cumplimiento = 'CUMPLE'` aunque la cuota sí se pague — el fix de hipoteca no tocó esta tabla
+  porque no depende de la categoría "esencial" unificada, depende del nombre crudo de
+  categoría. Este caveat ya está reflejado en el tooltip del dashboard para esa tarjeta
+  (`index.html`).
+- **`/crecimiento-kpis` → `deuda_indispensable_mensual` y `ratio_deuda_ingreso`**: sin cambios,
+  siguen leyendo presupuesto (lo planeado), no gasto real — el ratio DTI sigue siendo "cuota
+  planeada / ingreso", no "cuota efectivamente pagada / ingreso".
+- **`/gasto-esencial-discrecional`, `/libertad-financiera` y `supervivencia_estricta` de
+  `/crecimiento-kpis` — corregidos**: los tres ahora leen de `agg_gasto_esencial` (fuente
+  única, ver 0.3), que suma `costo_vida_interes_seguros` al bucket esencial. El interés + seguro
+  de la hipoteca de vivienda propia **ya cuenta** como gasto esencial real en estos tres
+  endpoints — antes quedaba completamente fuera al excluirse `'Inversiones'` en bloque.
+- La hipoteca se sigue midiendo correctamente en los endpoints dedicados `/hipoteca-*` y en
+  `/net-worth`, que leen `hipotecas_materialized` directo — sin cambios ahí.
 
-### 0.2 Mismatch 'Seguro' (presupuesto) vs 'Seguros' (código) — **sigue sin corregirse**
+### 0.2 Mismatch 'Seguro' (presupuesto) vs 'Seguros' (código) — **corregido**
 
-Confirmado en BigQuery (2026-08-22): `presupuesto_materialized.categoria` usa `'Seguro'`
-(singular; 10 filas, desde 2025-11-01 hasta el mes más reciente cargado). El código de
-`app.py` filtra `'Seguros'` (plural) en:
+`presupuesto_materialized.sql` (silver) ahora normaliza el nombre de categoría al cargar desde
+el Sheet: `WHEN UPPER(TRIM(categoria)) = 'SEGURO' THEN 'Seguros'` (junto con `'Gastos
+variables'` → `'Gastos Variables'`, mismo problema de capitalización inconsistente). Con esto,
+`'Seguros'` (plural) sí existe en `presupuesto_materialized` y el join con la lista canónica de
+esenciales (ver 0.3) ya no pierde esas filas — `supervivencia_estricta` en `/crecimiento-kpis`
+ya no subestima el presupuesto de seguros de la hipoteca.
 
-- `/crecimiento-kpis` → `query_estricta` (línea ~370) y `query_vida` no filtra por categoría
-  individual pero sí `query_estricta`, además del fallback sobre `agg_cumplimiento_presupuesto`.
-- `/crecimiento-kpis` y `/gasto-esencial-discrecional` → `categorias_esenciales_sql`.
+En `fact_transactions` (gasto real) la categoría ya se llamaba `'Seguros'` (plural) de por sí,
+así que ese lado nunca tuvo el problema — el bug vivía exclusivamente en la carga de
+`presupuesto_materialized`, y ahí quedó resuelto.
 
-Como `'Seguros'` (plural) nunca existe en `presupuesto_materialized`, el presupuesto de
-seguros del mes **queda excluido de `supervivencia_estricta`** (el "gasto mínimo de
-supervivencia" en `/crecimiento-kpis`) — ese KPI está subestimado en el monto mensual del
-seguro de la hipoteca (seguro de propiedad + desgravamen, vía `presupuesto_personal`/`Seguro`
-en el presupuesto). No es un problema simétrico: en `fact_transactions` (gasto real) la
-categoría **sí** se llama `'Seguros'` (plural, confirmado — 1 fila histórica, monto menor), así
-que el filtro de `/gasto-esencial-discrecional` sobre transacciones reales es literalmente
-correcto contra esa tabla; el bug vive específicamente en el cruce con `presupuesto_materialized`.
+### 0.3 Tres definiciones distintas de "gasto esencial/indispensable" — **unificadas**
 
-### 0.3 Tres definiciones distintas de "gasto esencial/indispensable" — no producen el mismo número
+`/crecimiento-kpis` (`supervivencia_estricta`), `/gasto-esencial-discrecional` (`esencial`) y
+`/libertad-financiera` (`indispensable`) leían tres listas de categorías hardcodeadas distintas
+en `app.py` y daban tres números distintos para "gasto esencial" del mismo mes. Corregido
+(commit `17b3ad4`): los tres ahora leen del mismo campo (`gasto_esencial_real` /
+`presupuesto_esencial`) de la tabla gold `agg_gasto_esencial`, que a su vez usa una lista única
+de categorías definida en el macro dbt `categorias_esenciales_supervivencia()`:
 
-Diff sistemático de las listas de categorías "esenciales" hardcodeadas en `app.py`:
+```
+COMIDA, TRANSPORTE, FACTURAS, SALUD, GASTOS VARIABLES, SEGUROS
+```
 
-| Endpoint | Tabla que filtra | Lista de categorías "esenciales" |
-|---|---|---|
-| `/crecimiento-kpis` (`supervivencia_estricta`) | `presupuesto_materialized` | `Comida, Transporte, Facturas, Deudas indispensables, Salud, Gastos Variables, Seguros` |
-| `/gasto-esencial-discrecional` | `fact_transactions` | mismas 7 categorías que arriba |
-| `/libertad-financiera` (`indispensable`) | `fact_transactions` | `Comida, Transporte, Facturas, Deudas, Salud, Gastos Variables` (6 categorías — sin `Seguros`, y usa `Deudas` genérico en vez de `Deudas indispensables`) |
+Nota deliberada: esta lista **excluye** `Deudas`/`Deudas indispensables` a propósito — esos
+nombres nunca capturan la hipoteca en `fact_transactions` (ver 0.1) — y en su lugar
+`agg_gasto_esencial` suma aparte el interés + seguros real de la hipoteca de vivienda propia
+(`hipotecas_materialized.costo_vida_interes_seguros`). El resultado es el mismo número de
+"esencial" en los tres endpoints para un mismo mes, y ya incluye el costo real de la hipoteca en
+vez de subestimarlo.
 
-Ningún par de estas tres listas es idéntico. Un asesor que compare "gasto esencial" entre
-`/crecimiento-kpis`, `/gasto-esencial-discrecional` y `/libertad-financiera` para el mismo mes
-va a ver tres cifras distintas por diseño, no por error de cálculo — son definiciones
-divergentes que nunca se unificaron. Además, como ya vimos en 0.1, `Deudas` y
-`Deudas indispensables` no capturan la hipoteca en ninguna de las tres, así que "esencial" en
-los tres casos subestima el verdadero costo de vida indispensable en el monto de intereses +
-seguros de la hipoteca.
+### 0.4 Cuentas de alto rendimiento en `/crecimiento-kpis` vs `/net-worth` — **unificadas**
 
-### 0.4 Inconsistencia confirmada: cuentas de alto rendimiento en `/crecimiento-kpis` vs `/net-worth`
+Antes, `/crecimiento-kpis` (`query_construccion_patrimonio`) solo contaba movimientos
+`'Dinero ingresado'`/`'Dinero gastado'` en `Wow Compartamos`/`Pichincha`/`GNB`, mientras que
+`/net-worth` (`q_cuentas_mensual`) también sumaba/restaba filas con `ingreso_gasto = 'Ingreso'`/
+`'Gastos'` en esas mismas cuentas (interés/rendimiento acreditado) — esas filas se veían en
+`/net-worth` pero no en `/crecimiento-kpis`.
 
-Ambos endpoints suman movimientos en las cuentas `Wow Compartamos`, `Pichincha`, `GNB`, pero con
-lógicas distintas:
+Corregido (commit `17b3ad4`): ambos endpoints usan ahora exactamente la misma lógica —
+`ingreso_gasto IN ('Ingreso', 'Dinero ingresado')` suma, `IN ('Gastos', 'Dinero gastado')`
+resta — y la misma lista de cuentas, que además ahora incluye `Global66 - USD` (antes solo
+`Wow Compartamos`, `Pichincha`, `GNB` en ambos). Confirmado en el código actual: el bloque
+`CASE` de `cuentas_alto_rendimiento` es idéntico carácter por carácter en `/crecimiento-kpis` y
+`/net-worth`, con comentario explícito en `/crecimiento-kpis` ("mismas cuentas y misma lógica
+que `/net-worth`").
 
-- `/net-worth` (`q_cuentas_mensual`): `ingreso_gasto IN ('Ingreso', 'Dinero ingresado')` suma,
-  `IN ('Gastos', 'Dinero gastado')` resta.
-- `/crecimiento-kpis` (`query_construccion_patrimonio`): solo contempla
-  `'Dinero ingresado'`/`'Dinero gastado'`; las filas con `ingreso_gasto = 'Ingreso'` o
-  `'Gastos'` en esas cuentas caen al `ELSE 0` y no se cuentan.
-
-Confirmado en BigQuery (2026-08-22): existen filas reales con `ingreso_gasto = 'Ingreso'` en
-esas cuentas (GNB: 7, Pichincha: 26, Wow Compartamos: 5 — mayormente interés/rendimiento
-acreditado) y 2 filas `Pichincha`/`Gastos`. Esas filas sí las ve `/net-worth` (quedan dentro de
-`cuentas_alto_rendimiento`/equity) pero **no** las ve `/crecimiento-kpis` — ese interés
-acreditado cuenta como ingreso total (`ingresos_periodo`) pero no como
-`construccion_patrimonio_periodo`, así que termina empujando `tasa_ahorro_caja` hacia arriba en
-vez de `tasa_construccion_patrimonio`, subestimando ligeramente esta última frente a lo que
-`/net-worth` implica que realmente pasó con el patrimonio.
+**Fuente única (2026-08-29)**: la lista de cuentas ya no está hardcodeada en `app.py` — ambos
+`cuenta IN (...)` fueron reemplazados por `cuenta IN (SELECT cuenta FROM
+cuentas_alto_rendimiento)`, la tabla gold nueva `finances_bq/models/gold/
+cuentas_alto_rendimiento.sql` (macro `cuentas_alto_rendimiento()`, 4 filas hoy). Motivo: cuando
+se agregó `Global66 - USD` se actualizó `app.py` pero no `tracking_inversiones.sql` en
+`finances_bq`, y quedaron desincronizados por semanas sin que nadie lo notara. Ahora dbt y la
+API leen de la misma tabla — abrir/cerrar una cuenta se actualiza en un solo lugar.
 
 ---
 
@@ -120,18 +134,26 @@ Fuente de datos: **real** (`fact_transactions`) en todos los endpoints de esta s
 ### `/flujo-caja`
 Serie temporal (diaria o mensual) de ingresos, gastos y balance de caja.
 
-- `ingresos`: suma de `importe_moneda_principal` donde `ingreso_gasto = 'Ingreso'`.
+- `ingresos`: suma de `importe_moneda_principal` donde `ingreso_gasto = 'Ingreso' AND categoria
+  != 'Reembolsos'` — excluye devoluciones para no inflar el ingreso "real" del periodo (fix
+  aplicado junto con la ronda de correcciones de la sección 0; antes sí las incluía).
 - `gastos`: suma de `importe_moneda_principal` donde `ingreso_gasto = 'Gastos'`, invertida a
-  positivo (`* -1` en el SQL, ya que en la tabla los gastos se guardan en negativo).
-- `balance`: ingresos − gastos del periodo (día o mes).
+  positivo (`* -1` en el SQL, ya que en la tabla los gastos se guardan en negativo). Sin
+  exclusión de `Reembolsos` (no aplica: los reembolsos son filas `ingreso_gasto = 'Ingreso'`,
+  nunca `'Gastos'`).
+- `balance`: **no usa el mismo filtro que `ingresos`** — es
+  `SUM(CASE WHEN ingreso_gasto='Ingreso' THEN importe ... )`, sin excluir `Reembolsos`. Esto es
+  deliberado, no una inconsistencia: `balance`/`acumulado` mide caja real movida (para eso el
+  reembolso sí es un ingreso de efectivo real), mientras que el campo `ingresos` mide "ingreso"
+  en el sentido de ganancia, no de flujo de caja — mismo criterio que distingue `/net-worth`
+  (incluye Reembolsos, mide caja) del resto de métricas de ingreso neto (lo excluyen).
 - `acumulado`: suma corriente (`SUM() OVER`) de `balance` ordenado por fecha — es la base del
   "efectivo acumulado" que después reaparece en `/net-worth` como `efectivo`.
 
-Sin exclusiones de categoría: incluye TODO lo que pase por `fact_transactions`, incluida la
-hipoteca completa (capital+interés+seguros) como gasto y cualquier transferencia a cuentas de
-alto rendimiento marcada como `'Ingreso'`/`'Gastos'` (no `'Dinero ingresado'`/`'Dinero
-gastado'`). Es la vista "cruda" de caja, no un KPI de consumo — para eso ver
-`/gasto-esencial-discrecional` y `/crecimiento-kpis`.
+Sin otras exclusiones de categoría: incluye la hipoteca completa (capital+interés+seguros) como
+gasto y cualquier transferencia a cuentas de alto rendimiento marcada como `'Ingreso'`/`'Gastos'`
+(no `'Dinero ingresado'`/`'Dinero gastado'`). Es la vista "cruda" de caja, no un KPI de consumo —
+para eso ver `/gasto-esencial-discrecional` y `/crecimiento-kpis`.
 
 ### `/balance-trimestre`
 Igual que `/flujo-caja` pero agregado por trimestre, usando `LOWER(ingreso_gasto) LIKE
@@ -142,9 +164,16 @@ inconsistente con el resto del código, que sí distingue ambos casos en otros e
 Suma de `importe_moneda_principal` por `categoria` en un rango de fechas.
 
 - `/gastos-categoria` excluye `concepto IN ('Cambio dólares', 'liquidación', 'Sin concepto')` y
-  restringe a una whitelist fija de 19 categorías (incluye `Deudas` e `Inversiones` como
+  restringe a una whitelist fija de 18 categorías (incluye `Deudas` e `Inversiones` como
   categorías separadas — ver 0.1: la hipoteca cae dentro de `Inversiones` aquí, no de
-  `Deudas`).
+  `Deudas`). `Anuncios` y `Préstamos` quedan fuera de esa whitelist a propósito (2026-08-29): se
+  muestran netos contra `Reembolsos`, no brutos — mismo criterio que `agg_gasto_esencial` y
+  `/costo-vida-kpis` (ver `agg_netos_prestamos_anuncios`). Antes de este fix, `Anuncios` se
+  mostraba bruto en este gráfico mientras `/gasto-esencial-discrecional` ya usaba el neto para
+  la misma categoría/mes — dos números distintos para el mismo dato en dos vistas del
+  dashboard. `Préstamos` no aparecía en el gráfico en absoluto; ahora aparece neteado. Si el
+  neto del rango pedido es exactamente 0, la categoría se omite del gráfico (igual que
+  cualquier categoría sin transacciones en el rango).
 - `/ingresos-categoria` excluye `categoria = 'Reembolsos'` (para no inflar ingresos con
   devoluciones de gasto).
 
@@ -182,8 +211,10 @@ será siempre 0 porque ningún registro de `fact_transactions` usa ese nombre �
 refleja que el nombre de categoría no tiene contraparte en las transacciones reales.
 
 Último ajuste conocido: commit `c1d8ba8` ("Corrige presupuestos de agosto no cargados") y
-`786f7eb` ("Cambio en CTE para cumplimiento de presupuesto") — cambios recientes en el modelo
-`agg_cumplimiento_presupuesto.sql`, no en `app.py`.
+`786f7eb` ("Cambio en CTE para cumplimiento de presupuesto") — cambios en el modelo
+`agg_cumplimiento_presupuesto.sql`, no en `app.py`. Confirmado (2026-08-29): el fix está
+materializado en BigQuery — el `dbt run` más reciente registrado corrió este modelo con éxito
+el 2026-08-28, después de aplicado el fix.
 
 ---
 
@@ -281,11 +312,11 @@ igual). No excluye nada dentro de esa categoría.
 
 ### `/libertad-financiera`
 `cobertura = pasivo / indispensable * 100` por mes — el % del gasto indispensable mensual que
-ya cubre el ingreso pasivo. Usa su propia definición de "indispensable" (ver 0.3: `Comida,
-Transporte, Facturas, Deudas, Salud, Gastos Variables`, sin `Seguros` y con `Deudas` en vez de
-`Deudas indispensables`). `latest_cobertura` toma el mes más reciente, salvo que sea el mes en
-curso (parcial) y haya un mes anterior disponible, en cuyo caso usa ese para no mostrar un %
-artificialmente bajo por datos incompletos del mes actual.
+ya cubre el ingreso pasivo. `indispensable` ahora lee `gasto_esencial_real` de
+`agg_gasto_esencial` (fuente única, ver 0.3) — antes tenía su propia lista de 6 categorías,
+distinta de las otras dos; ya unificada. `latest_cobertura` toma el mes más reciente, salvo que
+sea el mes en curso (parcial) y haya un mes anterior disponible, en cuyo caso usa ese para no
+mostrar un % artificialmente bajo por datos incompletos del mes actual.
 
 ---
 
@@ -307,9 +338,9 @@ Componentes de la serie mensual y del `snapshot` (último mes):
   capital de cuotas futuras aún no vencidas (ver comentario en código, línea ~582).
 - `fibras`: acumulado de `importe_moneda_principal` donde `categoria='Inversiones' AND
   subcategoria='FIBRAS'` (confirmado: 3 transacciones históricas, ~13,428 soles).
-- `cuentas_alto_rendimiento`: acumulado neto en `Wow Compartamos`/`Pichincha`/`GNB`, sumando
-  `'Ingreso'`/`'Dinero ingresado'` y restando `'Gastos'`/`'Dinero gastado'` (ver 0.4 para el
-  contraste con `/crecimiento-kpis`, que no maneja `'Ingreso'`/`'Gastos'` en estas cuentas).
+- `cuentas_alto_rendimiento`: acumulado neto en `Wow Compartamos`/`Pichincha`/`GNB`/`Global66 -
+  USD`, sumando `'Ingreso'`/`'Dinero ingresado'` y restando `'Gastos'`/`'Dinero gastado'` — misma
+  lógica y misma lista de cuentas que `/crecimiento-kpis` (ver 0.4, ya unificadas).
 - `efectivo`: balance de caja acumulado de todo el historial (`Ingreso - Gastos` de
   `fact_transactions`, sin filtro de fecha) **menos** `cuentas_alto_rendimiento` — se resta
   porque ese dinero ya se movió a las cuentas de alto rendimiento vía `'Dinero
@@ -348,12 +379,13 @@ solo payload. Desglose campo por campo:
 
 - `fondo_emergencia`: **constante hardcodeada en el código** (`30000.0`), no viene de ninguna
   tabla — no es un KPI calculado, es una meta fija de referencia.
-- `supervivencia_estricta`: **presupuesto** (planeado) del mes más reciente cargado en
-  `presupuesto_materialized`, sumando solo las categorías consideradas gasto mínimo de
-  supervivencia (`Comida, Transporte, Facturas, Deudas indispensables, Salud, Gastos
-  Variables, Seguros`). Sujeto al bug de 0.2 (`'Seguros'` nunca matchea `'Seguro'` real) y al de
-  0.1 (`'Deudas indispensables'` sin contraparte real, aunque aquí como es presupuesto sí tiene
-  filas). Tiene fallback a `agg_cumplimiento_presupuesto` si la query principal falla.
+- `supervivencia_estricta`: **presupuesto** (planeado) del mes más reciente, leído de
+  `agg_gasto_esencial.presupuesto_esencial` (fuente única, ver 0.3) — suma la lista canónica de
+  categorías esenciales (`Comida, Transporte, Facturas, Salud, Gastos Variables, Seguros`) más
+  el interés+seguros real de la hipoteca de vivienda propia. Los bugs 0.1 y 0.2 que afectaban
+  esta métrica ya están corregidos: `'Seguros'` sí matchea contra `presupuesto_materialized`
+  (0.2), y la hipoteca ya no depende del nombre roto `'Deudas indispensables'` (0.1). Tiene
+  fallback a `agg_cumplimiento_presupuesto` si la query principal falla.
 - `supervivencia_vida`: **presupuesto** total del mes (todas las categorías, sin filtro) — el
   presupuesto completo de vida, no solo lo estricto.
 - `mediana_ingreso_neto`: **real**, mediana de `agg_ingresos.ingreso_neto` en el rango de fechas
@@ -363,9 +395,9 @@ solo payload. Desglose campo por campo:
   buckets que suman exactamente 100% por construcción:
   - `construccion_patrimonio_periodo` = FIBRAS + amortización voluntaria (`categoria='Deudas'`
     o `categoria='Inversiones' AND subcategoria='Inmuebles' AND concepto='Amortización'`) +
-    cuentas de alto rendimiento (ver caveat 0.4) + **capital** (no interés/seguros) de la cuota
-    hipotecaria obligatoria del periodo, leído de `hipotecas_materialized.capital_cuota` con
-    `pagado=true`.
+    cuentas de alto rendimiento (misma lógica que `/net-worth`, ver 0.4, ya unificadas) +
+    **capital** (no interés/seguros) de la cuota hipotecaria obligatoria del periodo, leído de
+    `hipotecas_materialized.capital_cuota` con `pagado=true`.
   - `gasto_consumo_periodo` = gasto total del periodo (`ingreso_gasto='Gastos'`) **menos**
     FIBRAS, amortización voluntaria y el capital hipotecario ya contados arriba como
     patrimonio — lo que queda son interés + seguros de la hipoteca (si aplica) más todo el
@@ -425,10 +457,36 @@ Gasto neto mensual por persona (`valor`) para transacciones marcadas con `clave 
 ## 10. Esencial vs. discrecional
 
 ### `/gasto-esencial-discrecional`
-Ya cubierto en detalle en 0.3 (definición de "esencial") y 0.1 (exclusión de `Inversiones`/
-`Deudas` completas, lo que saca la hipoteca entera — capital, interés y seguros — de ambos
-buckets). `pct_esencial = esencial / (esencial + discrecional) * 100` por mes. Fuente: **real**
-(`fact_transactions`).
+Ya cubierto en detalle en 0.3 (definición unificada de "esencial") y 0.1. Lee
+`agg_gasto_esencial`: `esencial` y `discrecional` excluyen `Inversiones`/`Deudas` en bloque
+(construcción de patrimonio, no consumo) — pero **capital** de la hipoteca es lo único que
+realmente se pierde por esa exclusión; el **interés + seguros** de la hipoteca de vivienda
+propia sí se suma de vuelta a `esencial` (vía `hipotecas_materialized.
+costo_vida_interes_seguros`, ver 0.1), y `Anuncios`/`Préstamos` se suman netos (no brutos) a
+`discrecional` (ver `agg_netos_prestamos_anuncios`). `pct_esencial = esencial / (esencial +
+discrecional) * 100` por mes. Fuente: **real** (`fact_transactions` + `hipotecas_materialized`).
+
+---
+
+## Changelog de fixes
+
+- **2026-08-02** (`c1d8ba8`): `agg_cumplimiento_presupuesto` — el `FULL OUTER JOIN` se
+  comportaba como `INNER` por un `WHERE` mal ubicado, y el filtro incremental por
+  `fecha_carga` producía filas duplicadas con `month_cat_id = NULL`. Presupuestos de agosto sin
+  transacción "Gastos" coincidente no cargaban. Corregido; confirmado corrido en BigQuery el
+  2026-08-28.
+- **2026-08-28** (`17b3ad4`): ronda grande de correcciones — ver detalle en cada punto de la
+  sección 0: split hipoteca vivienda propia/inversión vía `tracking_inmuebles` (0.1, parcial —
+  no toca `/cumplimiento-presupuesto`), normalización `Seguro`→`Seguros` en
+  `presupuesto_materialized` (0.2), unificación de la lista de "esencial" vía
+  `agg_gasto_esencial`/`categorias_esenciales_supervivencia()` en los tres endpoints que la usan
+  (0.3), unificación de cuentas de alto rendimiento incluyendo `Global66 - USD` (0.4), y
+  exclusión de `Reembolsos` de ingreso/flujo neto en varios endpoints (con la excepción
+  deliberada de `/net-worth`, que sí lo incluye por medir caja real).
+- **2026-08-29**: `/gastos-categoria` deja de mostrar `Anuncios` bruto (inconsistente con el
+  neto ya usado en `/gasto-esencial-discrecional`) y agrega `Préstamos` neteado — ver sección 1.
+  Este documento se actualizó para reflejar el estado real del código tras las dos rondas
+  anteriores (antes describía como "sin corregir" varios bugs ya arreglados en `17b3ad4`).
 
 ---
 

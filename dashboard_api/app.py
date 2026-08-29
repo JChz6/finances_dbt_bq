@@ -208,7 +208,6 @@ def obtener_categorias(fecha_inicio: str, fecha_fin: str):
             "Viajes",
             "Seguros",
             "Salud",
-            "Anuncios",
             "Deudas",
             "Casa",
             "Gastos Variables",
@@ -222,7 +221,6 @@ def obtener_categorias(fecha_inicio: str, fecha_fin: str):
             "No comestibles"
             )
         GROUP BY categoria
-        ORDER BY monto DESC
     """
     parametros = [
         bigquery.ScalarQueryParameter("fecha_inicio", "DATE", fecha_inicio),
@@ -230,11 +228,36 @@ def obtener_categorias(fecha_inicio: str, fecha_fin: str):
     ]
     resultados = _query(query, parametros)
 
-    categorias, montos = [], []
-    for fila in resultados:
-        categorias.append(fila.categoria)
-        montos.append(fila.monto or 0.0)
-        
+    montos_por_categoria = {fila.categoria: float(fila.monto or 0.0) for fila in resultados}
+
+    # 'Anuncios' y 'Préstamos' se muestran netos contra 'Reembolsos' (mismo criterio que
+    # /gasto-esencial-discrecional y /costo-vida-kpis), no brutos — ver
+    # agg_netos_prestamos_anuncios. Se omiten del gráfico si el neto del rango es 0.
+    filtros_netos, parametros_netos = _rango_fechas(fecha_inicio, fecha_fin, campo="mes")
+    where_netos = ("WHERE " + " AND ".join(filtros_netos)) if filtros_netos else ""
+    query_netos = f"""
+        SELECT
+            SUM(neto_anuncios) AS anuncios,
+            SUM(neto_prestamos_terceros) AS prestamos
+        FROM `big-query-406221.finanzas_personales_mds.agg_netos_prestamos_anuncios`
+        {where_netos}
+    """
+    try:
+        res_netos = list(_query(query_netos, parametros_netos))
+        if res_netos:
+            neto_anuncios = float(res_netos[0].anuncios or 0.0)
+            neto_prestamos = float(res_netos[0].prestamos or 0.0)
+            if neto_anuncios != 0:
+                montos_por_categoria["Anuncios"] = neto_anuncios
+            if neto_prestamos != 0:
+                montos_por_categoria["Préstamos"] = neto_prestamos
+    except Exception as e:
+        print("Error en gastos-categoria (netos anuncios/prestamos):", e)
+
+    categorias_ordenadas = sorted(montos_por_categoria.items(), key=lambda kv: kv[1], reverse=True)
+    categorias = [c for c, _ in categorias_ordenadas]
+    montos = [m for _, m in categorias_ordenadas]
+
     return {"categorias": categorias, "montos": montos}
 
 @app.get("/balance-trimestre")
@@ -473,8 +496,8 @@ def obtener_crecimiento_kpis(fecha_inicio: Optional[str] = None, fecha_fin: Opti
             ) AS amortizacion_voluntaria,
             SUM(
                 CASE
-                    WHEN cuenta IN ('Wow Compartamos', 'Pichincha', 'GNB', 'Global66 - USD') AND ingreso_gasto IN ('Ingreso', 'Dinero ingresado') THEN importe_moneda_principal
-                    WHEN cuenta IN ('Wow Compartamos', 'Pichincha', 'GNB', 'Global66 - USD') AND ingreso_gasto IN ('Gastos', 'Dinero gastado') THEN -importe_moneda_principal
+                    WHEN cuenta IN (SELECT cuenta FROM `big-query-406221.finanzas_personales_mds.cuentas_alto_rendimiento`) AND ingreso_gasto IN ('Ingreso', 'Dinero ingresado') THEN importe_moneda_principal
+                    WHEN cuenta IN (SELECT cuenta FROM `big-query-406221.finanzas_personales_mds.cuentas_alto_rendimiento`) AND ingreso_gasto IN ('Gastos', 'Dinero gastado') THEN -importe_moneda_principal
                     ELSE 0
                 END
             ) AS cuentas_alto_rendimiento
@@ -586,6 +609,186 @@ def obtener_crecimiento_kpis(fecha_inicio: Optional[str] = None, fecha_fin: Opti
         "ratio_deuda_ingreso": round(ratio_deuda_ingreso, 1)
     }
 
+@app.get("/crecimiento-yoy-ingreso")
+def obtener_crecimiento_yoy_ingreso():
+    """
+    Serie mensual completa (todo el historial, no acota por fecha) de ingreso neto real
+    (agg_ingresos) con medias móviles de 3, 6 y 12 meses (para aplanar la volatilidad mensual
+    en distintos horizontes) y variación YoY: % contra el mismo mes del año anterior, buscado
+    por fecha exacta (LEFT JOIN por mes - 12, no por offset de fila), para no romperse si algún
+    mes no tiene datos.
+    """
+    query = """
+        WITH base AS (
+            SELECT DATE_TRUNC(fecha, MONTH) AS mes, ingreso_neto
+            FROM `big-query-406221.finanzas_personales_mds.agg_ingresos`
+        )
+        SELECT
+            CAST(b.mes AS STRING) AS mes,
+            b.ingreso_neto,
+            py.ingreso_neto AS ingreso_neto_anio_anterior
+        FROM base b
+        LEFT JOIN base py ON py.mes = DATE_SUB(b.mes, INTERVAL 12 MONTH)
+        ORDER BY b.mes
+    """
+    try:
+        resultados = _query(query, [])
+        meses, ingreso_neto, yoy_pct = [], [], []
+        valores = []
+        for fila in resultados:
+            meses.append(fila.mes[:7] if fila.mes else "")
+            v = float(fila.ingreso_neto or 0.0)
+            ingreso_neto.append(round(v, 2))
+            valores.append(v)
+            anterior = float(fila.ingreso_neto_anio_anterior) if fila.ingreso_neto_anio_anterior is not None else None
+            yoy_pct.append(round((v - anterior) / anterior * 100, 1) if anterior not in (None, 0) else None)
+
+        def media_movil(ventana_meses):
+            resultado = []
+            for i in range(len(valores)):
+                ventana = valores[max(0, i - ventana_meses + 1):i + 1]
+                resultado.append(round(sum(ventana) / len(ventana), 2) if ventana else 0.0)
+            return resultado
+
+        return {
+            "meses": meses,
+            "ingreso_neto": ingreso_neto,
+            "promedio_movil_3m": media_movil(3),
+            "promedio_movil_6m": media_movil(6),
+            "promedio_movil_12m": media_movil(12),
+            "yoy_pct": yoy_pct
+        }
+    except Exception as e:
+        print("Error en crecimiento-yoy-ingreso:", e)
+        return {
+            "meses": [], "ingreso_neto": [],
+            "promedio_movil_3m": [], "promedio_movil_6m": [], "promedio_movil_12m": [],
+            "yoy_pct": []
+        }
+
+@app.get("/crecimiento-yoy-categoria")
+def obtener_crecimiento_yoy_categoria(categoria: str):
+    """
+    Pivotea el gasto real de una categoría en una grilla mes-del-año (Ene-Dic) x año, para los
+    últimos 5 años disponibles — permite comparar el mismo mes lado a lado entre años (ej.
+    agosto de este año contra agosto de los 4 años anteriores) en vez de una línea de tiempo
+    continua. 'Anuncios' y 'Préstamos' se leen neteados contra 'Reembolsos'
+    (agg_netos_prestamos_anuncios) en vez de agg_gasto_mensual_categoria — mismo criterio que
+    /gastos-categoria y /gasto-esencial-discrecional.
+    """
+    categorias_netas = {"Anuncios": "neto_anuncios", "Préstamos": "neto_prestamos_terceros"}
+    if categoria in categorias_netas:
+        campo = categorias_netas[categoria]
+        query = f"""
+            SELECT
+                EXTRACT(YEAR FROM mes) AS anio,
+                EXTRACT(MONTH FROM mes) AS mes_num,
+                {campo} AS monto_real
+            FROM `big-query-406221.finanzas_personales_mds.agg_netos_prestamos_anuncios`
+        """
+        parametros = []
+    else:
+        query = """
+            SELECT
+                EXTRACT(YEAR FROM mes) AS anio,
+                EXTRACT(MONTH FROM mes) AS mes_num,
+                monto_real
+            FROM `big-query-406221.finanzas_personales_mds.agg_gasto_mensual_categoria`
+            WHERE categoria = @categoria
+        """
+        parametros = [bigquery.ScalarQueryParameter("categoria", "STRING", categoria)]
+
+    nombres_meses = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"]
+    try:
+        resultados = list(_query(query, parametros))
+        if not resultados:
+            return {"categoria": categoria, "anios": [], "meses_nombres": nombres_meses, "series": []}
+
+        anio_max = max(int(fila.anio) for fila in resultados)
+        anios_ventana = list(range(anio_max - 4, anio_max + 1))
+
+        grilla = {a: [None] * 12 for a in anios_ventana}
+        for fila in resultados:
+            anio = int(fila.anio)
+            if anio in grilla:
+                grilla[anio][int(fila.mes_num) - 1] = round(float(fila.monto_real or 0.0), 2)
+
+        series = [{"anio": a, "montos": grilla[a]} for a in anios_ventana]
+
+        return {
+            "categoria": categoria,
+            "anios": anios_ventana,
+            "meses_nombres": nombres_meses,
+            "series": series
+        }
+    except Exception as e:
+        print("Error en crecimiento-yoy-categoria:", e)
+        return {"categoria": categoria, "anios": [], "meses_nombres": nombres_meses, "series": []}
+
+@app.get("/crecimiento-yoy-resumen-categorias")
+def obtener_crecimiento_yoy_resumen_categorias(mes: Optional[int] = None):
+    """
+    Para un mes del año (1-12; por defecto el mes-del-año del dato más reciente disponible),
+    devuelve el monto por categoría en cada uno de los últimos 5 años disponibles para ese mes
+    (ventana fija, no toda la historia — mismo criterio que /crecimiento-yoy-categoria, para
+    poder comparar los mismos años en ambas vistas) más el % de variación YoY del último año
+    vs. el anterior — vista rápida de qué categorías se encarecieron más interanualmente.
+    Excluye 'Anuncios', 'Préstamos', 'Inafectos' y 'Jubilación': no son gasto de estilo de
+    vida (los dos primeros son neteos ruidosos contra Reembolsos, los otros dos son
+    descuentos/movimientos que no representan consumo real) — a pedido del usuario.
+    """
+    try:
+        if mes is None:
+            fila_max = list(_query(
+                "SELECT MAX(mes) AS mes_max FROM `big-query-406221.finanzas_personales_mds.agg_gasto_mensual_categoria`",
+                []
+            ))
+            mes = fila_max[0].mes_max.month if fila_max and fila_max[0].mes_max else 1
+
+        query = """
+            SELECT categoria, EXTRACT(YEAR FROM mes) AS anio, monto_real
+            FROM `big-query-406221.finanzas_personales_mds.agg_gasto_mensual_categoria`
+            WHERE EXTRACT(MONTH FROM mes) = @mes
+              AND categoria NOT IN ('Anuncios', 'Préstamos', 'Inafectos', 'Jubilación')
+            ORDER BY categoria, anio
+        """
+        parametros = [bigquery.ScalarQueryParameter("mes", "INT64", mes)]
+        resultados = list(_query(query, parametros))
+
+        if not resultados:
+            return {"mes": mes, "anios": [], "categorias": []}
+
+        anio_max = max(int(fila.anio) for fila in resultados)
+        anios_ventana = list(range(anio_max - 4, anio_max + 1))
+
+        por_categoria = {}
+        for fila in resultados:
+            anio = int(fila.anio)
+            if anio not in anios_ventana:
+                continue
+            entrada = por_categoria.setdefault(fila.categoria, {a: None for a in anios_ventana})
+            entrada[anio] = round(float(fila.monto_real or 0.0), 2)
+
+        categorias = []
+        for cat, por_anio in por_categoria.items():
+            montos = [por_anio[a] for a in anios_ventana]
+            presentes = [m for m in montos if m is not None]
+            yoy_pct_ultimo = None
+            if len(presentes) >= 2 and presentes[-2] != 0:
+                yoy_pct_ultimo = round((presentes[-1] - presentes[-2]) / presentes[-2] * 100, 1)
+            categorias.append({
+                "categoria": cat,
+                "montos": montos,
+                "yoy_pct_ultimo": yoy_pct_ultimo
+            })
+
+        categorias.sort(key=lambda c: (c["yoy_pct_ultimo"] is None, -(c["yoy_pct_ultimo"] or 0)))
+
+        return {"mes": mes, "anios": anios_ventana, "categorias": categorias}
+    except Exception as e:
+        print("Error en crecimiento-yoy-resumen-categorias:", e)
+        return {"mes": mes if mes else 0, "anios": [], "categorias": []}
+
 @app.get("/net-worth")
 def obtener_net_worth():
     """
@@ -631,7 +834,7 @@ def obtener_net_worth():
                 END
             ) AS monto_neto
         FROM `big-query-406221.finanzas_personales_mds.fact_transactions`
-        WHERE cuenta IN ('Wow Compartamos', 'Pichincha', 'GNB', 'Global66 - USD')
+        WHERE cuenta IN (SELECT cuenta FROM `big-query-406221.finanzas_personales_mds.cuentas_alto_rendimiento`)
         GROUP BY 1
         ORDER BY mes
     """
