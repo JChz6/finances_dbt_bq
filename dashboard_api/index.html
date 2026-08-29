@@ -166,6 +166,10 @@
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
                         Finanzas Sociales
                     </button>
+                    <button onclick="switchTab('fase2')" id="tab-btn-fase2" class="w-full flex items-center gap-3 px-4 py-2.5 text-textmuted hover:bg-slate-800/50 hover:text-textmain rounded-xl text-sm font-medium transition-all text-left">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5m4-14l-3 3m0 0l3 3m-3-3h9"/></svg>
+                        Fase 2
+                    </button>
                 </nav>
             </div>
             
@@ -1104,6 +1108,52 @@
                 </div>
             </div>
 
+            <!-- TAB: FASE 2 (Pool 1) -->
+            <div id="tab-fase2" class="hidden space-y-6">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="lg:col-span-2 bg-card rounded-3xl p-6 border border-accent/40 shadow-sm shadow-accent/5 relative overflow-hidden ring-1 ring-accent/10">
+                        <div class="flex items-start justify-between gap-3 mb-1">
+                            <p class="text-textmuted text-sm font-medium tracking-wide inline-flex items-center gap-1.5">Pool 1 — Real Estate Apalancado<button type="button" class="info-btn" data-tip="Capital disponible para el siguiente paso de la estrategia de Fase 2: saldo de cuentas de alto rendimiento (menos el fondo de emergencia, que no cuenta como parte del pool) más los aportes acumulados a FIBRAS. No incluye cashflow ni Pool 2 todavía — esta es la v1 del tracking.">i</button></p>
+                            <span id="fase2-pool1-badge" class="hidden flex-shrink-0 text-[10px] font-semibold px-2.5 py-1 rounded-full bg-accent/20 text-accent whitespace-nowrap">Meta alcanzada</span>
+                        </div>
+                        <h3 class="text-3xl sm:text-4xl font-semibold text-white mt-1" id="kpi-fase2-actual">S/ 0</h3>
+                        <p class="text-xs text-textmuted mt-1">de <span id="kpi-fase2-meta">S/ 100,000</span> meta</p>
+
+                        <div class="mt-5">
+                            <div class="w-full h-3 bg-slate-800 rounded-full overflow-hidden">
+                                <div id="fase2-progress-bar" class="h-full bg-accent transition-all duration-500" style="width: 0%"></div>
+                            </div>
+                            <div class="flex justify-between mt-1.5 text-[11px] text-textmuted">
+                                <span id="kpi-fase2-pct">0%</span>
+                                <span>100%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-card rounded-2xl p-6 border border-slate-800/60 shadow-sm">
+                        <h4 class="text-sm font-semibold text-white mb-4 inline-flex items-center gap-1.5">Composición<button type="button" class="info-btn" data-tip="Desglose de lo que forma el saldo actual del Pool 1: saldo de cuentas de alto rendimiento, menos el fondo de emergencia (colchón aparte, no cuenta para el pool), más los aportes acumulados a FIBRAS.">i</button></h4>
+                        <div class="space-y-3 text-sm">
+                            <div class="flex justify-between"><span class="text-textmuted">Cuentas Alto Rendimiento</span><span class="font-medium text-white" id="kpi-fase2-cuentas">S/ 0</span></div>
+                            <div class="flex justify-between"><span class="text-textmuted">− Fondo de Emergencia</span><span class="font-medium text-rose-400" id="kpi-fase2-fondo">− S/ 0</span></div>
+                            <div class="flex justify-between"><span class="text-textmuted">+ FIBRAS</span><span class="font-medium text-emerald-400" id="kpi-fase2-fibras">+ S/ 0</span></div>
+                            <div class="border-t border-slate-800 pt-3 flex justify-between"><span class="text-white font-semibold">Pool 1 Actual</span><span class="font-bold text-accent" id="kpi-fase2-total">S/ 0</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="fase2-alerta-meta" class="hidden bg-accent/10 border border-accent/40 rounded-2xl p-5 flex items-start gap-3">
+                    <svg class="w-6 h-6 text-accent flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    <div>
+                        <p class="text-sm font-semibold text-white">Meta de Pool 1 alcanzada</p>
+                        <p class="text-xs text-textmuted mt-1">Ya puedes redirigir tu excedente al siguiente paso de la estrategia de Fase 2.</p>
+                    </div>
+                </div>
+
+                <div class="bg-card rounded-2xl p-5 border border-slate-800/60 text-xs text-textmuted">
+                    El fondo de emergencia (<span id="fase2-fondo-nota">S/ 30,000</span>) ya está restado del saldo mostrado arriba — no es un número menor "por error" al compararlo con el que ves en Patrimonio Neto.
+                </div>
+            </div>
+
         </main>
     </div>
 
@@ -1271,6 +1321,8 @@
             const tabSocial = document.getElementById('tab-social');
             const tabBtnYoy = document.getElementById('tab-btn-yoy');
             const tabYoy = document.getElementById('tab-yoy');
+            const tabBtnFase2 = document.getElementById('tab-btn-fase2');
+            const tabFase2 = document.getElementById('tab-fase2');
 
             const filterDates = document.getElementById('filter-dates');
             const filterBudget = document.getElementById('filter-budget');
@@ -1278,10 +1330,10 @@
             const pageTitle = document.getElementById('page-title');
             const pageSubtitle = document.getElementById('page-subtitle');
 
-            [tabBtnOverview, tabBtnPresupuesto, tabBtnCrecimiento, tabBtnPatrimonio, tabBtnHipoteca, tabBtnCostoVida, tabBtnEstabilizadores, tabBtnSocial, tabBtnYoy].forEach(btn => {
+            [tabBtnOverview, tabBtnPresupuesto, tabBtnCrecimiento, tabBtnPatrimonio, tabBtnHipoteca, tabBtnCostoVida, tabBtnEstabilizadores, tabBtnSocial, tabBtnYoy, tabBtnFase2].forEach(btn => {
                 if (btn) btn.className = "w-full flex items-center gap-3 px-4 py-2.5 text-textmuted hover:bg-slate-800/50 hover:text-textmain rounded-xl text-sm font-medium transition-all text-left";
             });
-            [tabOverview, tabPresupuesto, tabCrecimiento, tabPatrimonio, tabHipoteca, tabCostoVida, tabEstabilizadores, tabSocial, tabYoy].forEach(t => {
+            [tabOverview, tabPresupuesto, tabCrecimiento, tabPatrimonio, tabHipoteca, tabCostoVida, tabEstabilizadores, tabSocial, tabYoy, tabFase2].forEach(t => {
                 if (t) t.classList.add('hidden');
             });
 
@@ -1367,6 +1419,15 @@
                 pageTitle.innerText = "Crecimiento YoY";
                 pageSubtitle.innerText = "Comparativas año contra año de ingreso neto y gasto por categoría, con todo el historial disponible.";
                 cargarCrecimientoYoY();
+            } else if (tab === 'fase2') {
+                tabFase2.classList.remove('hidden');
+                filterDates.classList.add('hidden');
+                filterBudget.classList.add('hidden');
+                tabBtnFase2.className = "w-full flex items-center gap-3 px-4 py-2.5 bg-accent/15 text-accent rounded-xl text-sm font-medium border border-accent/20 transition-all text-left";
+
+                pageTitle.innerText = "Fase 2";
+                pageSubtitle.innerText = "Tracking de la estrategia de real estate apalancado — v1, solo Pool 1.";
+                cargarFase2();
             }
 
             // En móvil, el menú es un drawer superpuesto: al elegir una pestaña, se cierra
@@ -3967,6 +4028,44 @@
                 });
             } catch (err) {
                 console.error("Error al cargar detalle YoY de categoría:", err);
+            }
+        }
+
+        // ===== Fase 2 (Pool 1) =====
+
+        async function cargarFase2() {
+            try {
+                const res = await fetch(`${API_URL}/fase2-pool1`);
+                const data = await res.json();
+
+                document.getElementById('kpi-fase2-actual').textContent = formatMoneda(data.pool1_actual);
+                document.getElementById('kpi-fase2-meta').textContent = formatMoneda(data.pool1_meta);
+                document.getElementById('kpi-fase2-pct').textContent = `${data.pool1_pct_avance}%`;
+                document.getElementById('kpi-fase2-cuentas').textContent = formatMoneda(data.cuentas_alto_rendimiento);
+                document.getElementById('kpi-fase2-fondo').textContent = `− ${formatMoneda(data.fondo_emergencia)}`;
+                document.getElementById('kpi-fase2-fibras').textContent = `+ ${formatMoneda(data.fibras)}`;
+                document.getElementById('kpi-fase2-total').textContent = formatMoneda(data.pool1_actual);
+                document.getElementById('fase2-fondo-nota').textContent = formatMoneda(data.fondo_emergencia);
+
+                const barra = document.getElementById('fase2-progress-bar');
+                const pctClamped = Math.max(0, Math.min(100, data.pool1_pct_avance || 0));
+                barra.style.width = `${pctClamped}%`;
+
+                const badge = document.getElementById('fase2-pool1-badge');
+                const alerta = document.getElementById('fase2-alerta-meta');
+                if (data.pool1_meta_alcanzada) {
+                    badge.classList.remove('hidden');
+                    alerta.classList.remove('hidden');
+                    barra.classList.remove('bg-accent');
+                    barra.classList.add('bg-emerald-400');
+                } else {
+                    badge.classList.add('hidden');
+                    alerta.classList.add('hidden');
+                    barra.classList.add('bg-accent');
+                    barra.classList.remove('bg-emerald-400');
+                }
+            } catch (err) {
+                console.error("Error al cargar Fase 2 - Pool 1:", err);
             }
         }
 

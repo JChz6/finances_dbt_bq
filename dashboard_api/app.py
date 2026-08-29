@@ -956,6 +956,67 @@ def obtener_net_worth():
         }
     }
 
+@app.get("/fase2-pool1")
+def obtener_fase2_pool1():
+    """
+    Tracking de Fase 2 (real estate apalancado), v1 — solo Pool 1. No es un modelo dbt nuevo:
+    reutiliza los mismos dos componentes que ya calcula /net-worth (saldo neto en cuentas de
+    alto rendimiento y aportes acumulados a FIBRAS), sin duplicar la lógica de qué
+    cuentas/categoría cuentan — misma tabla `cuentas_alto_rendimiento` y mismo filtro
+    categoria='Inversiones' AND subcategoria='FIBRAS' que usa /net-worth, solo que aquí se pide
+    el total acumulado (snapshot de hoy) en una sola query en vez de la serie mensual completa.
+    pool1_actual = (cuentas_alto_rendimiento - fondo_emergencia) + fibras: el fondo de
+    emergencia no cuenta como parte del Pool 1, es colchón aparte.
+    Ver financial_advisor/prompts_agentes/fase2_tracking.md y
+    financial_advisor/.claude/context/estrategia.md ("Checkpoint de Fase 2" → "Pool 1").
+    """
+    fondo_emergencia = 30000.0  # misma constante que /crecimiento-kpis — no se movió de sitio
+    pool1_meta = 100000.0
+
+    query = """
+        SELECT
+            SUM(
+                CASE
+                    WHEN cuenta IN (SELECT cuenta FROM `big-query-406221.finanzas_personales_mds.cuentas_alto_rendimiento`)
+                         AND ingreso_gasto IN ('Ingreso', 'Dinero ingresado') THEN importe_moneda_principal
+                    WHEN cuenta IN (SELECT cuenta FROM `big-query-406221.finanzas_personales_mds.cuentas_alto_rendimiento`)
+                         AND ingreso_gasto IN ('Gastos', 'Dinero gastado') THEN -importe_moneda_principal
+                    ELSE 0
+                END
+            ) AS cuentas_alto_rendimiento,
+            SUM(IF(categoria = 'Inversiones' AND subcategoria = 'FIBRAS', importe_moneda_principal, 0)) AS fibras
+        FROM `big-query-406221.finanzas_personales_mds.fact_transactions`
+    """
+    vacio = {
+        "cuentas_alto_rendimiento": 0.0,
+        "fondo_emergencia": fondo_emergencia,
+        "fibras": 0.0,
+        "pool1_actual": 0.0,
+        "pool1_meta": pool1_meta,
+        "pool1_pct_avance": 0.0,
+        "pool1_meta_alcanzada": False
+    }
+    try:
+        resultados = list(client.query(query).result())
+        if not resultados:
+            return vacio
+        cuentas_alto_rendimiento = float(resultados[0].cuentas_alto_rendimiento or 0.0)
+        fibras = float(resultados[0].fibras or 0.0)
+        pool1_actual = (cuentas_alto_rendimiento - fondo_emergencia) + fibras
+        pool1_pct_avance = round(pool1_actual / pool1_meta * 100, 2) if pool1_meta > 0 else 0.0
+        return {
+            "cuentas_alto_rendimiento": round(cuentas_alto_rendimiento, 2),
+            "fondo_emergencia": fondo_emergencia,
+            "fibras": round(fibras, 2),
+            "pool1_actual": round(pool1_actual, 2),
+            "pool1_meta": pool1_meta,
+            "pool1_pct_avance": pool1_pct_avance,
+            "pool1_meta_alcanzada": pool1_actual >= pool1_meta
+        }
+    except Exception as e:
+        print("Error en fase2-pool1:", e)
+        return vacio
+
 @app.get("/gasto-esencial-discrecional")
 def obtener_gasto_esencial_discrecional(fecha_inicio: Optional[str] = None, fecha_fin: Optional[str] = None):
     """
