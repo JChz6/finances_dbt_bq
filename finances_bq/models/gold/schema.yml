@@ -132,6 +132,33 @@ models:
       - name: neto_anuncios
         description: "Ver agg_netos_prestamos_anuncios."
 
+  - name: cuentas_alto_rendimiento
+    description: >
+      Materializa el macro cuentas_alto_rendimiento() como tabla real en BigQuery, para que
+      dashboard_api consulte esta lista por SELECT en vez de hardcodear el literal de cuentas
+      en Python. Única fuente de verdad de la lista: el macro (macros/cuentas_alto_rendimiento.sql).
+    columns:
+      - name: cuenta
+        description: "Nombre de una cuenta de ahorro de alto rendimiento (ej. 'Wow Compartamos')."
+
+  - name: agg_gasto_mensual_categoria
+    description: >
+      Grano mes x categoría de gasto real (fact_transactions), sin whitelist ni neteo de
+      Anuncios/Préstamos contra Reembolsos — ambos se aplican en dashboard_api. Fuente para
+      comparativas year-over-year: crecimiento de ingreso neto (junto con agg_ingresos) e
+      "inflación de estilo de vida" por categoría entre años.
+    columns:
+      - name: mes_cat_id
+        description: "Hash MD5 de mes + categoría, unique_key del merge incremental."
+      - name: mes
+        description: "Mes (primer día, DATETIME), DATE_TRUNC(txn_time, MONTH)."
+      - name: categoria
+        description: "Categoría tal cual viene en fact_transactions, sin normalizar."
+      - name: monto_real
+        description: "SUM(importe_moneda_principal) del mes/categoría donde ingreso_gasto = 'Gastos'."
+      - name: fecha_carga
+        description: "Última fecha_carga del batch que aportó datos a esta fila."
+
   - name: plan_inversion
     description: >
       Modelo Gold que calcula la distribución mensual del dinero disponible para ahorro e inversión
