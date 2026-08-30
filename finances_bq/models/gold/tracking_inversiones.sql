@@ -12,25 +12,33 @@ WITH relevantes AS(
       ELSE FALSE
     END AS flg_ingreso,
     CASE
-      WHEN (cuenta IN UNNEST({{ cuentas_alto_rendimiento() }}) AND ingreso_gasto = 'Dinero ingresado') THEN TRUE
+      WHEN (cuenta IN UNNEST({{ cuentas_alto_rendimiento() }}) AND ingreso_gasto LIKE '%ngres%') THEN TRUE
       WHEN (categoria = 'Inversiones' AND subcategoria = 'FIBRAS') THEN TRUE
       WHEN (categoria = 'Inversiones' AND subcategoria = 'Inmuebles' AND concepto = 'Amortización') THEN TRUE
       ELSE FALSE
     END AS flg_inversion,
     CASE
-      WHEN (cuenta IN UNNEST({{ cuentas_alto_rendimiento() }}) AND ingreso_gasto = 'Dinero ingresado') THEN 'Cuentas Alto Rendimiento'
+      WHEN (cuenta IN UNNEST({{ cuentas_alto_rendimiento() }}) AND ingreso_gasto LIKE '%ngres%') THEN 'Cuentas Alto Rendimiento'
       WHEN (categoria = 'Inversiones' AND subcategoria = 'FIBRAS') THEN 'FIBRAS'
       WHEN (categoria = 'Inversiones' AND subcategoria = 'Inmuebles' AND concepto = 'Amortización') THEN 'Prepagos'
       ELSE NULL
     END AS tipo_inversion,
 
-    CASE WHEN (cuenta IN UNNEST({{ cuentas_alto_rendimiento() }}) AND ingreso_gasto = 'Dinero ingresado') THEN importe_moneda_principal ELSE 0 END AS invertido_cuentas_alto_rendimiento,
-    CASE WHEN (categoria = 'Inversiones' AND subcategoria = 'FIBRAS') THEN importe_moneda_principal ELSE 0 END AS invertido_fibras,
+    CASE
+      WHEN (cuenta IN UNNEST({{ cuentas_alto_rendimiento() }}) AND ingreso_gasto LIKE '%ngres%') THEN importe_moneda_principal
+      ELSE 0
+    END AS invertido_cuentas_alto_rendimiento,
+        
+    CASE
+      WHEN (categoria = 'Inversiones' AND subcategoria = 'FIBRAS') THEN importe_moneda_principal
+      ELSE 0
+    END AS invertido_fibras,
+    
     CASE WHEN (categoria = 'Inversiones' AND subcategoria = 'Inmuebles' AND concepto = 'Amortización') THEN importe_moneda_principal ELSE 0 END AS invertido_prepagos
   FROM {{ ref('fact_transactions') }}
   WHERE categoria IN ('Salario', 'Freelance', 'Pasivo')
   --cuentas de alto rendimiento
-  OR (cuenta IN UNNEST({{ cuentas_alto_rendimiento() }}) AND ingreso_gasto = 'Dinero ingresado')
+  OR (cuenta IN UNNEST({{ cuentas_alto_rendimiento() }}) AND ingreso_gasto LIKE '%ngres%')
   --inversión en FIBRAS
   OR (categoria = 'Inversiones' AND subcategoria = 'FIBRAS')
   --amortizaciones a capital
