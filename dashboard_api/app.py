@@ -390,8 +390,22 @@ def obtener_cumplimiento_presupuesto(
 
 @app.get("/crecimiento-kpis")
 def obtener_crecimiento_kpis(fecha_inicio: Optional[str] = None, fecha_fin: Optional[str] = None):
-    fondo_emergencia = 30000.0
-    
+    # Saldo real del fondo de emergencia (ya no la meta fija de 30,000): lee la última fila del
+    # modelo dbt agg_fondo_emergencia, misma fuente que usa /fase2-pool1. Si aún no hay ninguna
+    # transacción 'Emerg/' registrada, cae a la meta (fondo intacto).
+    fondo_emergencia = 30000.0  # fallback si agg_fondo_emergencia no tiene filas todavía
+    try:
+        fila_fondo = list(client.query("""
+            SELECT saldo_actual
+            FROM `big-query-406221.finanzas_personales_mds.agg_fondo_emergencia`
+            ORDER BY txn_time DESC, txn_id DESC
+            LIMIT 1
+        """).result())
+        if fila_fondo and fila_fondo[0].saldo_actual is not None:
+            fondo_emergencia = float(fila_fondo[0].saldo_actual)
+    except Exception as e:
+        print("Error leyendo agg_fondo_emergencia (usando fallback):", e)
+
     # Lee de agg_gasto_esencial.presupuesto_esencial: fuente única de la lista canónica de
     # categorías esenciales (macro categorias_esenciales_supervivencia) + el componente real
     # de interés/seguros de la hipoteca de vivienda propia — reemplaza el hardcode de
@@ -965,12 +979,19 @@ def obtener_fase2_pool1():
     cuentas/categoría cuentan — misma tabla `cuentas_alto_rendimiento` y mismo filtro
     categoria='Inversiones' AND subcategoria='FIBRAS' que usa /net-worth, solo que aquí se pide
     el total acumulado (snapshot de hoy) en una sola query en vez de la serie mensual completa.
-    pool1_actual = (cuentas_alto_rendimiento - fondo_emergencia) + fibras: el fondo de
-    emergencia no cuenta como parte del Pool 1, es colchón aparte.
+
+    El fondo de emergencia vive físicamente mezclado dentro de cuentas_alto_rendimiento (no en
+    una cuenta aparte). Su meta y su saldo real (ajustado por transacciones etiquetadas 'Emerg/'
+    en el comentario, ver macros/fondo_emergencia.sql) ya no se calculan aquí: se leen del
+    modelo dbt `agg_fondo_emergencia` (fuente única de verdad, también usado por
+    /crecimiento-kpis, así que ambos endpoints siempre muestran el mismo saldo). Ese saldo real
+    ya está reflejado en cuentas_alto_rendimiento (son transacciones reales), así que restarlo
+    (no la meta fija) evita descontar ese dinero dos veces de Pool 1.
+    pool1_actual = (cuentas_alto_rendimiento - fondo_emergencia_actual) + fibras.
     Ver financial_advisor/prompts_agentes/fase2_tracking.md y
     financial_advisor/.claude/context/estrategia.md ("Checkpoint de Fase 2" → "Pool 1").
     """
-    fondo_emergencia = 30000.0  # misma constante que /crecimiento-kpis — no se movió de sitio
+    fondo_emergencia_meta_fallback = 30000.0  # solo si agg_fondo_emergencia no devuelve fila (sin transacciones 'Emerg/' aún)
     pool1_meta = 100000.0
 
     query = """
@@ -984,12 +1005,20 @@ def obtener_fase2_pool1():
                     ELSE 0
                 END
             ) AS cuentas_alto_rendimiento,
-            SUM(IF(categoria = 'Inversiones' AND subcategoria = 'FIBRAS', importe_moneda_principal, 0)) AS fibras
+            SUM(IF(categoria = 'Inversiones' AND subcategoria = 'FIBRAS', importe_moneda_principal, 0)) AS fibras,
+            (
+                SELECT AS STRUCT fondo_emergencia_meta, saldo_actual
+                FROM `big-query-406221.finanzas_personales_mds.agg_fondo_emergencia`
+                ORDER BY txn_time DESC, txn_id DESC
+                LIMIT 1
+            ) AS fondo_emergencia
         FROM `big-query-406221.finanzas_personales_mds.fact_transactions`
     """
     vacio = {
         "cuentas_alto_rendimiento": 0.0,
-        "fondo_emergencia": fondo_emergencia,
+        "fondo_emergencia_meta": fondo_emergencia_meta_fallback,
+        "fondo_emergencia_actual": fondo_emergencia_meta_fallback,
+        "fondo_emergencia_movimiento_neto": 0.0,
         "fibras": 0.0,
         "pool1_actual": 0.0,
         "pool1_meta": pool1_meta,
@@ -1002,11 +1031,18 @@ def obtener_fase2_pool1():
             return vacio
         cuentas_alto_rendimiento = float(resultados[0].cuentas_alto_rendimiento or 0.0)
         fibras = float(resultados[0].fibras or 0.0)
-        pool1_actual = (cuentas_alto_rendimiento - fondo_emergencia) + fibras
+        fondo_emergencia = resultados[0].fondo_emergencia
+        fondo_emergencia_meta = float(fondo_emergencia["fondo_emergencia_meta"]) if fondo_emergencia and fondo_emergencia["fondo_emergencia_meta"] is not None else fondo_emergencia_meta_fallback
+        fondo_emergencia_actual = float(fondo_emergencia["saldo_actual"]) if fondo_emergencia and fondo_emergencia["saldo_actual"] is not None else fondo_emergencia_meta
+        movimiento_neto = fondo_emergencia_meta - fondo_emergencia_actual
+
+        pool1_actual = (cuentas_alto_rendimiento - fondo_emergencia_actual) + fibras
         pool1_pct_avance = round(pool1_actual / pool1_meta * 100, 2) if pool1_meta > 0 else 0.0
         return {
             "cuentas_alto_rendimiento": round(cuentas_alto_rendimiento, 2),
-            "fondo_emergencia": fondo_emergencia,
+            "fondo_emergencia_meta": fondo_emergencia_meta,
+            "fondo_emergencia_actual": round(fondo_emergencia_actual, 2),
+            "fondo_emergencia_movimiento_neto": round(movimiento_neto, 2),
             "fibras": round(fibras, 2),
             "pool1_actual": round(pool1_actual, 2),
             "pool1_meta": pool1_meta,
