@@ -113,7 +113,7 @@ models:
         tests:
           - relationships:
               arguments:
-                to: ref('claves')
+                to: ref('claves_materialized')
                 field: clave
 
       - name: valor

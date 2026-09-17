@@ -55,7 +55,7 @@ FIRST_LAYER AS(
         END AS dias_trabajados,
     
         CASE
-            WHEN part_1 IN (SELECT DISTINCT clave FROM {{ref('claves')}})
+            WHEN part_1 IN (SELECT DISTINCT clave FROM {{ref('claves_materialized')}})
                 THEN part_1
             ELSE NULL
         END AS clave,
