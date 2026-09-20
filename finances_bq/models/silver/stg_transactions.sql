@@ -9,6 +9,7 @@
             "data_type": "datetime",
             "granularity": "month"
         },
+        cluster_by = ["ingreso_gasto", "cuenta", "categoria"],
         pre_hook = "{{
             replace_partitions_src(
                 source('finances_raw',

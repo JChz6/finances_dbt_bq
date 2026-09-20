@@ -9,6 +9,7 @@
             "data_type": "datetime",
             "granularity": "month"
         },
+        cluster_by = ["categoria"],
         pre_hook = "{{ replace_partitions(ref('fact_transactions'), this, 'txn_time', 'fecha') }}"
     )
 }}

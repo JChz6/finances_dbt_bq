@@ -9,6 +9,7 @@
             "data_type": "datetime",
             "granularity": "month"
         },
+        cluster_by = ["ingreso_gasto", "cuenta", "categoria"],
         pre_hook = "{{ replace_partitions(ref('stg_transactions'), this, 'txn_time', 'txn_time') }}"
     )
 }}
