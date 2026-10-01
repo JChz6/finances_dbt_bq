@@ -122,7 +122,7 @@ models:
       - name: mes
         description: "Mes (primer día)."
       - name: gasto_esencial_real
-        description: "Gasto real (fact_transactions) en categorías esenciales + interés/seguros de hipoteca (vivienda propia) del mes."
+        description: "Gasto real (fact_transactions) en categorías esenciales + interés/seguros de hipoteca (vivienda propia) del mes. Excluye transacciones con clave 'C/' (acompañante, pasan a discrecional), salvo 'C/ Odín' (con o sin tilde)."
       - name: gasto_discrecional_real
         description: "Gasto real discrecional (excluye esencial, Inversiones, Deudas) + netos de Préstamos/Anuncios del mes."
       - name: presupuesto_esencial

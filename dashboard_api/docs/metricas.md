@@ -101,6 +101,15 @@ nombres nunca capturan la hipoteca en `fact_transactions` (ver 0.1) — y en su 
 "esencial" en los tres endpoints para un mismo mes, y ya incluye el costo real de la hipoteca en
 vez de subestimarlo.
 
+**Exclusión de clave `C/` (gasto con/para acompañante):** en el gasto **real**, las
+transacciones con `clave = 'C/'` nunca cuentan como esenciales aunque su categoría esté en la
+lista — no son costo de supervivencia propio. Se reclasifican a `discrecional` (no
+desaparecen), así que `esencial + discrecional` sigue sumando el mismo gasto total.
+**Excepción:** `C/ Odín` sí cuenta como esencial; se compara `valor` sin tildes y en
+mayúsculas (`ODIN`) para cubrir `Odín`/`Odin`. No aplica a `presupuesto_esencial` (el
+presupuesto no tiene clave). Impacto al implementarlo (histórico completo): esencial real
+S/49,703.55 → S/38,535.99; total sin cambio.
+
 ### 0.4 Cuentas de alto rendimiento en `/crecimiento-kpis` vs `/net-worth` — **unificadas**
 
 Antes, `/crecimiento-kpis` (`query_construccion_patrimonio`) solo contaba movimientos
@@ -463,7 +472,8 @@ Ya cubierto en detalle en 0.3 (definición unificada de "esencial") y 0.1. Lee
 realmente se pierde por esa exclusión; el **interés + seguros** de la hipoteca de vivienda
 propia sí se suma de vuelta a `esencial` (vía `hipotecas_materialized.
 costo_vida_interes_seguros`, ver 0.1), y `Anuncios`/`Préstamos` se suman netos (no brutos) a
-`discrecional` (ver `agg_netos_prestamos_anuncios`). `pct_esencial = esencial / (esencial +
+`discrecional` (ver `agg_netos_prestamos_anuncios`). Transacciones con clave `C/` (salvo
+`C/ Odín`) van a `discrecional` aunque su categoría sea esencial (ver 0.3). `pct_esencial = esencial / (esencial +
 discrecional) * 100` por mes. Fuente: **real** (`fact_transactions` + `hipotecas_materialized`).
 
 ---
