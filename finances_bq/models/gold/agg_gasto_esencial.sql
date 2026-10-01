@@ -31,19 +31,34 @@ WITH hipoteca_mensual AS (
     GROUP BY 1
 ),
 
+-- Transacciones con clave 'C/' (gasto con/para un acompañante) nunca cuentan como
+-- esenciales aunque su categoría esté en la lista canónica: no son costo de supervivencia
+-- propio. Se mueven al bucket discrecional para que esencial + discrecional siga sumando
+-- el mismo gasto total.
+-- Excepción: 'C/ Odín' (con o sin tilde) sí cuenta como esencial — se compara sin
+-- acentos y en mayúsculas para cubrir 'Odin'/'Odín'.
 real_mensual AS (
     SELECT
         DATE_TRUNC(DATE(txn_time), MONTH) AS mes,
-        SUM(IF(UPPER(TRIM(categoria)) IN UNNEST({{ categorias_esenciales_supervivencia() }}), importe_moneda_principal, 0)) AS gasto_esencial_categorias,
+        SUM(IF(es_esencial, importe_moneda_principal, 0)) AS gasto_esencial_categorias,
         SUM(
             IF(
-                UPPER(TRIM(categoria)) NOT IN UNNEST({{ categorias_esenciales_supervivencia() }})
+                NOT es_esencial
                 AND categoria NOT IN ('Inversiones', 'Deudas', 'Anuncios', 'Préstamos'),
                 importe_moneda_principal, 0
             )
         ) AS gasto_discrecional_bruto
-    FROM {{ ref('fact_transactions') }}
-    WHERE ingreso_gasto = 'Gastos'
+    FROM (
+        SELECT
+            *,
+            UPPER(TRIM(categoria)) IN UNNEST({{ categorias_esenciales_supervivencia() }})
+                AND (
+                    clave IS DISTINCT FROM 'C/'
+                    OR UPPER(REGEXP_REPLACE(NORMALIZE(TRIM(valor), NFD), r'\p{M}', '')) = 'ODIN'
+                ) AS es_esencial
+        FROM {{ ref('fact_transactions') }}
+        WHERE ingreso_gasto = 'Gastos'
+    )
     GROUP BY 1
 ),
 
