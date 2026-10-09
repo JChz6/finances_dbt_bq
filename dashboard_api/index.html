@@ -105,6 +105,12 @@
         #info-popover {
             font-family: 'Outfit', sans-serif;
         }
+        .objective-track { height: 10px; border-radius: 999px; background: #2A2A2A; overflow: hidden; }
+        .objective-fill { height: 100%; border-radius: inherit; background: #4ADE80; transition: width .35s ease; }
+        .objective-fill.provisional { background: repeating-linear-gradient(110deg, #4ADE80 0 8px, #24653b 8px 14px); }
+        .objective-month-bar { min-height: 4px; border-radius: 6px 6px 2px 2px; background: #4ADE80; }
+        .objective-month-bar.provisional { background: repeating-linear-gradient(135deg, #4ADE80 0 7px, #24653b 7px 12px); }
+        @media (prefers-reduced-motion: reduce) { .objective-fill { transition: none; } }
     </style>
 </head>
 <body class="bg-darkbg text-textmain font-sans antialiased selection:bg-accent selection:text-white">
@@ -168,13 +174,13 @@
                     </button>
                     <button onclick="switchTab('fase2')" id="tab-btn-fase2" class="w-full flex items-center gap-3 px-4 py-2.5 text-textmuted hover:bg-slate-800/50 hover:text-textmain rounded-xl text-sm font-medium transition-all text-left">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5m4-14l-3 3m0 0l3 3m-3-3h9"/></svg>
-                        Fase 2
+                        Objetivos y decisiones
                     </button>
                 </nav>
             </div>
             
             <div class="mt-8 pt-4 border-t border-slate-800/80 text-[11px] text-textmuted flex flex-col gap-1">
-                <div>Conectado a <span class="text-accent">BigQuery</span></div>
+                <div>Fuente: <span class="text-accent">BigQuery</span></div>
                 <div id="ultima-actualizacion" class="text-[9px] text-slate-500">Última actualización: Cargando...</div>
             </div>
         </aside>
@@ -1108,50 +1114,45 @@
                 </div>
             </div>
 
-            <!-- TAB: FASE 2 (Pool 1) -->
+            <!-- TAB: OBJETIVOS Y DECISIONES -->
             <div id="tab-fase2" class="hidden space-y-6">
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <div class="lg:col-span-2 bg-card rounded-3xl p-6 border border-accent/40 shadow-sm shadow-accent/5 relative overflow-hidden ring-1 ring-accent/10">
-                        <div class="flex items-start justify-between gap-3 mb-1">
-                            <p class="text-textmuted text-sm font-medium tracking-wide inline-flex items-center gap-1.5">Pool 1 — Real Estate Apalancado<button type="button" class="info-btn" data-tip="Capital disponible para el siguiente paso de la estrategia de Fase 2: saldo de cuentas de alto rendimiento (menos el fondo de emergencia, que no cuenta como parte del pool) más los aportes acumulados a FIBRAS. No incluye cashflow ni Pool 2 todavía — esta es la v1 del tracking.">i</button></p>
-                            <span id="fase2-pool1-badge" class="hidden flex-shrink-0 text-[10px] font-semibold px-2.5 py-1 rounded-full bg-accent/20 text-accent whitespace-nowrap">Meta alcanzada</span>
-                        </div>
-                        <h3 class="text-3xl sm:text-4xl font-semibold text-white mt-1" id="kpi-fase2-actual">S/ 0</h3>
-                        <p class="text-xs text-textmuted mt-1">de <span id="kpi-fase2-meta">S/ 100,000</span> meta</p>
-
-                        <div class="mt-5">
-                            <div class="w-full h-3 bg-slate-800 rounded-full overflow-hidden">
-                                <div id="fase2-progress-bar" class="h-full bg-accent transition-all duration-500" style="width: 0%"></div>
-                            </div>
-                            <div class="flex justify-between mt-1.5 text-[11px] text-textmuted">
-                                <span id="kpi-fase2-pct">0%</span>
-                                <span>100%</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="bg-card rounded-2xl p-6 border border-slate-800/60 shadow-sm">
-                        <h4 class="text-sm font-semibold text-white mb-4 inline-flex items-center gap-1.5">Composición<button type="button" class="info-btn" data-tip="Desglose de lo que forma el saldo actual del Pool 1: saldo de cuentas de alto rendimiento, menos el saldo REAL del fondo de emergencia (colchón aparte, no cuenta para el pool), más los aportes acumulados a FIBRAS. El saldo real del fondo parte de la meta de S/30,000 y se ajusta por transacciones etiquetadas 'Emerg/' en el comentario: gastos lo reducen, ingresos/reembolsos lo reponen.">i</button></h4>
-                        <div class="space-y-3 text-sm">
-                            <div class="flex justify-between"><span class="text-textmuted">Cuentas Alto Rendimiento</span><span class="font-medium text-white" id="kpi-fase2-cuentas">S/ 0</span></div>
-                            <div class="flex justify-between"><span class="text-textmuted">− Fondo de Emergencia</span><span class="font-medium text-rose-400" id="kpi-fase2-fondo">− S/ 0</span></div>
-                            <div class="flex justify-between"><span class="text-textmuted">+ FIBRAS</span><span class="font-medium text-emerald-400" id="kpi-fase2-fibras">+ S/ 0</span></div>
-                            <div class="border-t border-slate-800 pt-3 flex justify-between"><span class="text-white font-semibold">Pool 1 Actual</span><span class="font-bold text-accent" id="kpi-fase2-total">S/ 0</span></div>
-                        </div>
-                    </div>
+                <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                    <div><p class="text-[11px] uppercase tracking-[.18em] text-accent font-semibold">Mapa de progreso</p><p class="text-2xl sm:text-3xl font-semibold text-white mt-1">Ruta hacia S/6,000 netos</p></div>
+                    <p class="text-xs text-textmuted sm:text-right max-w-sm">Soles de octubre de 2026 · seis meses completos, independientes de los filtros · revisión anual · sin fecha estimada</p>
                 </div>
-
-                <div id="fase2-alerta-meta" class="hidden bg-accent/10 border border-accent/40 rounded-2xl p-5 flex items-start gap-3">
-                    <svg class="w-6 h-6 text-accent flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                    <div>
-                        <p class="text-sm font-semibold text-white">Meta de Pool 1 alcanzada</p>
-                        <p class="text-xs text-textmuted mt-1">Ya puedes redirigir tu excedente al siguiente paso de la estrategia de Fase 2.</p>
+                <p id="objetivos-error" class="hidden rounded-xl border border-rose-500/40 bg-rose-500/10 p-4 text-rose-200" role="alert"></p>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <section class="bg-card rounded-3xl p-5 sm:p-6 border border-accent/40 shadow-sm shadow-accent/5" aria-labelledby="objetivos-reserva-title">
+                        <div><p class="text-[11px] uppercase tracking-widest text-textmuted">01 · Seguridad</p><h3 id="objetivos-reserva-title" class="text-xl font-semibold text-white mt-1">Reserva personal <button type="button" class="info-btn" data-tip="Meta = 6 × (presupuesto completo vigente sin Deudas indispensables + cuota obligatoria íntegra del cronograma). Saldo de agg_fondo_emergencia; S/30,000 histórico no cuenta como saldo.">i</button></h3></div>
+                        <div id="objetivos-reserva" class="mt-5" aria-live="polite">Cargando…</div>
+                    </section>
+                    <section class="bg-card rounded-3xl p-5 sm:p-6 border border-slate-800/60" aria-labelledby="objetivos-hipoteca-title">
+                        <div class="flex items-start justify-between gap-3"><div><p class="text-[11px] uppercase tracking-widest text-textmuted">02 · Liberar flujo</p><h3 id="objetivos-hipoteca-title" class="text-xl font-semibold text-white mt-1">Hipoteca de vivienda <button type="button" class="info-btn" data-tip="Hitos sobre capital + interés de la próxima cuota prevista; seguros aparte. Saldo de deuda según última cuota pagada. Reducir cuota al amortizar es ahorro de gasto, no renta pasiva.">i</button></h3></div><span class="text-accent text-2xl" aria-hidden="true">⌂</span></div>
+                        <div id="objetivos-hipoteca" class="mt-5" aria-live="polite">Cargando…</div>
+                    </section>
+                </div>
+                <section class="bg-card rounded-3xl p-5 sm:p-6 border border-slate-800/60" aria-labelledby="objetivos-renta-title">
+                    <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2"><div><p class="text-[11px] uppercase tracking-widest text-textmuted">03 · Independencia</p><h3 id="objetivos-renta-title" class="text-xl font-semibold text-white mt-1">Renta pasiva recurrente neta <button type="button" class="info-btn" data-tip="Promedio de seis meses calendario completos. Neto requiere conciliar recurrencia, impuestos, comisiones, operación, reservas y deuda del activo. Mientras falte, Pasivo registrado es solo candidato bruto provisional.">i</button></h3></div><span id="objetivos-renta-badge" class="self-start rounded-full px-3 py-1 text-xs border border-slate-700 text-textmuted">Cargando</span></div>
+                    <div id="objetivos-renta" class="mt-5" aria-live="polite">Cargando…</div>
+                    <div class="mt-7 grid grid-cols-1 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] gap-7">
+                        <div><h4 class="text-sm font-semibold text-white">Seis meses completos</h4><p class="text-xs text-textmuted mt-1">Montos mensuales y dispersión de la base disponible</p><div id="objetivos-meses" class="mt-4"></div></div>
+                        <div><h4 class="text-sm font-semibold text-white">Escalera de ingreso neto</h4><p class="text-xs text-textmuted mt-1">Los avances provisionales no acreditan hitos</p><div id="objetivos-hitos" class="mt-4 space-y-3"></div></div>
                     </div>
-                </div>
-
-                <div class="bg-card rounded-2xl p-5 border border-slate-800/60 text-xs text-textmuted">
-                    El fondo de emergencia (<span id="fase2-fondo-nota">S/ 30,000</span>) ya está restado del saldo mostrado arriba — no es un número menor "por error" al compararlo con el que ves en Patrimonio Neto.
-                </div>
+                </section>
+                <section class="bg-card rounded-3xl p-5 sm:p-6 border border-slate-800/60" aria-labelledby="objetivos-capital-title">
+                    <p class="text-[11px] uppercase tracking-widest text-textmuted">04 · Recursos disponibles</p><h3 id="objetivos-capital-title" class="text-xl font-semibold text-white mt-1">Capital y provisión fiscal <button type="button" class="info-btn" data-tip="Capital asignable = efectivo acreditado − emergencia − provisión IR separada − compromisos. CAR por movimientos y FIBRAs a costo no son efectivo ni valor realizable.">i</button></h3>
+                    <div id="objetivos-capital" class="mt-5"></div>
+                </section>
+                <section aria-labelledby="objetivos-decisiones-title">
+                    <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2 mb-4"><div><p class="text-[11px] uppercase tracking-widest text-textmuted">05 · Puertas de decisión</p><h3 id="objetivos-decisiones-title" class="text-xl font-semibold text-white mt-1">Checkpoints de decisión</h3></div><p class="text-xs text-textmuted">Un umbral cumplido no registra una decisión</p></div>
+                    <div id="objetivos-decisiones" class="grid grid-cols-1 xl:grid-cols-2 gap-6" aria-live="polite"></div>
+                    <p class="mt-4 text-xs text-textmuted">Cobertura 1.20 y estrés son reglas personales. Una caída global del 40% es un ejemplo, no la pérdida máxima. Retiro parcial: horizonte deseado de 3–4 años, sin fecha prometida.</p>
+                </section>
+                <section class="bg-card rounded-3xl p-5 sm:p-6 border border-slate-800/60" aria-labelledby="objetivos-comparacion-title">
+                    <p class="text-[11px] uppercase tracking-widest text-textmuted">06 · Alternativas</p><h3 id="objetivos-comparacion-title" class="text-xl font-semibold text-white mt-1">Comparación de segundo inmueble</h3>
+                    <div id="objetivos-comparacion" class="mt-5">Pendiente de oferta y costos verificables.</div>
+                </section>
+                <p class="text-xs text-textmuted">S/100,000 de Pool 1 y S/30,000 de emergencia son referencias históricas, no permisos de compra ni la meta dinámica de reserva. La Brecha de Libertad de Crecimiento usa otra base: pasivos registrados / gasto esencial real.</p>
             </div>
 
         </main>
@@ -1425,8 +1426,8 @@
                 filterBudget.classList.add('hidden');
                 tabBtnFase2.className = "w-full flex items-center gap-3 px-4 py-2.5 bg-accent/15 text-accent rounded-xl text-sm font-medium border border-accent/20 transition-all text-left";
 
-                pageTitle.innerText = "Fase 2";
-                pageSubtitle.innerText = "Tracking de la estrategia de real estate apalancado — v1, solo Pool 1.";
+                pageTitle.innerText = "Objetivos y decisiones";
+                pageSubtitle.innerText = "Progreso medible y condiciones para revisar decisiones.";
                 cargarFase2();
             }
 
@@ -4031,47 +4032,291 @@
             }
         }
 
-        // ===== Fase 2 (Pool 1) =====
+        // ===== Objetivos y decisiones =====
+        function objetivoMonto(value) {
+            return value === null || value === undefined ? 'Pendiente' :
+                new Intl.NumberFormat('es-PE', {style: 'currency', currency: 'PEN', maximumFractionDigits: 2}).format(value);
+        }
+
+        function objetivoEl(tag, classes, content) {
+            const element = document.createElement(tag);
+            element.className = classes;
+            if (content !== undefined) element.textContent = String(content);
+            return element;
+        }
+
+        function objetivoAdd(parent, tag, classes, content) {
+            const element = objetivoEl(tag, classes, content);
+            parent.appendChild(element);
+            return element;
+        }
+
+        function objetivoStatus(status) {
+            if (['vigente', 'habilitado', 'cumple', 'verificado', 'decisión tomada', 'deuda cero'].includes(status))
+                return ['✓', 'text-accent border-accent/30 bg-accent/10'];
+            if (['faltan condiciones', 'no cumplida', 'no vigente', 'error de carga'].includes(status))
+                return ['!', 'text-rose-300 border-rose-500/30 bg-rose-500/10'];
+            if (['prevista', 'pagada'].includes(status))
+                return ['◷', 'text-textmuted border-slate-700 bg-slate-900'];
+            return ['?', 'text-amber-200 border-amber-400/30 bg-amber-400/10'];
+        }
+
+        function objetivoBadge(status) {
+            const [icon, classes] = objetivoStatus(status);
+            return objetivoEl('span', `inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium ${classes}`, `${icon} ${status}`);
+        }
+
+        function objetivoDato(parent, label, value) {
+            const box = objetivoAdd(parent, 'div', 'min-w-0');
+            objetivoAdd(box, 'dt', 'text-[11px] uppercase tracking-wide text-textmuted', label);
+            objetivoAdd(box, 'dd', 'mt-1 text-sm font-medium text-white break-words', value);
+            return box;
+        }
+
+        function objetivoProgreso(parent, value, max, provisional, label) {
+            const track = objetivoAdd(parent, 'div', 'objective-track mt-3');
+            track.setAttribute('role', 'progressbar');
+            track.setAttribute('aria-label', label);
+            if (Number.isFinite(value) && Number.isFinite(max) && max > 0) {
+                const pct = Math.max(0, Math.min(100, value / max * 100));
+                track.setAttribute('aria-valuemin', '0');
+                track.setAttribute('aria-valuemax', String(max));
+                track.setAttribute('aria-valuenow', String(Math.max(0, Math.min(max, value))));
+                track.setAttribute('aria-valuetext', `${objetivoMonto(value)} de ${objetivoMonto(max)}${provisional ? ', provisional' : ''}`);
+                const fill = objetivoAdd(track, 'div', `objective-fill${provisional ? ' provisional' : ''}`);
+                fill.style.width = `${pct}%`;
+            } else {
+                track.setAttribute('aria-valuetext', 'Datos pendientes');
+            }
+        }
+
+        function objetivoRenderReserva(r) {
+            const root = document.getElementById('objetivos-reserva');
+            root.replaceChildren();
+            const top = objetivoAdd(root, 'div', 'flex flex-wrap items-end justify-between gap-3');
+            const figure = objetivoAdd(top, 'div', 'min-w-0');
+            objetivoAdd(figure, 'p', 'text-xs text-textmuted', 'Meses de cobertura');
+            objetivoAdd(figure, `p`, `text-3xl sm:text-4xl font-semibold tabular-nums ${r.months === null ? 'text-textmuted' : 'text-accent'}`, r.months === null ? 'Pendiente' : `${r.months} / 6`);
+            top.appendChild(objetivoBadge(r.status));
+            const pct = r.balance !== null && r.target > 0 ? Math.min(100, Math.max(0, r.balance / r.target * 100)) : null;
+            objetivoProgreso(root, r.balance, r.target, false, 'Cobertura de la reserva personal');
+            objetivoAdd(root, 'p', 'mt-2 text-xs text-textmuted', pct === null ? 'Avance pendiente' : `${pct.toFixed(1)}% de la meta dinámica`);
+            const metrics = objetivoAdd(root, 'dl', 'grid grid-cols-2 gap-x-4 gap-y-4 mt-6 pt-5 border-t border-slate-800');
+            objetivoDato(metrics, 'Saldo real', objetivoMonto(r.balance));
+            objetivoDato(metrics, 'Meta · 6 meses', objetivoMonto(r.target));
+            objetivoDato(metrics, 'Presupuesto / mes', objetivoMonto(r.budget));
+            objetivoDato(metrics, 'Faltante', objetivoMonto(r.shortfall));
+            objetivoAdd(root, 'p', 'mt-5 text-xs text-textmuted leading-relaxed', `Corte ${r.as_of || 'pendiente'} · fondo ${r.source_dates?.fund || 'pendiente'} · presupuesto ${r.source_dates?.budget || 'pendiente'} · cuota ${r.source_dates?.scheduled_payment || 'pendiente'}. ${r.reason || ''}`);
+        }
+
+        function objetivoRenderHipoteca(h) {
+            const root = document.getElementById('objetivos-hipoteca');
+            root.replaceChildren();
+            if (h.status === 'faltan datos') {
+                root.appendChild(objetivoBadge(h.status));
+                objetivoAdd(root, 'p', 'mt-4 text-sm text-textmuted', h.reason || 'Falta el cronograma de pagos.');
+                return;
+            }
+            const top = objetivoAdd(root, 'div', 'flex flex-wrap items-end justify-between gap-3');
+            const figure = objetivoAdd(top, 'div', 'min-w-0');
+            objetivoAdd(figure, 'p', 'text-xs text-textmuted', 'Próxima cuota · capital + interés');
+            objetivoAdd(figure, 'p', 'text-3xl sm:text-4xl font-semibold text-white tabular-nums', objetivoMonto(h.principal_interest));
+            top.appendChild(objetivoBadge(h.status));
+            objetivoAdd(root, 'p', 'mt-2 text-xs text-textmuted', `Cuota ${h.as_of || 'pendiente'} · seguros ${objetivoMonto(h.insurance)} · total obligatorio ${objetivoMonto(h.payment)}`);
+            objetivoAdd(root, 'p', 'mt-6 text-[11px] uppercase tracking-widest text-textmuted', 'Escalera de cuota · capital + interés');
+            const rail = objetivoAdd(root, 'div', 'grid grid-cols-1 xl:grid-cols-3 gap-2 mt-3');
+            (h.milestones || []).forEach(m => {
+                const cell = objetivoAdd(rail, 'div', `min-w-0 rounded-xl border p-3 flex xl:block items-center justify-between gap-2 ${m.met ? 'border-accent/30 bg-accent/10' : 'border-slate-800 bg-slate-900/60'}`);
+                objetivoAdd(cell, 'p', `text-xs font-semibold whitespace-nowrap ${m.met ? 'text-accent' : 'text-white'}`, `≤ ${objetivoMonto(m.target)}`);
+                objetivoAdd(cell, 'p', 'xl:mt-2 text-[11px] text-textmuted leading-tight text-right xl:text-left', m.met ? '✓ Vigente' : `Faltan ${objetivoMonto(m.gap)}`);
+            });
+            const debt = objetivoAdd(root, 'div', 'flex flex-wrap items-center justify-between gap-2 mt-5 pt-4 border-t border-slate-800');
+            const debtText = objetivoAdd(debt, 'div', 'min-w-0');
+            objetivoAdd(debtText, 'p', 'text-xs text-textmuted', `Saldo tras cuota pagada · ${h.balance_as_of || 'pendiente'}`);
+            objetivoAdd(debtText, 'p', 'text-lg font-semibold text-white', objetivoMonto(h.balance));
+            debt.appendChild(objetivoBadge(h.balance === null ? 'faltan datos' : h.debt_free ? 'deuda cero' : 'faltan condiciones'));
+        }
+
+        function objetivoRenderRenta(p) {
+            const root = document.getElementById('objetivos-renta');
+            const badge = document.getElementById('objetivos-renta-badge');
+            root.replaceChildren();
+            const nextBadge = objetivoBadge(p.status);
+            nextBadge.id = 'objetivos-renta-badge';
+            badge.replaceWith(nextBadge);
+            const top = objetivoAdd(root, 'div', 'flex flex-wrap items-end gap-x-8 gap-y-4');
+            const average = objetivoAdd(top, 'div', 'min-w-0');
+            objetivoAdd(average, 'p', 'text-xs text-textmuted', p.status === 'verificado' ? 'Promedio neto / mes' : p.status === 'provisional' ? 'Promedio candidato / mes' : 'Promedio / mes');
+            objetivoAdd(average, 'p', `text-3xl sm:text-4xl font-semibold tabular-nums ${p.average === null ? 'text-textmuted' : 'text-accent'}`, objetivoMonto(p.average));
+            const goal = objetivoAdd(top, 'div', 'min-w-0 pb-1');
+            objetivoAdd(goal, 'p', 'text-xs text-textmuted', 'Meta de vida');
+            objetivoAdd(goal, 'p', 'text-lg font-semibold text-white', 'S/ 6,000 netos / mes');
+            if (p.status === 'verificado') {
+                objetivoProgreso(root, p.average, 6000, false, 'Renta pasiva neta sobre meta de vida');
+                objetivoAdd(root, 'p', 'mt-2 text-xs text-textmuted', `Ingreso laboral neto restante: ${objetivoMonto(p.labor_needed)}`);
+            } else {
+                const note = objetivoAdd(root, 'div', 'mt-5 rounded-xl border border-amber-400/25 bg-amber-400/5 p-3 text-xs text-amber-100 leading-relaxed');
+                note.textContent = p.reason || 'La base aún no está conciliada como renta recurrente neta; los hitos y el ingreso laboral restante siguen pendientes.';
+            }
+            objetivoAdd(root, 'p', 'mt-3 text-xs text-textmuted', `Rango ${objetivoMonto(p.min)}–${objetivoMonto(p.max)} · variación ${objetivoMonto(p.spread)} · corte ${p.as_of || 'pendiente'} · fuente ${p.status === 'faltan datos' ? 'registros mensuales pendientes' : p.source || 'pendiente'}`);
+            const chart = document.getElementById('objetivos-meses');
+            chart.replaceChildren();
+            if (!p.months?.length) { objetivoAdd(chart, 'p', 'text-sm text-textmuted', 'No hay meses completos disponibles.'); }
+            else {
+                const max = Math.max(1, ...p.months.map(m => m.amount || 0));
+                const columns = objetivoAdd(chart, 'ul', 'grid grid-cols-6 gap-1.5 sm:gap-3 items-end h-44 border-b border-slate-700 pb-1');
+                p.months.forEach(m => {
+                    const item = objetivoAdd(columns, 'li', 'min-w-0 h-full flex flex-col justify-end items-center');
+                    const label = new Date(`${m.month}-01T12:00:00`).toLocaleDateString('es-PE', {month: 'short'}).replace('.', '');
+                    const amount = m.amount === null ? 'Sin dato' : objetivoMonto(m.amount);
+                    item.setAttribute('aria-label', `${m.month}: ${amount}${p.status === 'provisional' ? ', provisional' : ''}`);
+                    objetivoAdd(item, 'span', 'text-[10px] sm:text-xs text-textmuted mb-2 tabular-nums', m.amount === null ? '—' : `S/${Math.round(m.amount)}`);
+                    const bar = objetivoAdd(item, 'div', m.amount === null ? 'w-full max-w-12 rounded bg-slate-700' : `objective-month-bar w-full max-w-12${p.status === 'provisional' ? ' provisional' : ''}`);
+                    bar.style.height = m.amount === null ? '4px' : `${Math.max(4, (m.amount / max) * 105)}px`;
+                    objetivoAdd(item, 'span', 'text-[11px] text-textmuted mt-2 capitalize', label);
+                });
+            }
+            const milestones = document.getElementById('objetivos-hitos');
+            milestones.replaceChildren();
+            (p.milestones || []).forEach(m => {
+                const row = objetivoAdd(milestones, 'div', 'rounded-xl border border-slate-800 bg-slate-900/50 p-3');
+                const head = objetivoAdd(row, 'div', 'flex items-center justify-between gap-2');
+                objetivoAdd(head, 'span', 'text-sm font-semibold text-white', `${objetivoMonto(m.target)} / mes`);
+                objetivoAdd(head, 'span', 'text-xs text-textmuted', m.percent === null ? 'Avance pendiente' : `${m.percent}%`);
+                objetivoProgreso(row, m.actual, m.target, p.status !== 'verificado', `Avance ${p.status} hacia ${objetivoMonto(m.target)}`);
+                objetivoAdd(row, 'p', 'mt-2 text-[11px] text-textmuted', `Actual ${objetivoMonto(m.actual)} · faltan ${objetivoMonto(m.shortfall)} · ${p.status === 'verificado' ? m.current ? 'vigente' : 'no vigente' : p.status} · ${m.achieved_on ? `alcanzado ${m.achieved_on}` : 'sin fecha acreditada'}`);
+            });
+        }
+
+        function objetivoRenderCapital(c, f, holdings) {
+            const root = document.getElementById('objetivos-capital');
+            root.replaceChildren();
+            const summary = objetivoAdd(root, 'div', 'rounded-2xl border border-slate-800 bg-slate-900/60 p-4 sm:p-5');
+            objetivoAdd(summary, 'p', 'text-xs text-textmuted', 'Capital asignable');
+            objetivoAdd(summary, 'p', `text-2xl sm:text-3xl font-semibold mt-1 tabular-nums ${c.assignable === null ? 'text-textmuted' : 'text-accent'}`, objetivoMonto(c.assignable));
+            objetivoAdd(summary, 'p', 'text-xs text-textmuted mt-1', `Corte ${c.as_of || 'pendiente'} · ${c.source || 'fuente pendiente'}`);
+            const formula = objetivoAdd(root, 'dl', 'grid grid-cols-2 sm:grid-cols-4 gap-4 mt-5');
+            objetivoDato(formula, 'Efectivo', objetivoMonto(c.cash));
+            objetivoDato(formula, '− Emergencia', objetivoMonto(c.emergency));
+            objetivoDato(formula, '− IR separado', objetivoMonto(c.tax_reserve));
+            objetivoDato(formula, '− Compromisos', objetivoMonto(c.commitments));
+            const detail = objetivoAdd(root, 'div', 'grid grid-cols-1 md:grid-cols-2 gap-4 mt-5 pt-5 border-t border-slate-800');
+            const fiscal = objetivoAdd(detail, 'div', 'rounded-xl bg-slate-900/50 border border-slate-800 p-4');
+            objetivoAdd(fiscal, 'h4', 'text-sm font-semibold text-white', 'Provisión de IR');
+            objetivoAdd(fiscal, 'p', 'text-xs text-textmuted mt-2', `Estimado ${objetivoMonto(f.estimate)} · retenciones ${objetivoMonto(f.withholdings)} · pendiente ${objetivoMonto(f.pending)} · separado ${objetivoMonto(f.separated)}`);
+            const assets = objetivoAdd(detail, 'div', 'rounded-xl bg-slate-900/50 border border-slate-800 p-4');
+            objetivoAdd(assets, 'h4', 'text-sm font-semibold text-white', 'Activos sin liquidez acreditada');
+            objetivoAdd(assets, 'p', 'text-xs text-textmuted mt-2', `CAR por movimientos ${objetivoMonto(holdings.car_movimientos)} · FIBRAs a costo ${objetivoMonto(holdings.fibras_costo)} · realizable neto ${objetivoMonto(holdings.realizable_neto)}`);
+            objetivoAdd(assets, 'p', 'text-[11px] text-textmuted mt-2', holdings.reason || holdings.source || 'Fuente pendiente');
+        }
+
+        function objetivoCondicionValor(name, number, difference = false) {
+            if (number === null || number === undefined) return 'Pendiente';
+            if (['riesgo PEN', 'comparación'].includes(name)) return difference ? Number(number).toFixed(2) : number >= 1 ? 'Sí' : 'No';
+            if (name === 'horizonte') return `${Number(number).toFixed(2)} años`;
+            if (name === 'coverage') return Number(number).toFixed(2);
+            return objetivoMonto(number);
+        }
+
+        function objetivoRenderDecisiones(decisions) {
+            const root = document.getElementById('objetivos-decisiones');
+            root.replaceChildren();
+            const labels = {capital: 'Asignar nuevo capital', property: 'Segundo inmueble', global: 'Inversión global', retirement: 'Retiro parcial'};
+            const conditionLabels = {capital: 'Capital financiado', coverage: 'Cobertura de deuda', stress: 'Estrés anual', 'comparación': 'Comparación de alternativas', reserva: 'Reserva', IR: 'Provisión IR', 'capital asignable': 'Capital asignable', horizonte: 'Horizonte', importe: 'Importe', 'riesgo PEN': 'Riesgo en soles aceptado', 'renta neta': 'Renta neta mensual', 'vivienda sin deuda': 'Saldo vivienda', 'ingreso combinado': 'Ingreso combinado'};
+            Object.entries(decisions).forEach(([key, item]) => {
+                const card = objetivoAdd(root, 'article', 'bg-card rounded-3xl border border-slate-800/60 p-5 sm:p-6');
+                const head = objetivoAdd(card, 'div', 'flex flex-wrap items-start justify-between gap-2');
+                const title = objetivoAdd(head, 'div', 'min-w-0');
+                objetivoAdd(title, 'p', 'text-[11px] uppercase tracking-widest text-textmuted', `Checkpoint · ${Object.keys(labels).indexOf(key) + 1}`);
+                objetivoAdd(title, 'h4', 'text-lg font-semibold text-white mt-1', labels[key] || key);
+                head.appendChild(objetivoBadge(item.status));
+                const list = objetivoAdd(card, 'ul', 'mt-5 space-y-2');
+                Object.entries(item.conditions).forEach(([name, value]) => {
+                    const li = objetivoAdd(list, 'li', 'rounded-xl border border-slate-800 bg-slate-900/50 p-3');
+                    const line = objetivoAdd(li, 'div', 'flex items-start gap-3');
+                    const [icon, colors] = objetivoStatus(value.status);
+                    objetivoAdd(line, 'span', `flex-none w-6 h-6 rounded-full border flex items-center justify-center text-xs ${colors}`, icon);
+                    const body = objetivoAdd(line, 'div', 'min-w-0 flex-1');
+                    const labelLine = objetivoAdd(body, 'div', 'flex flex-wrap items-baseline justify-between gap-x-2');
+                    objetivoAdd(labelLine, 'span', 'text-sm font-medium text-white', conditionLabels[name] || name);
+                    objetivoAdd(labelLine, 'span', 'text-[11px] text-textmuted', value.status);
+                    objetivoAdd(body, 'p', 'text-xs text-textmuted mt-1', `Actual ${objetivoCondicionValor(name, value.actual)} · umbral ${objetivoCondicionValor(name, value.threshold)} · diferencia ${objetivoCondicionValor(name, value.difference, true)}`);
+                    objetivoAdd(body, 'p', 'text-[11px] text-textmuted mt-1', `Corte ${value.as_of || 'pendiente'}${value.reason ? ` · ${value.reason}` : ''}`);
+                });
+                objetivoAdd(card, 'p', 'mt-5 pt-4 border-t border-slate-800 text-xs text-textmuted leading-relaxed', item.record ? `Decisión: ${item.record.outcome} (${item.record.date}). Motivo: ${item.record.reason}. Revisar: ${item.record.next_review}${item.conditions_changed ? '. Alerta: condiciones cambiadas.' : ''}` : 'Sin decisión registrada. Cumplir un umbral no toma una decisión.');
+            });
+        }
+
+        function objetivoRenderComparacion(comparison) {
+            const root = document.getElementById('objetivos-comparacion');
+            root.replaceChildren();
+            if (!comparison) {
+                const empty = objetivoAdd(root, 'div', 'rounded-2xl border border-dashed border-slate-700 bg-slate-900/40 p-5 flex items-start gap-4');
+                objetivoAdd(empty, 'span', 'text-2xl text-textmuted', '◇').setAttribute('aria-hidden', 'true');
+                const copy = objetivoAdd(empty, 'div', 'min-w-0');
+                objetivoAdd(copy, 'p', 'font-medium text-white', 'Comparación pendiente');
+                objetivoAdd(copy, 'p', 'text-sm text-textmuted mt-1', 'Faltan oferta, costos y horizonte verificables para contrastar inmueble, amortización de vivienda y cartera financiera con el mismo capital.');
+                return;
+            }
+            objetivoAdd(root, 'p', 'text-sm text-textmuted', `Mismo capital ${objetivoMonto(comparison.capital_total)} · ${comparison.horizon_years} años · corte ${comparison.as_of}`);
+            const grid = objetivoAdd(root, 'div', 'grid grid-cols-1 md:grid-cols-3 gap-3 mt-4');
+            Object.entries(comparison.alternatives).forEach(([name, alt]) => {
+                const card = objetivoAdd(grid, 'div', 'rounded-xl border border-slate-800 bg-slate-900/50 p-4');
+                objetivoAdd(card, 'h4', 'font-semibold text-white capitalize', name);
+                objetivoAdd(card, 'p', 'text-sm text-textmuted mt-2', `Caja ${objetivoMonto(alt.cash)} · patrimonio ${objetivoMonto(alt.net_worth)}`);
+                objetivoAdd(card, 'p', 'text-xs text-textmuted mt-2', `Liquidez ${alt.liquidity} · riesgo ${alt.risk} · esfuerzo ${alt.effort}`);
+            });
+        }
+
+        function objetivoLoading() {
+            const oldBadge = document.getElementById('objetivos-renta-badge');
+            const loadingBadge = objetivoEl('span', 'self-start rounded-full px-3 py-1 text-xs border border-slate-700 text-textmuted', 'Cargando');
+            loadingBadge.id = 'objetivos-renta-badge';
+            oldBadge.replaceWith(loadingBadge);
+            ['objetivos-reserva', 'objetivos-hipoteca', 'objetivos-renta', 'objetivos-capital', 'objetivos-comparacion', 'objetivos-decisiones'].forEach(id => {
+                const root = document.getElementById(id);
+                root.setAttribute('aria-busy', 'true');
+                root.replaceChildren();
+                const skeleton = objetivoAdd(root, 'div', 'space-y-3 animate-pulse');
+                skeleton.setAttribute('role', 'status');
+                skeleton.setAttribute('aria-label', 'Cargando objetivos');
+                objetivoAdd(skeleton, 'div', 'h-4 w-28 rounded bg-slate-800');
+                objetivoAdd(skeleton, 'div', 'h-8 w-44 rounded bg-slate-800');
+                objetivoAdd(skeleton, 'div', 'h-2 w-full rounded bg-slate-800');
+            });
+            ['objetivos-meses', 'objetivos-hitos'].forEach(id => document.getElementById(id).replaceChildren());
+        }
 
         async function cargarFase2() {
+            const error = document.getElementById('objetivos-error');
+            error.classList.add('hidden');
+            objetivoLoading();
             try {
-                const res = await fetch(`${API_URL}/fase2-pool1`);
-                const data = await res.json();
-
-                document.getElementById('kpi-fase2-actual').textContent = formatMoneda(data.pool1_actual);
-                document.getElementById('kpi-fase2-meta').textContent = formatMoneda(data.pool1_meta);
-                document.getElementById('kpi-fase2-pct').textContent = `${data.pool1_pct_avance}%`;
-                document.getElementById('kpi-fase2-cuentas').textContent = formatMoneda(data.cuentas_alto_rendimiento);
-                document.getElementById('kpi-fase2-fondo').textContent = `− ${formatMoneda(data.fondo_emergencia_actual)}`;
-                document.getElementById('kpi-fase2-fibras').textContent = `+ ${formatMoneda(data.fibras)}`;
-                document.getElementById('kpi-fase2-total').textContent = formatMoneda(data.pool1_actual);
-
-                const notaFondo = document.getElementById('fase2-fondo-nota');
-                if (Math.abs(data.fondo_emergencia_movimiento_neto || 0) > 0.01) {
-                    notaFondo.textContent = `meta ${formatMoneda(data.fondo_emergencia_meta)}, saldo real hoy ${formatMoneda(data.fondo_emergencia_actual)} tras gastos/reposiciones etiquetados 'Emerg/'`;
-                } else {
-                    notaFondo.textContent = formatMoneda(data.fondo_emergencia_meta);
-                }
-
-                const barra = document.getElementById('fase2-progress-bar');
-                const pctClamped = Math.max(0, Math.min(100, data.pool1_pct_avance || 0));
-                barra.style.width = `${pctClamped}%`;
-
-                const badge = document.getElementById('fase2-pool1-badge');
-                const alerta = document.getElementById('fase2-alerta-meta');
-                if (data.pool1_meta_alcanzada) {
-                    badge.classList.remove('hidden');
-                    alerta.classList.remove('hidden');
-                    barra.classList.remove('bg-accent');
-                    barra.classList.add('bg-emerald-400');
-                } else {
-                    badge.classList.add('hidden');
-                    alerta.classList.add('hidden');
-                    barra.classList.add('bg-accent');
-                    barra.classList.remove('bg-emerald-400');
-                }
+                const response = await fetch(`${API_URL}/objetivos-decisiones`);
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                const data = await response.json();
+                const r = data.reserve, h = data.mortgage, p = data.passive;
+                objetivoRenderReserva(r);
+                objetivoRenderHipoteca(h);
+                objetivoRenderRenta(p);
+                const c = data.capital, f = data.fiscal, holdings = data.holdings;
+                objetivoRenderCapital(c, f, holdings);
+                objetivoRenderDecisiones(data.decisions);
+                objetivoRenderComparacion(data.property_comparison);
+                ['objetivos-reserva', 'objetivos-hipoteca', 'objetivos-renta', 'objetivos-capital', 'objetivos-comparacion', 'objetivos-decisiones'].forEach(id => document.getElementById(id).removeAttribute('aria-busy'));
             } catch (err) {
-                console.error("Error al cargar Fase 2 - Pool 1:", err);
+                error.textContent = 'No se pudieron cargar los objetivos. Revisa la conexión e inténtalo de nuevo.';
+                error.classList.remove('hidden');
+                const errorBadge = objetivoBadge('error de carga');
+                errorBadge.id = 'objetivos-renta-badge';
+                document.getElementById('objetivos-renta-badge').replaceWith(errorBadge);
+                ['objetivos-reserva', 'objetivos-hipoteca', 'objetivos-renta', 'objetivos-capital', 'objetivos-comparacion'].forEach(id => {
+                    const root = document.getElementById(id);
+                    root.replaceChildren(objetivoEl('p', 'text-sm text-textmuted', 'Datos no disponibles.'));
+                });
+                ['objetivos-meses', 'objetivos-hitos', 'objetivos-decisiones'].forEach(id => document.getElementById(id).replaceChildren());
+                ['objetivos-reserva', 'objetivos-hipoteca', 'objetivos-renta', 'objetivos-capital', 'objetivos-comparacion', 'objetivos-decisiones'].forEach(id => document.getElementById(id).removeAttribute('aria-busy'));
+                console.error('Error al cargar objetivos y decisiones:', err);
             }
         }
 
@@ -4089,7 +4334,7 @@
                     const infoElement = document.getElementById('ultima-actualizacion');
                     if (data.ultima_actualizacion && infoElement) {
                         const dateObj = new Date(data.ultima_actualizacion);
-                        const dateStr = dateObj.toLocaleString('es-PE', {
+                        const dateStr = Number.isNaN(dateObj.getTime()) ? 'Desconocida' : dateObj.toLocaleString('es-PE', {
                             day: '2-digit', month: '2-digit', year: 'numeric',
                             hour: '2-digit', minute: '2-digit'
                         });

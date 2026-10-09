@@ -1,12 +1,16 @@
 import os
 import time
+from datetime import datetime
 from collections import defaultdict, deque
 from typing import List, Optional
+from zoneinfo import ZoneInfo
 from fastapi import FastAPI, Query, Request
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from google.cloud import bigquery
+import yaml
+from .objectives import condition, decision, mortgage, passive, property_scenario, reserve
 
 def find_credentials():
     current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -83,10 +87,180 @@ def _rango_fechas(fecha_inicio: Optional[str], fecha_fin: Optional[str], campo: 
         parametros.append(bigquery.ScalarQueryParameter("fecha_fin", "DATE", fecha_fin))
     return condiciones, parametros
 
-def _query(query: str, parametros: list):
+def _query(query: str, parametros: list, timeout: Optional[int] = None):
     """Ejecuta un query parametrizado en BigQuery."""
     job_config = bigquery.QueryJobConfig(query_parameters=parametros)
-    return client.query(query, job_config=job_config).result()
+    return client.query(query, job_config=job_config, timeout=timeout).result(timeout=timeout)
+
+
+@app.get("/objetivos-decisiones")
+def obtener_objetivos_decisiones():
+    """Seguimiento conservador: una fuente fallida nunca se convierte en cero cumplido."""
+    today = datetime.now(ZoneInfo("America/Lima")).date()
+    base_dir = os.path.dirname(__file__)
+    private_path = os.path.join(base_dir, "objectives_data.yaml")
+    config_path = private_path if os.path.exists(private_path) else os.path.join(base_dir, "objectives_config.yaml")
+    with open(config_path, encoding="utf-8") as config_file:
+        cfg = yaml.safe_load(config_file)
+
+    def rows(sql):
+        try:
+            return list(_query(sql, [], timeout=12)), None
+        except Exception as exc:
+            print("Error en objetivos-decisiones:", exc)
+            return [], "Fuente no disponible"
+
+    fund_rows, fund_error = rows("""
+        SELECT CAST(fecha AS STRING) AS fecha, saldo_actual
+        FROM `big-query-406221.finanzas_personales_mds.agg_fondo_emergencia`
+        ORDER BY txn_time DESC, txn_id DESC LIMIT 1
+    """)
+    balance = float(fund_rows[0].saldo_actual) if fund_rows and fund_rows[0].saldo_actual is not None else None
+    fund_date = fund_rows[0].fecha if fund_rows else None
+
+    budget_rows, budget_error = rows("""
+        SELECT CAST(MAX(fecha) AS STRING) AS fecha,
+               SUM(IF(categoria = 'Deudas indispensables', 0, presupuesto)) AS sin_deuda
+        FROM `big-query-406221.finanzas_personales_mds.presupuesto_materialized`
+        WHERE fecha = (
+            SELECT MAX(fecha) FROM `big-query-406221.finanzas_personales_mds.presupuesto_materialized`
+            WHERE fecha <= CURRENT_DATE('America/Lima'))
+    """)
+    budget = float(budget_rows[0].sin_deuda) if budget_rows and budget_rows[0].sin_deuda is not None else None
+    budget_date = budget_rows[0].fecha if budget_rows else None
+    if not budget_date or budget_date[:7] != today.strftime("%Y-%m"):
+        budget = None
+
+    mortgage_rows, mortgage_error = rows("""
+        SELECT CAST(fecha_vencimiento AS STRING) AS fecha, pagado,
+               capital_cuota AS capital, interes_cuota AS interest,
+               COALESCE(seguro_propiedad, 0) + COALESCE(seguro_desgravamen, 0) AS insurance,
+               saldo_final AS balance
+        FROM `big-query-406221.finanzas_personales_mds.hipotecas_materialized`
+        WHERE fecha_vencimiento <= CURRENT_DATE('America/Lima') AND pagado
+           OR fecha_vencimiento >= CURRENT_DATE('America/Lima') AND NOT pagado
+        ORDER BY fecha_vencimiento
+    """)
+    schedule = [{"date": row.fecha, "paid": row.pagado, "capital": float(row.capital),
+                 "interest": float(row.interest), "insurance": float(row.insurance),
+                 "balance": float(row.balance) if row.balance is not None else None}
+                for row in mortgage_rows if row.capital is not None and row.interest is not None]
+    paid = next((row for row in reversed(schedule) if row["paid"]), None)
+    due = next((row for row in schedule if not row["paid"]), None)
+    home = mortgage(paid, due)
+    if mortgage_error:
+        home["reason"] = mortgage_error
+    personal_reserve = reserve(balance, budget, home.get("payment"), str(today))
+    personal_reserve["source_dates"] = {"fund": fund_date, "budget": budget_date,
+                                        "scheduled_payment": home.get("as_of")}
+    if fund_error or budget_error or mortgage_error:
+        personal_reserve["reason"] = ", ".join(error for error in (fund_error, budget_error, mortgage_error) if error)
+
+    income_rows, income_error = rows("""
+        SELECT FORMAT_DATE('%Y-%m', DATE(txn_time)) AS mes,
+               COUNT(*) AS registros,
+               (SELECT CAST(MAX(DATE(txn_time)) AS STRING)
+                FROM `big-query-406221.finanzas_personales_mds.fact_transactions`) AS latest_txn_date,
+               SUM(IF((categoria = 'Pasivo' OR (concepto = 'Extra Trii' AND DATE(txn_time) = DATE '2026-08-29'))
+                      AND ingreso_gasto = 'Ingreso', importe_moneda_principal, 0)) AS bruto_pasivo
+        FROM `big-query-406221.finanzas_personales_mds.fact_transactions`
+        WHERE DATE(txn_time) >= DATE_SUB(DATE_TRUNC(CURRENT_DATE('America/Lima'), MONTH), INTERVAL 12 MONTH)
+          AND DATE(txn_time) < DATE_TRUNC(CURRENT_DATE('America/Lima'), MONTH)
+        GROUP BY 1 ORDER BY 1
+    """)
+    monthly = [{"month": row.mes, "amount": round(float(row.bruto_pasivo or 0), 2),
+                "complete": bool(row.registros and row.latest_txn_date and row.latest_txn_date[:7] > row.mes)}
+               for row in income_rows]
+    passive_cfg = cfg["passive"]
+    verified_months = passive_cfg.get("monthly_net") or {}
+    is_verified = bool(passive_cfg.get("verified") and passive_cfg.get("source") and passive_cfg.get("as_of"))
+    if is_verified:
+        monthly = [{"month": month, "amount": value, "complete": value is not None}
+                   for month, value in verified_months.items()]
+    income = passive(monthly, today, verified=is_verified and not income_error)
+    if income_error:
+        income["reason"] = income_error
+    income["source"] = passive_cfg["source"] if is_verified else "fact_transactions; Pasivo y Extra Trii del 29/08 como bruto candidato"
+
+    liquidity_rows, liquidity_error = rows("""
+        SELECT
+          SUM(IF(cuenta IN (SELECT cuenta FROM `big-query-406221.finanzas_personales_mds.cuentas_alto_rendimiento`),
+                 CASE WHEN ingreso_gasto IN ('Ingreso', 'Dinero ingresado') THEN importe_moneda_principal
+                      WHEN ingreso_gasto IN ('Gastos', 'Dinero gastado') THEN -importe_moneda_principal ELSE 0 END, 0)) AS car,
+          SUM(IF(categoria = 'Inversiones' AND subcategoria = 'FIBRAS', importe_moneda_principal, 0)) AS fibras_costo
+        FROM `big-query-406221.finanzas_personales_mds.fact_transactions`
+    """)
+    holdings = {"car_movimientos": float(liquidity_rows[0].car or 0) if liquidity_rows else None,
+                "fibras_costo": float(liquidity_rows[0].fibras_costo or 0) if liquidity_rows else None,
+                "realizable_neto": None, "source": "movimientos y costo histórico; no disponible para comprar",
+                "reason": liquidity_error}
+
+    fiscal = cfg["fiscal"]
+    fiscal_known = bool(fiscal["verified"] and fiscal["source"] and fiscal["as_of"] and
+                        all(fiscal[key] is not None for key in ("estimated_tax", "valid_withholdings", "separated_reserve")))
+    pending_tax = max(fiscal["estimated_tax"] - fiscal["valid_withholdings"], 0) if fiscal_known else None
+    tax_condition = condition(fiscal["separated_reserve"] if fiscal_known else None, pending_tax,
+                              as_of=fiscal["as_of"], reason="IR anual pendiente de conciliación" if not fiscal_known else None)
+    reserve_condition = condition(personal_reserve["balance"], personal_reserve["target"], as_of=personal_reserve["as_of"],
+                                  reason=personal_reserve["reason"])
+    capital = cfg["capital"]
+    cash_known = bool(capital["source"] and capital["as_of"] and capital["available_cash"] is not None
+                      and capital["commitments"] is not None and fiscal_known and balance is not None)
+    assignable = (capital["available_cash"] - balance - fiscal["separated_reserve"] - capital["commitments"]
+                  if cash_known else None)
+    property_conditions = property_scenario(cfg.get("property_offer"))
+    comparison = cfg.get("property_comparison")
+    offer = cfg.get("property_offer")
+    alternatives = comparison.get("alternatives") if comparison else None
+    comparison_ready = bool(offer and comparison and comparison.get("source") and comparison.get("as_of")
+                            and comparison.get("horizon_years") and alternatives and
+                            all(name in alternatives for name in ("property", "home_prepayment", "financial_portfolio"))
+                            and all(all(alt.get(field) is not None for field in
+                                        ("capital_total", "cash", "net_worth"))
+                                    and all(alt.get(field) for field in ("liquidity", "risk", "effort"))
+                                    and alt.get("capital_total") == comparison.get("capital_total")
+                                    for alt in alternatives.values())
+                            and comparison.get("capital_total") == property_conditions["capital"]["threshold"])
+    property_conditions["comparación"] = condition(1 if comparison_ready else None, 1,
+                                                  as_of=comparison.get("as_of") if comparison_ready else None,
+                                                  reason="Falta comparar caja, patrimonio, liquidez, riesgo y esfuerzo con igual capital y horizonte")
+    global_cfg = cfg["global"]
+    global_ready = bool(global_cfg["source"] and global_cfg["as_of"])
+    global_conditions = {"reserva": reserve_condition, "IR": tax_condition,
+                         "horizonte": condition(global_cfg["years_unneeded"] if global_ready else None, 10, as_of=global_cfg["as_of"]),
+                         "importe": condition(global_cfg["amount"] if global_ready else None, 0.01, as_of=global_cfg["as_of"]),
+                         "riesgo PEN": condition(1 if global_ready and global_cfg["pen_risk_accepted"] is True else
+                                                 0 if global_ready and global_cfg["pen_risk_accepted"] is False else None, 1,
+                                                 as_of=global_cfg["as_of"])}
+    retirement_cfg = cfg["retirement"]
+    retirement_conditions = {"renta neta": condition(income["average"] if income["status"] == "verificado" else None, 3000,
+                                                      as_of=income["as_of"]),
+                             "vivienda sin deuda": condition(home.get("balance"), 0, minimum=False,
+                                                              as_of=home.get("balance_as_of")),
+                             "reserva": reserve_condition, "IR": tax_condition,
+                             "ingreso combinado": condition(retirement_cfg["future_labor_net"] + income["average"]
+                                                           if retirement_cfg["source"] and retirement_cfg["as_of"] and
+                                                           retirement_cfg["future_labor_net"] is not None and
+                                                           income["status"] == "verificado" else None, 6000,
+                                                           as_of=retirement_cfg["as_of"])}
+    records = cfg.get("decisions") or {}
+    return {"as_of": str(today), "window": "seis meses calendario completos; independiente de filtros globales",
+            "reserve": personal_reserve, "mortgage": home, "passive": income, "holdings": holdings,
+            "property_comparison": comparison if comparison_ready else None,
+            "capital": {"cash": capital["available_cash"], "emergency": balance,
+                        "tax_reserve": fiscal["separated_reserve"] if fiscal_known else None,
+                        "commitments": capital["commitments"], "assignable": assignable,
+                        "as_of": capital["as_of"], "source": capital["source"]},
+            "fiscal": {"estimate": fiscal["estimated_tax"] if fiscal_known else None,
+                       "withholdings": fiscal["valid_withholdings"] if fiscal_known else None,
+                       "pending": pending_tax, "separated": fiscal["separated_reserve"] if fiscal_known else None,
+                       "as_of": fiscal["as_of"], "source": fiscal["source"]},
+            "decisions": {
+                "capital": decision({"reserva": reserve_condition, "IR": tax_condition,
+                                     "capital asignable": condition(assignable, 0.01, as_of=capital["as_of"])}, records.get("capital")),
+                "property": decision(property_conditions, records.get("property")),
+                "global": decision(global_conditions, records.get("global")),
+                "retirement": decision(retirement_conditions, records.get("retirement"))}}
 
 @app.get("/ultima-actualizacion")
 def obtener_ultima_actualizacion():
