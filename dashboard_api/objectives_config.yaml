@@ -1,0 +1,31 @@
+# Completar únicamente con datos conciliados. Cada bloque exige fuente y fecha.
+fiscal:
+  verified: false
+  estimated_tax: null
+  valid_withholdings: null
+  separated_reserve: null
+  source: null
+  as_of: null
+capital:
+  available_cash: null
+  commitments: null
+  source: null
+  as_of: null
+passive:
+  verified: false
+  monthly_net: {} # YYYY-MM: neto confirmado; seis meses completos como mínimo
+  source: null
+  as_of: null
+property_offer: null # oferta con todos los campos documentados en docs/metricas.md
+property_comparison: null # misma suma y horizonte; fuente y fecha
+global:
+  amount: null
+  years_unneeded: null
+  pen_risk_accepted: null
+  source: null
+  as_of: null
+retirement:
+  future_labor_net: null
+  source: null
+  as_of: null
+decisions: {} # clave capital/property/global/retirement: date, outcome, reason, next_review
