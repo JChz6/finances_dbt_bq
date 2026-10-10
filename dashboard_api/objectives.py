@@ -4,7 +4,7 @@ from datetime import date
 from calendar import monthrange
 
 PASSIVE_TARGETS = (500, 1000, 2400, 3000, 4500, 6000)
-MORTGAGE_TARGETS = (600, 400, 200)
+MORTGAGE_TARGETS = (1200, 1000, 800, 600, 400, 200)
 
 
 def previous_months(today: date, count: int = 6) -> list[str]:

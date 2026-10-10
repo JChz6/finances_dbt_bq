@@ -110,6 +110,26 @@
         .objective-fill.provisional { background: repeating-linear-gradient(110deg, #4ADE80 0 8px, #24653b 8px 14px); }
         .objective-month-bar { min-height: 4px; border-radius: 6px 6px 2px 2px; background: #4ADE80; }
         .objective-month-bar.provisional { background: repeating-linear-gradient(135deg, #4ADE80 0 7px, #24653b 7px 12px); }
+        .objective-mortgage-route { position: relative; display: block; }
+        .objective-mortgage-route::before { content: ''; position: absolute; z-index: 0; top: 18px; bottom: 18px; left: 18px; width: 4px; border-radius: 999px; background: #2A2A2A; }
+        .objective-mortgage-route::after { content: ''; position: absolute; z-index: 0; top: 18px; left: 18px; width: 4px; height: var(--route-fill-y); border-radius: 999px; background: #4ADE80; }
+        .objective-mortgage-step { position: relative; z-index: 1; display: grid; grid-template-columns: 40px minmax(0, 1fr); gap: 12px; align-items: start; min-height: 76px; }
+        .objective-mortgage-step:last-child { min-height: 40px; }
+        .objective-route-node { width: 40px; height: 40px; display: inline-flex; align-items: center; justify-content: center; border-radius: 999px; border: 2px solid #404040; background: #171717; color: #9CA3AF; flex-shrink: 0; }
+        .objective-route-node.is-met { border-color: #4ADE80; background: #143321; color: #4ADE80; }
+        .objective-route-node.is-next { border-color: #4ADE80; color: #4ADE80; box-shadow: 0 0 0 4px rgba(74, 222, 128, .10); }
+        .objective-passive-route { position: relative; }
+        .objective-passive-route::before { content: ''; position: absolute; left: 17px; top: 18px; bottom: 20px; width: 2px; background: #2A2A2A; }
+        .objective-passive-step { position: relative; display: grid; grid-template-columns: 36px minmax(0, 1fr); gap: 12px; padding-bottom: 16px; }
+        .objective-passive-step:last-child { padding-bottom: 0; }
+        .objective-passive-step .objective-route-node { width: 36px; height: 36px; }
+        @media (min-width: 1280px) {
+            .objective-mortgage-route { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); }
+            .objective-mortgage-route::before { top: 18px; bottom: auto; left: 8.333%; right: 8.333%; width: auto; height: 4px; }
+            .objective-mortgage-route::after { top: 18px; left: 8.333%; width: var(--route-fill-x); height: 4px; }
+            .objective-mortgage-step { display: flex; flex-direction: column; align-items: center; gap: 8px; min-height: 0; text-align: center; }
+            .objective-mortgage-step:last-child { min-height: 0; }
+        }
         @media (prefers-reduced-motion: reduce) { .objective-fill { transition: none; } }
     </style>
 </head>
@@ -1136,7 +1156,7 @@
                     <div id="objetivos-renta" class="mt-5" aria-live="polite">Cargando…</div>
                     <div class="mt-7 grid grid-cols-1 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] gap-7">
                         <div><h4 class="text-sm font-semibold text-white">Seis meses completos</h4><p class="text-xs text-textmuted mt-1">Montos mensuales y dispersión de la base disponible</p><div id="objetivos-meses" class="mt-4"></div></div>
-                        <div><h4 class="text-sm font-semibold text-white">Escalera de ingreso neto</h4><p class="text-xs text-textmuted mt-1">Los avances provisionales no acreditan hitos</p><div id="objetivos-hitos" class="mt-4 space-y-3"></div></div>
+                        <div><h4 class="text-sm font-semibold text-white">Roadmap de ingreso neto</h4><p class="text-xs text-textmuted mt-1">Los avances provisionales no acreditan hitos</p><div id="objetivos-hitos" class="mt-4"></div></div>
                     </div>
                 </section>
                 <section class="bg-card rounded-3xl p-5 sm:p-6 border border-slate-800/60" aria-labelledby="objetivos-capital-title">
@@ -4038,6 +4058,10 @@
                 new Intl.NumberFormat('es-PE', {style: 'currency', currency: 'PEN', maximumFractionDigits: 2}).format(value);
         }
 
+        function objetivoMeta(value) {
+            return new Intl.NumberFormat('es-PE', {style: 'currency', currency: 'PEN', maximumFractionDigits: 0}).format(value);
+        }
+
         function objetivoEl(tag, classes, content) {
             const element = document.createElement(tag);
             element.className = classes;
@@ -4049,6 +4073,27 @@
             const element = objetivoEl(tag, classes, content);
             parent.appendChild(element);
             return element;
+        }
+
+        function objetivoIconoHito(node, met) {
+            if (met) {
+                node.textContent = '✓';
+            } else {
+                const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                svg.setAttribute('viewBox', '0 0 24 24');
+                svg.setAttribute('width', '19');
+                svg.setAttribute('height', '19');
+                svg.setAttribute('fill', 'none');
+                svg.setAttribute('stroke', 'currentColor');
+                svg.setAttribute('stroke-width', '1.8');
+                svg.setAttribute('stroke-linecap', 'round');
+                svg.setAttribute('stroke-linejoin', 'round');
+                const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                path.setAttribute('d', 'M6 21V4m0 1c4-2 8 2 12 0l-2 4 2 4c-4 2-8-2-12 0');
+                svg.appendChild(path);
+                node.appendChild(svg);
+            }
+            node.setAttribute('aria-hidden', 'true');
         }
 
         function objetivoStatus(status) {
@@ -4123,13 +4168,36 @@
             objetivoAdd(figure, 'p', 'text-3xl sm:text-4xl font-semibold text-white tabular-nums', objetivoMonto(h.principal_interest));
             top.appendChild(objetivoBadge(h.status));
             objetivoAdd(root, 'p', 'mt-2 text-xs text-textmuted', `Cuota ${h.as_of || 'pendiente'} · seguros ${objetivoMonto(h.insurance)} · total obligatorio ${objetivoMonto(h.payment)}`);
-            objetivoAdd(root, 'p', 'mt-6 text-[11px] uppercase tracking-widest text-textmuted', 'Escalera de cuota · capital + interés');
-            const rail = objetivoAdd(root, 'div', 'grid grid-cols-1 xl:grid-cols-3 gap-2 mt-3');
-            (h.milestones || []).forEach(m => {
-                const cell = objetivoAdd(rail, 'div', `min-w-0 rounded-xl border p-3 flex xl:block items-center justify-between gap-2 ${m.met ? 'border-accent/30 bg-accent/10' : 'border-slate-800 bg-slate-900/60'}`);
-                objetivoAdd(cell, 'p', `text-xs font-semibold whitespace-nowrap ${m.met ? 'text-accent' : 'text-white'}`, `≤ ${objetivoMonto(m.target)}`);
-                objetivoAdd(cell, 'p', 'xl:mt-2 text-[11px] text-textmuted leading-tight text-right xl:text-left', m.met ? '✓ Vigente' : `Faltan ${objetivoMonto(m.gap)}`);
+            const marks = h.milestones || [];
+            const reached = marks.filter(m => m.met).length;
+            const nextIndex = marks.findIndex(m => !m.met);
+            const routeHead = objetivoAdd(root, 'div', 'flex flex-wrap items-end justify-between gap-x-4 gap-y-1 mt-6');
+            objetivoAdd(routeHead, 'p', 'text-[11px] uppercase tracking-widest text-textmuted', 'Ruta de reducción · capital + interés');
+            objetivoAdd(routeHead, 'p', 'text-xs font-medium text-accent', `${reached} de ${marks.length} hitos cumplidos`);
+            if (nextIndex >= 0) objetivoAdd(root, 'p', 'mt-2 text-sm text-white', `Próximo hito: ≤ ${objetivoMeta(marks[nextIndex].target)} · reducir ${objetivoMonto(marks[nextIndex].gap)}`);
+            else if (marks.length) objetivoAdd(root, 'p', 'mt-2 text-sm text-accent', 'Todos los hitos de cuota cumplidos al corte.');
+            const route = objetivoAdd(root, 'ol', 'objective-mortgage-route mt-5');
+            let progress = 0;
+            if (marks.length > 1) {
+                if (nextIndex < 0) progress = 1;
+                else if (nextIndex > 0) {
+                    const upper = marks[nextIndex - 1].target;
+                    const lower = marks[nextIndex].target;
+                    const fraction = Math.max(0, Math.min(1, (upper - h.principal_interest) / (upper - lower)));
+                    progress = (nextIndex - 1 + fraction) / (marks.length - 1);
+                }
+            }
+            route.style.setProperty('--route-fill-x', `${(progress * 83.334).toFixed(2)}%`);
+            route.style.setProperty('--route-fill-y', `calc(${(progress * 100).toFixed(2)}% - ${(progress * 36).toFixed(2)}px)`);
+            marks.forEach((m, index) => {
+                const item = objetivoAdd(route, 'li', 'objective-mortgage-step');
+                const node = objetivoAdd(item, 'span', `objective-route-node${m.met ? ' is-met' : index === nextIndex ? ' is-next' : ''}`);
+                objetivoIconoHito(node, m.met);
+                const copy = objetivoAdd(item, 'div', 'min-w-0 pt-1 xl:pt-0');
+                objetivoAdd(copy, 'p', `text-xs font-semibold ${m.met ? 'text-accent' : 'text-white'}`, `≤ ${objetivoMeta(m.target)}`);
+                objetivoAdd(copy, 'p', 'text-[11px] text-textmuted leading-snug mt-1', m.met ? 'Cumplido' : `Faltan ${objetivoMonto(m.gap)}`);
             });
+            objetivoAdd(root, 'p', 'mt-3 text-[11px] text-textmuted', 'Cumplido significa que la próxima cuota está bajo el umbral al corte; no acredita una fecha histórica.');
             const debt = objetivoAdd(root, 'div', 'flex flex-wrap items-center justify-between gap-2 mt-5 pt-4 border-t border-slate-800');
             const debtText = objetivoAdd(debt, 'div', 'min-w-0');
             objetivoAdd(debtText, 'p', 'text-xs text-textmuted', `Saldo tras cuota pagada · ${h.balance_as_of || 'pendiente'}`);
@@ -4178,13 +4246,26 @@
             }
             const milestones = document.getElementById('objetivos-hitos');
             milestones.replaceChildren();
+            const roadmap = objetivoAdd(milestones, 'ol', 'objective-passive-route');
+            const start = objetivoAdd(roadmap, 'li', 'objective-passive-step');
+            const startNode = objetivoAdd(start, 'span', `objective-route-node${p.status === 'verificado' ? ' is-met' : ''}`);
+            startNode.textContent = '●';
+            startNode.setAttribute('aria-hidden', 'true');
+            const startCopy = objetivoAdd(start, 'div', 'min-w-0 pb-3 border-b border-slate-800');
+            objetivoAdd(startCopy, 'p', 'text-sm font-semibold text-white', p.status === 'verificado' ? 'Punto actual · neto verificado' : p.status === 'provisional' ? 'Punto actual · candidato bruto' : 'Punto de partida pendiente');
+            objetivoAdd(startCopy, 'p', 'text-xs text-textmuted mt-1', `${objetivoMonto(p.average)} / mes · corte ${p.as_of || 'pendiente'}`);
             (p.milestones || []).forEach(m => {
-                const row = objetivoAdd(milestones, 'div', 'rounded-xl border border-slate-800 bg-slate-900/50 p-3');
-                const head = objetivoAdd(row, 'div', 'flex items-center justify-between gap-2');
-                objetivoAdd(head, 'span', 'text-sm font-semibold text-white', `${objetivoMonto(m.target)} / mes`);
-                objetivoAdd(head, 'span', 'text-xs text-textmuted', m.percent === null ? 'Avance pendiente' : `${m.percent}%`);
-                objetivoProgreso(row, m.actual, m.target, p.status !== 'verificado', `Avance ${p.status} hacia ${objetivoMonto(m.target)}`);
-                objetivoAdd(row, 'p', 'mt-2 text-[11px] text-textmuted', `Actual ${objetivoMonto(m.actual)} · faltan ${objetivoMonto(m.shortfall)} · ${p.status === 'verificado' ? m.current ? 'vigente' : 'no vigente' : p.status} · ${m.achieved_on ? `alcanzado ${m.achieved_on}` : 'sin fecha acreditada'}`);
+                const current = p.status === 'verificado' && m.current;
+                const historical = p.status === 'verificado' && Boolean(m.achieved_on) && !m.current;
+                const row = objetivoAdd(roadmap, 'li', 'objective-passive-step');
+                const node = objetivoAdd(row, 'span', `objective-route-node${current ? ' is-met' : ''}`);
+                objetivoIconoHito(node, current || historical);
+                const copy = objetivoAdd(row, 'div', 'min-w-0 pb-3 border-b border-slate-800');
+                const head = objetivoAdd(copy, 'div', 'flex flex-wrap items-baseline justify-between gap-x-2');
+                objetivoAdd(head, 'p', `text-sm font-semibold ${current ? 'text-accent' : 'text-white'}`, `${objetivoMeta(m.target)} netos / mes`);
+                objetivoAdd(head, 'span', `text-[11px] ${current ? 'text-accent' : 'text-textmuted'}`, current ? 'Vigente' : historical ? 'Alcanzado antes' : 'Sin acreditar');
+                objetivoAdd(copy, 'p', 'text-xs text-textmuted mt-1', `Actual ${objetivoMonto(m.actual)} · faltan ${objetivoMonto(m.shortfall)} · ${m.percent === null ? 'avance pendiente' : `${m.percent}%${p.status === 'provisional' ? ' indicativo' : ''}`}`);
+                objetivoAdd(copy, 'p', 'text-[11px] text-textmuted mt-1', m.achieved_on ? `Alcanzado ${m.achieved_on}${historical ? ' · ya no vigente' : ''}` : 'Sin fecha acreditada');
             });
         }
 
