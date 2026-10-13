@@ -565,7 +565,7 @@
                             <button type="button" onclick="seleccionarTodasFuentes(false)" class="px-2.5 py-1.5 bg-slate-900 border border-slate-800 hover:border-slate-700 rounded-lg text-textmuted hover:text-textmain font-semibold">Desmarcar todas</button>
                         </div>
                     </div>
-                    <div id="fuente-filtros" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 mb-5 text-[11px]">
+                    <div id="fuente-filtros" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-2 md:gap-4 mb-5 text-[11px]">
                         <p class="text-textmuted animate-pulse">Cargando fuentes...</p>
                     </div>
                     <div class="relative h-[420px]">
@@ -2138,6 +2138,7 @@
         // pisar lo que el usuario marcó a mano al cambiar el rango de fechas.
         const FUENTE_CATEGORIAS_DESMARCADAS = new Set(['Pasivo']);
         const fuentesVistas = new Set();
+        const categoriasFuenteExpandidas = new Set(); // solo afecta a móvil
 
         function claveFuente(f) {
             return `${f.categoria}|${f.fuente}`;
@@ -2191,15 +2192,23 @@
                     </button>`;
                 }).join('');
                 const activas = lista.filter(f => !fuentesExcluidas.has(claveFuente(f))).length;
+                // En móvil cada panel se colapsa (arranca cerrado) para que los filtros no empujen el
+                // chart fuera de la pantalla; desde md hacia arriba la lista siempre está visible.
+                const expandida = categoriasFuenteExpandidas.has(cat);
                 return `<div class="bg-slate-900/40 border border-slate-800/60 rounded-xl p-3">
-                    <label class="flex items-center justify-between gap-2 mb-2 cursor-pointer">
-                        <span class="flex items-center gap-2 font-semibold text-white text-xs">
-                            <input type="checkbox" class="fuente-cat-check accent-accent" data-categoria="${escapeHtml(cat)}" ${activas > 0 ? 'checked' : ''} ${lista.length ? '' : 'disabled'} data-parcial="${activas > 0 && activas < lista.length}">
-                            ${escapeHtml(cat)} <span class="text-textmuted font-normal">(${activas}/${lista.length})</span>
+                    <div class="flex items-center justify-between gap-2">
+                        <span class="flex items-center gap-2 font-semibold text-white text-xs min-w-0">
+                            <input type="checkbox" class="fuente-cat-check accent-accent shrink-0" aria-label="Marcar todas las fuentes de ${escapeHtml(cat)}" data-categoria="${escapeHtml(cat)}" ${activas > 0 ? 'checked' : ''} ${lista.length ? '' : 'disabled'} data-parcial="${activas > 0 && activas < lista.length}">
+                            <button type="button" class="fuente-cat-toggle flex items-center gap-1 text-left md:cursor-default" data-categoria="${escapeHtml(cat)}" aria-expanded="${expandida}">
+                                ${escapeHtml(cat)} <span class="text-textmuted font-normal">(${activas}/${lista.length})</span>
+                            </button>
                         </span>
-                        <span class="text-textmuted">${formatMoneda(totalCat)}</span>
-                    </label>
-                    <div class="space-y-1 max-h-48 overflow-y-auto pr-1">${chips || '<p class="text-textmuted italic px-2 py-1">Sin fuentes en el rango</p>'}</div>
+                        <button type="button" class="fuente-cat-toggle flex items-center gap-1.5 text-textmuted md:cursor-default" data-categoria="${escapeHtml(cat)}" aria-label="Mostrar u ocultar fuentes de ${escapeHtml(cat)}">
+                            ${formatMoneda(totalCat)}
+                            <svg class="w-3.5 h-3.5 md:hidden transition-transform ${expandida ? 'rotate-180' : ''}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        </button>
+                    </div>
+                    <div class="${expandida ? 'block' : 'hidden'} md:block mt-2 space-y-1 max-h-48 overflow-y-auto pr-1">${chips || '<p class="text-textmuted italic px-2 py-1">Sin fuentes en el rango</p>'}</div>
                 </div>`;
             }).join('');
             cont.querySelectorAll('.fuente-cat-check').forEach(cb => { cb.indeterminate = cb.dataset.parcial === 'true'; });
@@ -2207,6 +2216,13 @@
 
         // Delegación de eventos: los filtros se re-renderizan con cada carga.
         document.getElementById('fuente-filtros').addEventListener('click', e => {
+            const toggle = e.target.closest('.fuente-cat-toggle');
+            if (toggle) {
+                const cat = toggle.dataset.categoria;
+                categoriasFuenteExpandidas.has(cat) ? categoriasFuenteExpandidas.delete(cat) : categoriasFuenteExpandidas.add(cat);
+                renderFiltrosFuente();
+                return;
+            }
             const chip = e.target.closest('.fuente-chip');
             if (!chip) return;
             const clave = chip.dataset.clave;
