@@ -473,7 +473,7 @@
                 <!-- KPI Summary cards -->
                 <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-6">
                     <div class="col-span-2 md:col-span-1 bg-card rounded-3xl p-6 border border-accent/40 shadow-sm shadow-accent/5 relative overflow-hidden ring-1 ring-accent/10">
-                        <p class="text-textmuted text-sm font-medium tracking-wide inline-flex items-center gap-1.5">Índice de Libertad<button type="button" class="info-btn" data-tip="Ingreso pasivo real / gasto indispensable del mes, en %. 'Indispensable' es el mismo gasto esencial real que Esencial vs Discrecional (Comida, Transporte, Facturas, Salud, Gastos Variables, Seguros + interés/seguros de la hipoteca de vivienda propia), sin gastos con clave C/ salvo C/ Odín. Si el mes actual está incompleto, muestra el mes anterior.">i</button></p>
+                        <p class="text-textmuted text-sm font-medium tracking-wide inline-flex items-center gap-1.5">Índice de Libertad<button type="button" class="info-btn" data-tip="Ingreso pasivo real / gasto indispensable del mes, en %. 'Indispensable' es el gasto esencial real (Comida, Transporte, Facturas, Salud, Gastos Variables, Seguros + interés/seguros de la hipoteca de vivienda propia), sin gastos con clave C/ salvo C/ Odín. Si el mes actual está incompleto, muestra el mes anterior.">i</button></p>
                         <h3 class="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-semibold text-accent mt-1" id="kpi-libertad">0%</h3>
                         <p class="text-[10px] text-textmuted mt-1">Supervivencia cubierta por pasivos</p>
                         <div class="absolute right-4 bottom-4 text-accent/10"><svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg></div>
@@ -549,23 +549,36 @@
                     </div>
                 </div>
 
-                <!-- Evolutivo Libertad layout -->
-                <div class="grid grid-cols-1 mt-6 gap-6">
-                    <div class="bg-card rounded-2xl p-6 border border-slate-800/60 shadow-sm">
-                        <h3 class="font-bold text-white text-base mb-4 inline-flex items-center gap-1.5">Evolutivo: Brecha de Libertad<button type="button" class="info-btn" data-tip="% del gasto indispensable mensual que ya cubre el ingreso pasivo real, mes a mes. 'Indispensable' es el mismo gasto esencial real que Esencial vs Discrecional: categorías esenciales + interés/seguros de la hipoteca de vivienda propia, sin gastos con clave C/ salvo C/ Odín.">i</button></h3>
-                        <div class="relative h-[320px]">
-                            <canvas id="libertadChart"></canvas>
+                <!-- Ingreso bruto por fuente (ancho completo, con filtros propios) -->
+                <div class="bg-card rounded-2xl p-6 border border-slate-800/60 shadow-sm">
+                    <div class="flex flex-wrap items-start justify-between gap-4 mb-4">
+                        <div>
+                            <h3 class="font-bold text-white text-base inline-flex items-center gap-1.5">Ingreso Bruto por Fuente<button type="button" class="info-btn" data-tip="Ingreso bruto real por mes, una pila por fuente (el 'concepto' de la transacción) dentro de Salario, Freelance, Pasivo y Extraordinarios. Excluye Reembolsos y Dinero extra. Es bruto: los descuentos de planilla (AFP, quinta categoría) no se pueden atribuir a cada empleador, por eso no cuadra con Ingreso Neto Mensual.">i</button></h3>
+                            <p class="text-xs text-textmuted mt-1">Seleccionado en el rango: <span id="fuente-total-seleccionado" class="text-accent font-semibold">S/ 0</span></p>
                         </div>
+                        <div class="flex flex-wrap items-center gap-2 text-[11px]">
+                            <div class="flex rounded-lg border border-slate-800 overflow-hidden">
+                                <button type="button" id="fuente-vista-fuente" onclick="setVistaFuente('fuente')" class="px-2.5 py-1.5 bg-accent/15 text-accent font-semibold">Por fuente</button>
+                                <button type="button" id="fuente-vista-categoria" onclick="setVistaFuente('categoria')" class="px-2.5 py-1.5 text-textmuted hover:text-textmain">Por categoría</button>
+                            </div>
+                            <button type="button" onclick="seleccionarTodasFuentes(true)" class="px-2.5 py-1.5 bg-slate-900 border border-slate-800 hover:border-slate-700 rounded-lg text-accent font-semibold">Marcar todas</button>
+                            <button type="button" onclick="seleccionarTodasFuentes(false)" class="px-2.5 py-1.5 bg-slate-900 border border-slate-800 hover:border-slate-700 rounded-lg text-textmuted hover:text-textmain font-semibold">Desmarcar todas</button>
+                        </div>
+                    </div>
+                    <div id="fuente-filtros" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 mb-5 text-[11px]">
+                        <p class="text-textmuted animate-pulse">Cargando fuentes...</p>
+                    </div>
+                    <div class="relative h-[420px]">
+                        <canvas id="ingresoFuenteChart"></canvas>
                     </div>
                 </div>
 
-                <!-- Esencial vs Discrecional -->
-                <div class="grid grid-cols-1 gap-6">
+                <!-- Evolutivo Libertad layout -->
+                <div class="grid grid-cols-1 mt-6 gap-6">
                     <div class="bg-card rounded-2xl p-6 border border-slate-800/60 shadow-sm">
-                        <h3 class="font-bold text-white text-base mb-1 inline-flex items-center gap-1.5">Gasto Esencial vs Discrecional<button type="button" class="info-btn" data-tip="Gasto real (no presupuesto) del periodo. 'Esencial' = Comida, Transporte, Facturas, Salud, Gastos Variables y Seguros + interés/seguros de la hipoteca de vivienda propia (el capital no cuenta). Los gastos con clave C/ (acompañante) pasan a Discrecional, salvo C/ Odín, que sí cuenta como esencial.">i</button></h3>
-                        <p class="text-xs text-textmuted mb-4">% del gasto de consumo mensual. Excluye FIBRAS, cuentas de alto rendimiento y amortización voluntaria (eso es construcción de patrimonio, no consumo).</p>
-                        <div class="relative h-[300px]">
-                            <canvas id="esencialDiscrecionalChart"></canvas>
+                        <h3 class="font-bold text-white text-base mb-4 inline-flex items-center gap-1.5">Evolutivo: Brecha de Libertad<button type="button" class="info-btn" data-tip="% del gasto indispensable mensual que ya cubre el ingreso pasivo real, mes a mes. 'Indispensable' es el gasto esencial real: categorías esenciales (Comida, Transporte, Facturas, Salud, Gastos Variables, Seguros) + interés/seguros de la hipoteca de vivienda propia, sin gastos con clave C/ salvo C/ Odín.">i</button></h3>
+                        <div class="relative h-[320px]">
+                            <canvas id="libertadChart"></canvas>
                         </div>
                     </div>
                 </div>
@@ -1267,7 +1280,11 @@
         let ingresoNetoChartInstance = null;
         let libertadChartInstance = null;
         let incomePieChartInstance = null;
-        let esencialDiscrecionalChartInstance = null;
+        let ingresoFuenteChartInstance = null;
+        let ingresoFuenteData = { meses: [], fuentes: [], porCategoria: {} };
+        // Se conserva al cambiar el rango de fechas: la clave es categoría|fuente, no el índice.
+        let fuentesExcluidas = new Set();
+        let vistaFuente = 'fuente';
         let originalIncomeCategoryData = null;
         let excludedIncomeCategories = new Set();
         let hipotecaChartInstance = null;
@@ -2089,75 +2106,208 @@
             cargarTopIngresos(desde, hasta);
             cargarIngresoNetoChart(desde, hasta);
             cargarLibertad();
-            cargarEsencialDiscrecional(desde, hasta);
+            cargarIngresoPorFuente(desde, hasta);
         }
 
-        async function cargarEsencialDiscrecional(desde, hasta) {
+        // ---- Ingreso bruto por fuente ----
+        // Un tono por categoría y variaciones de luminosidad por fuente, para que las pilas de una
+        // misma categoría se lean como familia. El color se asigna sobre la lista completa (no la
+        // filtrada) para que una fuente no cambie de color al marcar/desmarcar otras.
+        // Cada categoría tiene una banda de tonos propia (no un solo tono) y las fuentes se reparten
+        // dentro de ella con la razón áurea, alternando además tres niveles de luz/saturación: así
+        // dos fuentes contiguas difieren en tono Y en luminosidad. Las bandas no se solapan para que
+        // la categoría siga leyéndose como familia (Salario verdes, Freelance violetas, etc.).
+        const FUENTE_BANDA_CATEGORIA = {
+            'Salario': [75, 165], 'Freelance': [265, 330], 'Pasivo': [175, 215], 'Extraordinarios': [5, 45]
+        };
+        const FUENTE_NIVELES = [[70, 42], [60, 62], [55, 80]]; // [saturación, luz]
+
+        function colorFuenteCategoria(categoria, indice) {
+            const [desde, hasta] = FUENTE_BANDA_CATEGORIA[categoria] ?? [200, 240];
+            const hue = Math.round(desde + ((indice * 0.618) % 1) * (hasta - desde));
+            const [sat, luz] = FUENTE_NIVELES[indice % FUENTE_NIVELES.length];
+            return `hsl(${hue}, ${sat}%, ${luz}%)`;
+        }
+
+        function colorCategoriaIngreso(categoria) {
+            const [desde, hasta] = FUENTE_BANDA_CATEGORIA[categoria] ?? [200, 240];
+            return `hsl(${Math.round((desde + hasta) / 2)}, 65%, 55%)`;
+        }
+
+        // Categorías que arrancan desmarcadas. Solo aplica a fuentes que aún no se han visto, para no
+        // pisar lo que el usuario marcó a mano al cambiar el rango de fechas.
+        const FUENTE_CATEGORIAS_DESMARCADAS = new Set(['Pasivo']);
+        const fuentesVistas = new Set();
+
+        function claveFuente(f) {
+            return `${f.categoria}|${f.fuente}`;
+        }
+
+        async function cargarIngresoPorFuente(desde, hasta) {
             try {
-                const res = await fetch(`${API_URL}/gasto-esencial-discrecional?fecha_inicio=${desde}&fecha_fin=${hasta}`);
+                const res = await fetch(`${API_URL}/ingreso-por-fuente?fecha_inicio=${desde}&fecha_fin=${hasta}`);
                 const data = await res.json();
 
-                if (esencialDiscrecionalChartInstance) {
-                    esencialDiscrecionalChartInstance.destroy();
-                }
+                // Todas las categorías del endpoint tienen panel, aunque no traigan fuentes en el rango.
+                const porCategoria = {};
+                (data.categorias || []).forEach(cat => { porCategoria[cat] = []; });
+                (data.fuentes || []).forEach(f => (porCategoria[f.categoria] ||= []).push(f));
+                Object.values(porCategoria).forEach(lista => {
+                    lista.forEach((f, i) => { f.color = colorFuenteCategoria(f.categoria, i); });
+                });
 
-                const pctDiscrecional = (data.pct_esencial || []).map(p => Math.round((100 - p) * 10) / 10);
+                (data.fuentes || []).forEach(f => {
+                    const clave = claveFuente(f);
+                    if (fuentesVistas.has(clave)) return;
+                    fuentesVistas.add(clave);
+                    if (FUENTE_CATEGORIAS_DESMARCADAS.has(f.categoria)) fuentesExcluidas.add(clave);
+                });
 
-                const ctx = document.getElementById('esencialDiscrecionalChart').getContext('2d');
-                esencialDiscrecionalChartInstance = new Chart(ctx, {
-                    type: 'bar',
-                    data: {
-                        labels: data.meses || [],
-                        datasets: [
-                            {
-                                label: 'Esencial',
-                                data: data.pct_esencial || [],
-                                backgroundColor: 'rgba(74, 222, 128, 0.85)', // Accent green (mismo tono que "dentro de presupuesto" e "Hipoteca > Capital")
-                                stack: 'pct',
-                                borderRadius: 3
-                            },
-                            {
-                                label: 'Discrecional',
-                                data: pctDiscrecional,
-                                backgroundColor: 'rgba(156, 163, 175, 0.85)', // Gris (mismo tono que "sobre presupuesto" en Presupuesto)
-                                stack: 'pct',
-                                borderRadius: 3
-                            }
-                        ]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: {
-                                position: 'top',
-                                labels: { boxWidth: 12, font: { size: 10 } }
-                            },
-                            tooltip: {
-                                callbacks: {
-                                    label: (context) => `${context.dataset.label}: ${context.parsed.y}%`
-                                }
-                            }
-                        },
-                        scales: {
-                            x: {
-                                stacked: true,
-                                grid: { display: false },
-                                ticks: { font: { size: 9 } }
-                            },
-                            y: {
-                                stacked: true,
-                                min: 0,
-                                max: 100,
-                                grid: { color: 'rgba(51, 65, 85, 0.1)' },
-                                ticks: { font: { size: 9 }, callback: v => `${v}%` }
+                ingresoFuenteData = { meses: data.meses || [], fuentes: data.fuentes || [], porCategoria };
+                renderFiltrosFuente();
+                renderIngresoFuenteChart();
+            } catch (err) {
+                console.error("Error al cargar ingreso por fuente:", err);
+            }
+        }
+
+        function renderFiltrosFuente() {
+            const cont = document.getElementById('fuente-filtros');
+            const { porCategoria } = ingresoFuenteData;
+            const categorias = Object.keys(porCategoria);
+            if (!categorias.length) {
+                cont.innerHTML = '<p class="text-textmuted">Sin ingresos en el rango seleccionado.</p>';
+                return;
+            }
+            cont.innerHTML = categorias.map(cat => {
+                const lista = porCategoria[cat];
+                const totalCat = lista.reduce((s, f) => s + f.total, 0);
+                const chips = lista.map(f => {
+                    const activa = !fuentesExcluidas.has(claveFuente(f));
+                    return `<button type="button" data-clave="${escapeHtml(claveFuente(f))}"
+                        class="fuente-chip w-full flex items-center justify-between gap-2 px-2 py-1 rounded-md border transition-all ${activa ? 'border-slate-700 bg-slate-900 text-textmain' : 'border-transparent text-textmuted opacity-50 hover:opacity-80'}">
+                        <span class="flex items-center gap-1.5 min-w-0"><span class="w-2.5 h-2.5 rounded-sm shrink-0" style="background:${f.color}"></span><span class="truncate">${escapeHtml(f.fuente)}</span></span>
+                        <span class="shrink-0 text-textmuted">${formatMoneda(f.total)}</span>
+                    </button>`;
+                }).join('');
+                const activas = lista.filter(f => !fuentesExcluidas.has(claveFuente(f))).length;
+                return `<div class="bg-slate-900/40 border border-slate-800/60 rounded-xl p-3">
+                    <label class="flex items-center justify-between gap-2 mb-2 cursor-pointer">
+                        <span class="flex items-center gap-2 font-semibold text-white text-xs">
+                            <input type="checkbox" class="fuente-cat-check accent-accent" data-categoria="${escapeHtml(cat)}" ${activas > 0 ? 'checked' : ''} ${lista.length ? '' : 'disabled'} data-parcial="${activas > 0 && activas < lista.length}">
+                            ${escapeHtml(cat)} <span class="text-textmuted font-normal">(${activas}/${lista.length})</span>
+                        </span>
+                        <span class="text-textmuted">${formatMoneda(totalCat)}</span>
+                    </label>
+                    <div class="space-y-1 max-h-48 overflow-y-auto pr-1">${chips || '<p class="text-textmuted italic px-2 py-1">Sin fuentes en el rango</p>'}</div>
+                </div>`;
+            }).join('');
+            cont.querySelectorAll('.fuente-cat-check').forEach(cb => { cb.indeterminate = cb.dataset.parcial === 'true'; });
+        }
+
+        // Delegación de eventos: los filtros se re-renderizan con cada carga.
+        document.getElementById('fuente-filtros').addEventListener('click', e => {
+            const chip = e.target.closest('.fuente-chip');
+            if (!chip) return;
+            const clave = chip.dataset.clave;
+            fuentesExcluidas.has(clave) ? fuentesExcluidas.delete(clave) : fuentesExcluidas.add(clave);
+            renderFiltrosFuente();
+            renderIngresoFuenteChart();
+        });
+        document.getElementById('fuente-filtros').addEventListener('change', e => {
+            const cb = e.target.closest('.fuente-cat-check');
+            if (!cb) return;
+            (ingresoFuenteData.porCategoria[cb.dataset.categoria] || []).forEach(f => {
+                cb.checked ? fuentesExcluidas.delete(claveFuente(f)) : fuentesExcluidas.add(claveFuente(f));
+            });
+            renderFiltrosFuente();
+            renderIngresoFuenteChart();
+        });
+
+        function seleccionarTodasFuentes(marcar) {
+            ingresoFuenteData.fuentes.forEach(f => {
+                marcar ? fuentesExcluidas.delete(claveFuente(f)) : fuentesExcluidas.add(claveFuente(f));
+            });
+            renderFiltrosFuente();
+            renderIngresoFuenteChart();
+        }
+
+        function setVistaFuente(vista) {
+            vistaFuente = vista;
+            const activo = 'px-2.5 py-1.5 bg-accent/15 text-accent font-semibold';
+            const inactivo = 'px-2.5 py-1.5 text-textmuted hover:text-textmain';
+            document.getElementById('fuente-vista-fuente').className = vista === 'fuente' ? activo : inactivo;
+            document.getElementById('fuente-vista-categoria').className = vista === 'categoria' ? activo : inactivo;
+            renderIngresoFuenteChart();
+        }
+
+        function renderIngresoFuenteChart() {
+            const { meses, fuentes, porCategoria } = ingresoFuenteData;
+            const seleccionadas = fuentes.filter(f => !fuentesExcluidas.has(claveFuente(f)));
+
+            let datasets;
+            if (vistaFuente === 'categoria') {
+                datasets = Object.keys(porCategoria).map(cat => {
+                    const delCat = seleccionadas.filter(f => f.categoria === cat);
+                    return {
+                        label: cat,
+                        data: meses.map((_, i) => delCat.reduce((s, f) => s + f.datos[i], 0)),
+                        backgroundColor: colorCategoriaIngreso(cat)
+                    };
+                }).filter(d => d.data.some(v => v > 0));
+            } else {
+                datasets = seleccionadas.map(f => ({
+                    label: f.fuente,
+                    categoria: f.categoria,
+                    data: f.datos,
+                    backgroundColor: f.color
+                }));
+            }
+            // Borde del color de la tarjeta: separa visualmente pilas contiguas de tonos parecidos.
+            datasets.forEach(d => { d.borderRadius = 2; d.borderSkipped = false; d.maxBarThickness = 48; d.borderColor = '#1A1A1A'; d.borderWidth = 1; });
+
+            const totalSel = seleccionadas.reduce((s, f) => s + f.total, 0);
+            document.getElementById('fuente-total-seleccionado').textContent = formatMoneda(totalSel);
+
+            if (ingresoFuenteChartInstance) {
+                ingresoFuenteChartInstance.data.labels = meses;
+                ingresoFuenteChartInstance.data.datasets = datasets;
+                ingresoFuenteChartInstance.update('none');
+                return;
+            }
+
+            const ctx = document.getElementById('ingresoFuenteChart').getContext('2d');
+            ingresoFuenteChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: { labels: meses, datasets },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: { mode: 'index', intersect: false },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            filter: item => item.raw > 0,
+                            itemSort: (a, b) => b.raw - a.raw,
+                            callbacks: {
+                                label: item => {
+                                    const cat = item.dataset.categoria ? ` (${item.dataset.categoria})` : '';
+                                    return ` ${item.dataset.label}${cat}: ${formatMoneda(item.raw)}`;
+                                },
+                                footer: items => `Total: ${formatMoneda(items.reduce((s, i) => s + i.raw, 0))}`
                             }
                         }
+                    },
+                    scales: {
+                        x: { stacked: true, grid: { display: false }, ticks: { font: { size: 9 } } },
+                        y: {
+                            stacked: true,
+                            grid: { color: 'rgba(51, 65, 85, 0.1)' },
+                            ticks: { font: { size: 9 }, callback: v => formatMoneda(v) }
+                        }
                     }
-                });
-            } catch (err) {
-                console.error("Error al cargar esencial vs discrecional:", err);
-            }
+                }
+            });
         }
 
         async function cargarCrecimientoKPIs(desde, hasta) {

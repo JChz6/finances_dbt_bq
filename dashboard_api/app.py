@@ -1445,6 +1445,68 @@ def obtener_top_ingresos(
         print("Error en top_ingresos:", e)
         return {"ingresos": []}
 
+# Categorías de ingreso que entran al chart de ingreso bruto por fuente. Reembolsos queda fuera
+# (devuelve plata propia, no es ingreso), igual que Dinero extra, Saldo Inicial, Negocios, Otro, etc.
+# "Extraordinarios" aún no tiene transacciones pero se incluye a propósito: el frontend muestra su
+# panel de filtros vacío hasta que lleguen.
+CATEGORIAS_INGRESO_POR_FUENTE = ["Salario", "Extraordinarios", "Freelance", "Pasivo"]
+
+@app.get("/ingreso-por-fuente")
+def obtener_ingreso_por_fuente(fecha_inicio: Optional[str] = None, fecha_fin: Optional[str] = None):
+    """
+    Ingreso BRUTO mensual por fuente (concepto) dentro de CATEGORIAS_INGRESO_POR_FUENTE.
+    Es bruto a propósito: los descuentos de planilla (AFP, quinta categoría) son conceptos aparte
+    y no se pueden atribuir a un empleador, así que no se intenta netear por fuente — para el neto
+    está /ingreso-neto-mensual. Devuelve todos los meses del rango (con 0 donde no hubo ingreso)
+    para que las series del chart apilado queden alineadas.
+    """
+    filtros, parametros = _rango_fechas(fecha_inicio, fecha_fin)
+    filtros = ["ingreso_gasto = 'Ingreso'", "categoria IN UNNEST(@categorias)"] + filtros
+    parametros.append(bigquery.ArrayQueryParameter("categorias", "STRING", CATEGORIAS_INGRESO_POR_FUENTE))
+
+    query = f"""
+        SELECT
+            FORMAT_DATE('%Y-%m', DATE(txn_time)) AS mes,
+            categoria,
+            COALESCE(NULLIF(TRIM(concepto), ''), 'Sin concepto') AS fuente,
+            SUM(importe_moneda_principal) AS monto
+        FROM `big-query-406221.finanzas_personales_mds.fact_transactions`
+        WHERE {" AND ".join(filtros)}
+        GROUP BY 1, 2, 3
+        ORDER BY 1
+    """
+    try:
+        resultados = list(_query(query, parametros))
+        if not resultados:
+            return {"categorias": CATEGORIAS_INGRESO_POR_FUENTE, "meses": [], "fuentes": []}
+
+        primer_mes, ultimo_mes = resultados[0].mes, resultados[-1].mes
+        meses = []
+        anio, mes = int(primer_mes[:4]), int(primer_mes[5:7])
+        while f"{anio:04d}-{mes:02d}" <= ultimo_mes:
+            meses.append(f"{anio:04d}-{mes:02d}")
+            anio, mes = (anio + 1, 1) if mes == 12 else (anio, mes + 1)
+        indice_mes = {m: i for i, m in enumerate(meses)}
+
+        fuentes = {}
+        for fila in resultados:
+            clave = (fila.categoria, fila.fuente)
+            if clave not in fuentes:
+                fuentes[clave] = {"categoria": fila.categoria, "fuente": fila.fuente, "datos": [0.0] * len(meses)}
+            fuentes[clave]["datos"][indice_mes[fila.mes]] += float(fila.monto or 0.0)
+
+        lista = []
+        for f in fuentes.values():
+            f["datos"] = [round(v, 2) for v in f["datos"]]
+            f["total"] = round(sum(f["datos"]), 2)
+            lista.append(f)
+        orden_cat = {c: i for i, c in enumerate(CATEGORIAS_INGRESO_POR_FUENTE)}
+        lista.sort(key=lambda f: (orden_cat.get(f["categoria"], 99), -f["total"]))
+        return {"categorias": CATEGORIAS_INGRESO_POR_FUENTE, "meses": meses, "fuentes": lista}
+    except Exception as e:
+        print("Error en ingreso_por_fuente:", e)
+        return {"categorias": CATEGORIAS_INGRESO_POR_FUENTE, "meses": [], "fuentes": []}
+
 @app.get("/ingresos-categoria")
 def obtener_ingresos_categoria(fecha_inicio: str, fecha_fin: str):
     query = """

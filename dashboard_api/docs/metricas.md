@@ -1,5 +1,97 @@
 # Métricas y KPIs de `dashboard_api`
 
+## Objetivos y decisiones (`/objetivos-decisiones`, 2026-10-08)
+
+La última pestaña usa una ventana fija de los seis meses calendario cerrados anteriores al
+mes actual en la zona `America/Lima`; los filtros globales no la alteran. Es seguimiento,
+no una orden de comprar, amortizar, invertir o cambiar empleo. Las metas de renta están
+en soles de poder adquisitivo de octubre de 2026 y requieren revisión anual de inflación
+y presupuesto. No se proyecta una fecha de logro sin aportes netos sostenibles verificados.
+
+**Reserva:** `agg_fondo_emergencia.saldo_actual` de la última fila, con fecha de dato,
+dividido por `(suma del presupuesto completo vigente sin la categoría Deudas
+indispensables) + (capital + interés + seguros de la próxima cuota no pagada del cronograma)`.
+La meta son seis veces ese presupuesto mensual; faltante `max(meta - saldo, 0)`. Así la
+cuota obligatoria entra una sola vez y puede diferir del importe planeado en el Sheet.
+La meta histórica S/30,000 del pipeline permanece intacta y nunca se usa como saldo de
+reserva en esta ruta. Sin fila del fondo, presupuesto o cuota, saldo/meta/cobertura son
+desconocidos. Este saldo es un cálculo basado en `Emerg/`, no una conciliación bancaria.
+
+**Hipoteca:** `hipotecas_materialized`, última fila `pagado = true` para saldo_final y
+primera cuota futura no pagada para capital + interés, seguros y obligación íntegra.
+Hitos descendentes de capital + interés ≤S/1,200, ≤S/1,000, ≤S/800, ≤S/600,
+≤S/400 y ≤S/200 muestran diferencia en soles. «Cumplido» indica que la cuota del
+cronograma satisface el umbral al corte; no infiere una fecha histórica de logro.
+Deuda cero usa el último saldo pagado. La ruta visual interpola entre umbrales solo
+para ubicar la cuota actual, sin presentar ese tramo como porcentaje de reducción
+respecto de una cuota base no aprobada. La cuota evitada por amortizar vivienda es
+ahorro de gasto, no renta pasiva.
+
+**Renta:** `fact_transactions` aporta un candidato bruto por mes desde filas de categoría
+`Pasivo` y, una sola vez por transacción, `Extra Trii` del 29/08/2026, aunque se
+reclasifique a Pasivo. Cada mes con transacciones y carga posterior a ese mes, pero sin
+cobros candidatos, es cero; un mes sin transacciones o sin carga posterior es desconocido.
+El promedio solo existe con seis meses
+completos. La variación es máximo menos mínimo de los seis valores. Esta consulta no
+demuestra recurrencia ni neto; su estado es **provisional**.
+Ventas, devolución de capital, plusvalías, impuestos, comisiones, operación, reservas y
+deuda de activos productores necesitan conciliación. Solo se marca **verificado** al
+aportar en `objectives_data.yaml` seis o más importes mensuales netos conciliados,
+`source`, `as_of` y `verified: true`. La fecha de logro de un hito se obtiene del primer
+cierre con seis meses netos consecutivos que superan el umbral; permanece si luego cae.
+El ingreso laboral neto restante `max(6000 - promedio, 0)` solo se muestra para base
+verificada. La Brecha de Libertad existente en Crecimiento usa todos los pasivos
+registrados / gasto esencial real, incluye interés y seguros de vivienda pero excluye
+principal. Su significado no cambia y difiere de esta meta de S/6,000.
+
+`objectives_config.yaml` es una plantilla versionada sin datos personales. Para completar
+fuentes o registrar decisiones, copiarla a `objectives_data.yaml` en el mismo directorio;
+este archivo privado está ignorado por Git y se lee en cada solicitud, sin reiniciar la
+API. Mantenerlo en el servidor exige una entrega separada de datos validada por el usuario.
+
+**Decisiones:** cada condición conserva estado, actual, umbral, diferencia y fecha. La
+condición de reserva compara saldo en soles con meta en soles sin redondear los meses.
+Si
+falta un dato, el checkpoint queda en `faltan datos`, aunque se muestran incumplimientos
+conocidos. Solo todas las condiciones cumplidas dan `habilitado`. `decisión tomada` requiere
+registro explícito en YAML con `date`, `outcome`, `reason` y `next_review`; alerta si las
+condiciones cambiaron. El registro se mantiene en el archivo, no en memoria del proceso.
+Los bloques YAML de IR, efectivo, oferta, comparación, inversión global y retiro requieren
+fuente y fecha. No se deriva IR anual de transacciones etiquetadas como impuesto. IR
+pendiente = `max(estimated_tax - valid_withholdings, 0)` y debe estar cubierto por
+`separated_reserve`; obligación cero verificada cumple. Capital asignable = efectivo
+acreditado − emergencia − provisión IR separada − compromisos. CAR reconstruidas por
+movimientos, costo de FIBRAs y valor realizable son conceptos separados; el último queda
+pendiente. No se exige vender activos existentes.
+
+`property_offer` requiere `property`, `price`, `source`, `as_of`, `stabilization_date`, `equity`, `closing`,
+`works`, `prepayments`, `transition_deficit`, `operating_reserve`, `available_capital`,
+`rent_monthly`, `fixed_monthly`, `variable_monthly`, `tax_monthly`, `reserve_monthly` y
+`debt_monthly` (servicio total incluyendo seguros del crédito). Capital requerido suma
+los seis primeros costos; incluye transición negativa financiada. Cobertura = (renta −
+costos fijos − variables − impuesto − reserva) / deuda, mínimo 1.20; sin deuda se exige
+flujo neto positivo. Estrés anual = 10 × (0.9 × renta − costo variable) − 12 ×
+(costos fijos + impuesto + reserva + deuda), mínimo cero. Los dos meses sin renta
+sustituyen la vacancia base; los costos variables aquí solo ocurren con ocupación.
+`property_comparison` requiere `capital_total`, `horizon_years`, `source`, `as_of` y
+`alternatives` (`property`, `home_prepayment`, `financial_portfolio`), cada una con el
+mismo `capital_total`, `cash`, `net_worth`, `liquidity`, `risk`, `effort`. Son cifras
+documentadas de una oferta real, nunca yields precargados. Faltan oferta y comparación
+en la configuración inicial, por lo que segundo inmueble queda pendiente. S/100,000
+de Pool 1 es una referencia histórica, no autorización.
+
+Para inversión global se exige emergencia e IR cubiertos, importe positivo, horizonte
+sin necesitar fondos ≥10 años y aceptación explícita del riesgo en soles. Para retiro
+parcial se exige renta neta verificada ≥S/3,000, deuda vivienda cero, reservas cubiertas
+e ingreso laboral neto futuro + renta pasiva ≥S/6,000. El horizonte deseado de 3–4 años
+no es una predicción. Sin valores conciliados en YAML, las condiciones permanecen
+pendientes.
+
+Los endpoints antiguos (`/fase2-pool1`, `/crecimiento-kpis`, `/net-worth` y
+`/libertad-financiera`) conservan sus contratos y reglas. La pestaña nueva solo consulta
+`/objetivos-decisiones`; fallos de BigQuery devuelven valores desconocidos con motivo.
+
+
 Referencia de todas las métricas financieras que expone `dashboard_api/app.py`, pensada para
 que un agente (p. ej. `financial_advisor/`) pueda razonar sobre los números sin releer el SQL
 cada vez. No cubre endpoints que solo devuelven listados crudos de transacciones sin agregación
