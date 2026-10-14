@@ -92,11 +92,17 @@
             flex-shrink: 0;
             transition: opacity 0.15s ease, background-color 0.15s ease;
         }
-        .info-btn:hover,
         .info-btn:focus-visible,
         .info-btn.active {
             opacity: 1;
             background: rgba(255, 255, 255, 0.08);
+        }
+        /* Solo con mouse: en touch el :hover queda "pegado" tras tocar y el ícono sigue resaltado. */
+        @media (hover: hover) {
+            .info-btn:hover {
+                opacity: 1;
+                background: rgba(255, 255, 255, 0.08);
+            }
         }
         .info-btn:focus-visible {
             outline: 1px solid #4ADE80;
@@ -1250,7 +1256,17 @@
                     openInfoPopover(btn);
                     return;
                 }
-                if (!e.target.closest('#info-popover')) closeInfoPopover();
+                // Tocar el propio popover también lo cierra (en móvil es el gesto natural).
+                if (e.target.closest('#info-popover')) closeInfoPopover();
+            });
+
+            // Cierre al tocar fuera con pointerdown y no con click: iOS Safari no dispara 'click'
+            // al tocar elementos no interactivos (fondo, tarjetas, texto), así que en móvil el
+            // popover quedaba abierto sin forma de quitarlo.
+            document.addEventListener('pointerdown', (e) => {
+                if (!activeBtn) return;
+                if (e.target.closest('.info-btn') || e.target.closest('#info-popover')) return;
+                closeInfoPopover();
             });
 
             document.addEventListener('keydown', (e) => {
@@ -1260,6 +1276,19 @@
             window.addEventListener('scroll', closeInfoPopover, true);
             window.addEventListener('resize', closeInfoPopover);
         })();
+
+        // Tooltips de Chart.js en móvil: con touch se abren al tocar el canvas pero nunca se cierran
+        // al tocar fuera (Chart.js solo escucha eventos sobre su propio canvas). Al tocar en
+        // cualquier otro lado se limpian los tooltips activos del resto de los charts.
+        document.addEventListener('pointerdown', (e) => {
+            Object.values(Chart.instances).forEach(chart => {
+                if (chart.canvas.contains(e.target)) return;
+                if (!chart.tooltip || !chart.tooltip.getActiveElements().length) return;
+                chart.tooltip.setActiveElements([], { x: 0, y: 0 });
+                chart.setActiveElements([]);
+                chart.update('none');
+            });
+        });
 
         // Colores y tipografía globales de Chart.js
         Chart.defaults.color = '#64748b';
@@ -2140,6 +2169,10 @@
         const fuentesVistas = new Set();
         const categoriasFuenteExpandidas = new Set(); // solo afecta a móvil
 
+        function formatPctFuente(pct) {
+            return `${pct < 10 ? pct.toFixed(1) : Math.round(pct)}%`;
+        }
+
         function claveFuente(f) {
             return `${f.categoria}|${f.fuente}`;
         }
@@ -2180,15 +2213,22 @@
                 cont.innerHTML = '<p class="text-textmuted">Sin ingresos en el rango seleccionado.</p>';
                 return;
             }
+            // Los % son sobre el total seleccionado en el rango (lo que suma el chart); una fuente
+            // desmarcada no aporta, así que no muestra %.
+            const totalSel = ingresoFuenteData.fuentes
+                .filter(f => !fuentesExcluidas.has(claveFuente(f)))
+                .reduce((s, f) => s + f.total, 0);
+            const pctDe = monto => totalSel > 0 ? formatPctFuente(monto / totalSel * 100) : '';
             cont.innerHTML = categorias.map(cat => {
                 const lista = porCategoria[cat];
                 const totalCat = lista.reduce((s, f) => s + f.total, 0);
+                const selCat = lista.filter(f => !fuentesExcluidas.has(claveFuente(f))).reduce((s, f) => s + f.total, 0);
                 const chips = lista.map(f => {
                     const activa = !fuentesExcluidas.has(claveFuente(f));
                     return `<button type="button" data-clave="${escapeHtml(claveFuente(f))}"
                         class="fuente-chip w-full flex items-center justify-between gap-2 px-2 py-1 rounded-md border transition-all ${activa ? 'border-slate-700 bg-slate-900 text-textmain' : 'border-transparent text-textmuted opacity-50 hover:opacity-80'}">
                         <span class="flex items-center gap-1.5 min-w-0"><span class="w-2.5 h-2.5 rounded-sm shrink-0" style="background:${f.color}"></span><span class="truncate">${escapeHtml(f.fuente)}</span></span>
-                        <span class="shrink-0 text-textmuted">${formatMoneda(f.total)}</span>
+                        <span class="shrink-0 text-textmuted">${formatMoneda(f.total)}${activa && pctDe(f.total) ? ` <span class="text-accent/80">· ${pctDe(f.total)}</span>` : ''}</span>
                     </button>`;
                 }).join('');
                 const activas = lista.filter(f => !fuentesExcluidas.has(claveFuente(f))).length;
@@ -2204,7 +2244,7 @@
                             </button>
                         </span>
                         <button type="button" class="fuente-cat-toggle flex items-center gap-1.5 text-textmuted md:cursor-default" data-categoria="${escapeHtml(cat)}" aria-label="Mostrar u ocultar fuentes de ${escapeHtml(cat)}">
-                            ${formatMoneda(totalCat)}
+                            ${formatMoneda(totalCat)}${selCat > 0 && pctDe(selCat) ? ` <span class="text-accent/80">· ${pctDe(selCat)}</span>` : ''}
                             <svg class="w-3.5 h-3.5 md:hidden transition-transform ${expandida ? 'rotate-180' : ''}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                         </button>
                     </div>
@@ -2306,9 +2346,12 @@
                             filter: item => item.raw > 0,
                             itemSort: (a, b) => b.raw - a.raw,
                             callbacks: {
+                                // % sobre el total del mes (solo de lo seleccionado).
                                 label: item => {
                                     const cat = item.dataset.categoria ? ` (${item.dataset.categoria})` : '';
-                                    return ` ${item.dataset.label}${cat}: ${formatMoneda(item.raw)}`;
+                                    const totalMes = item.chart.data.datasets.reduce((s, d) => s + (d.data[item.dataIndex] || 0), 0);
+                                    const pct = totalMes > 0 ? ` (${formatPctFuente(item.raw / totalMes * 100)})` : '';
+                                    return ` ${item.dataset.label}${cat}: ${formatMoneda(item.raw)}${pct}`;
                                 },
                                 footer: items => `Total: ${formatMoneda(items.reduce((s, i) => s + i.raw, 0))}`
                             }
