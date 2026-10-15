@@ -19,9 +19,10 @@ desconocidos. Este saldo es un cálculo basado en `Emerg/`, no una conciliación
 
 **Hipoteca:** `hipotecas_materialized`, última fila `pagado = true` para saldo_final y
 primera cuota futura no pagada para capital + interés, seguros y obligación íntegra.
-Hitos descendentes de capital + interés ≤S/1,200, ≤S/1,000, ≤S/800, ≤S/600,
-≤S/400 y ≤S/200 muestran diferencia en soles. «Cumplido» indica que la cuota del
-cronograma satisface el umbral al corte; no infiere una fecha histórica de logro.
+Hitos descendentes de cuota completa (capital + interés + seguros) ≤S/1,200,
+≤S/1,000, ≤S/800, ≤S/600, ≤S/400 y ≤S/200 muestran diferencia en soles.
+«Cumplido» indica que la cuota del cronograma satisface el umbral al corte; no
+infiere una fecha histórica de logro.
 Deuda cero usa el último saldo pagado. La ruta visual interpola entre umbrales solo
 para ubicar la cuota actual, sin presentar ese tramo como porcentaje de reducción
 respecto de una cuota base no aprobada. La cuota evitada por amortizar vivienda es

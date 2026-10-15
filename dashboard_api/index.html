@@ -4373,15 +4373,17 @@
             }
             const top = objetivoAdd(root, 'div', 'flex flex-wrap items-end justify-between gap-3');
             const figure = objetivoAdd(top, 'div', 'min-w-0');
-            objetivoAdd(figure, 'p', 'text-xs text-textmuted', 'Próxima cuota · capital + interés');
-            objetivoAdd(figure, 'p', 'text-3xl sm:text-4xl font-semibold text-white tabular-nums', objetivoMonto(h.principal_interest));
+            objetivoAdd(figure, 'p', 'text-xs text-textmuted', 'Cuota obligatoria completa');
+            objetivoAdd(figure, 'p', 'text-3xl sm:text-4xl font-semibold text-white tabular-nums', objetivoMonto(h.payment));
             top.appendChild(objetivoBadge(h.status));
-            objetivoAdd(root, 'p', 'mt-2 text-xs text-textmuted', `Cuota ${h.as_of || 'pendiente'} · seguros ${objetivoMonto(h.insurance)} · total obligatorio ${objetivoMonto(h.payment)}`);
+            objetivoAdd(root, 'p', 'mt-2 text-xs text-textmuted', h.status === 'prevista'
+                ? `Próxima cuota (pagado = FALSE) · vence ${h.as_of || 'pendiente'}`
+                : `Última cuota (pagado = TRUE) · ${h.as_of || 'pendiente'}`);
             const marks = h.milestones || [];
             const reached = marks.filter(m => m.met).length;
             const nextIndex = marks.findIndex(m => !m.met);
             const routeHead = objetivoAdd(root, 'div', 'flex flex-wrap items-end justify-between gap-x-4 gap-y-1 mt-6');
-            objetivoAdd(routeHead, 'p', 'text-[11px] uppercase tracking-widest text-textmuted', 'Ruta de reducción · capital + interés');
+            objetivoAdd(routeHead, 'p', 'text-[11px] uppercase tracking-widest text-textmuted', 'Ruta de reducción · cuota completa');
             objetivoAdd(routeHead, 'p', 'text-xs font-medium text-accent', `${reached} de ${marks.length} hitos cumplidos`);
             if (nextIndex >= 0) objetivoAdd(root, 'p', 'mt-2 text-sm text-white', `Próximo hito: ≤ ${objetivoMeta(marks[nextIndex].target)} · reducir ${objetivoMonto(marks[nextIndex].gap)}`);
             else if (marks.length) objetivoAdd(root, 'p', 'mt-2 text-sm text-accent', 'Todos los hitos de cuota cumplidos al corte.');
@@ -4392,7 +4394,7 @@
                 else if (nextIndex > 0) {
                     const upper = marks[nextIndex - 1].target;
                     const lower = marks[nextIndex].target;
-                    const fraction = Math.max(0, Math.min(1, (upper - h.principal_interest) / (upper - lower)));
+                    const fraction = Math.max(0, Math.min(1, (upper - h.payment) / (upper - lower)));
                     progress = (nextIndex - 1 + fraction) / (marks.length - 1);
                 }
             }

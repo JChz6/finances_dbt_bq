@@ -39,13 +39,14 @@ def mortgage(latest_paid, next_due):
         return {"status": "faltan datos", "reason": "No hay cronograma válido", "milestones": []}
     principal_interest = source["capital"] + source["interest"]
     insurance = source["insurance"]
+    payment = principal_interest + insurance
     balance = latest_paid["balance"] if latest_paid else None
     return {"status": "prevista" if next_due else "pagada", "as_of": source["date"],
             "principal_interest": round(principal_interest, 2), "insurance": round(insurance, 2),
-            "payment": round(principal_interest + insurance, 2), "balance": balance,
+            "payment": round(payment, 2), "balance": balance,
             "balance_as_of": latest_paid["date"] if latest_paid else None,
-            "milestones": [{"target": t, "gap": round(max(principal_interest - t, 0), 2),
-                            "met": principal_interest <= t} for t in MORTGAGE_TARGETS],
+            "milestones": [{"target": t, "gap": round(max(payment - t, 0), 2),
+                            "met": payment <= t} for t in MORTGAGE_TARGETS],
             "debt_free": balance is not None and balance <= 0}
 
 
