@@ -6,12 +6,12 @@
     <title>Wealth Dashboard</title>
 
     <!-- Favicon -->
-    <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/static/favicon-16x16.png">
-    <link rel="shortcut icon" href="/static/favicon.ico">
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32x32.png?v=20261016-darkpig">
+    <link rel="icon" type="image/png" sizes="16x16" href="/static/favicon-16x16.png?v=20261016-darkpig">
+    <link rel="shortcut icon" href="/static/favicon.ico?v=20261016-darkpig">
 
     <!-- Ícono al agregar a la pantalla de inicio en iOS Safari -->
-    <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png?v=20261016-darkpig">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="WealthDash">
@@ -138,6 +138,8 @@
         }
         @media (prefers-reduced-motion: reduce) { .objective-fill { transition: none; } }
     </style>
+    <link rel="stylesheet" href="/static/dashboard.css?v=20261017">
+    <script src="/static/chart-light.js?v=20261017"></script>
 </head>
 <body class="bg-darkbg text-textmain font-sans antialiased selection:bg-accent selection:text-white">
 
@@ -149,7 +151,7 @@
             <div>
                 <div class="flex items-center justify-between mb-8">
                     <div class="flex items-center gap-3">
-                        <img src="/static/apple-touch-icon.png" alt="WealthDash" class="w-9 h-9 rounded-xl shadow-lg shadow-accent/20">
+                        <img src="/static/apple-touch-icon.png?v=20261016-darkpig" alt="WealthDash" class="w-9 h-9 rounded-xl shadow-lg shadow-accent/20">
                         <div>
                             <h1 class="text-lg font-bold tracking-tight">Wealth<span class="text-accent font-light">Dash</span></h1>
                             <span class="text-[10px] text-textmuted uppercase tracking-widest font-semibold">Consola de Control</span>
@@ -235,11 +237,11 @@
                     <div id="filter-dates" class="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center gap-2.5 bg-card px-4 py-2 rounded-xl border border-slate-800/80 text-sm w-full sm:w-auto">
                         <div class="flex items-center gap-2">
                             <span class="text-textmuted">Desde:</span>
-                            <input type="date" id="input-desde" class="bg-transparent text-white focus:outline-none focus:ring-1 focus:ring-accent rounded px-2.5 py-1 border border-slate-800 text-sm flex-1" value="2026-01-01">
+                            <input type="date" aria-label="Desde" id="input-desde" class="bg-transparent text-white focus:outline-none focus:ring-1 focus:ring-accent rounded px-2.5 py-1 border border-slate-800 text-sm flex-1" value="2026-01-01">
                         </div>
                         <div class="flex items-center gap-2">
                             <span class="text-textmuted sm:ml-1">Hasta:</span>
-                            <input type="date" id="input-hasta" class="bg-transparent text-white focus:outline-none focus:ring-1 focus:ring-accent rounded px-2.5 py-1 border border-slate-800 text-sm flex-1">
+                            <input type="date" aria-label="Hasta" id="input-hasta" class="bg-transparent text-white focus:outline-none focus:ring-1 focus:ring-accent rounded px-2.5 py-1 border border-slate-800 text-sm flex-1">
                         </div>
                         <button onclick="aplicarFiltros()" class="sm:ml-2 bg-accent hover:bg-accentHover text-white px-4 py-1.5 rounded-lg font-medium transition-colors text-sm w-full sm:w-auto">
                             Filtrar
@@ -1099,7 +1101,7 @@
                     <div class="bg-card rounded-3xl p-6 border border-slate-800/60 shadow-sm relative overflow-hidden">
                         <p class="text-textmuted text-sm font-medium tracking-wide inline-flex items-center gap-1.5">Media Móvil 12M<button type="button" class="info-btn" data-tip="Promedio del ingreso neto de los últimos 12 meses (incluido el actual) — suaviza tanto la volatilidad mensual como la estacionalidad anual para ver la tendencia de fondo.">i</button></p>
                         <h3 class="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-medium text-white mt-1" id="kpi-yoy-media-movil">S/ 0</h3>
-                        <p class="text-[10px] text-textmuted mt-1">Promedio de los últimos 3 meses</p>
+                        <p class="text-[10px] text-textmuted mt-1">Promedio de los últimos 12 meses</p>
                     </div>
                 </div>
 
@@ -1291,7 +1293,7 @@
         });
 
         // Colores y tipografía globales de Chart.js
-        Chart.defaults.color = '#64748b';
+        Chart.defaults.color = '#a4afa8';
         Chart.defaults.font.family = "Outfit, ui-sans-serif, system-ui, sans-serif";
 
         let globalGranularidad = "mensual";
